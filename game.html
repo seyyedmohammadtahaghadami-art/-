@@ -3,679 +3,709 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Subway Surfers 3D - Ultimate Real Edition</title>
+    <title>Subway Surfers 3D - Real Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lalezar&display=swap');
-        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Lalezar', cursive; user-select: none; touch-action: none; }
-        canvas { display: block; width: 100vw; height: 100vh; outline: none; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Lalezar', cursive; touch-action: none; user-select: none; }
+        canvas { display: block; width: 100%; height: 100%; }
         
-        /* UI Layers */
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; z-index: 5; }
-        .hud { display: flex; justify-content: space-between; padding: 20px; font-size: 32px; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
-        .hud-box { background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,0,0,0.2)); padding: 10px 25px; border-radius: 20px; border: 2px solid rgba(255,255,255,0.3); backdrop-filter: blur(5px); display: flex; align-items: center; gap: 10px; }
-        .coin-icon { color: #FFD700; text-shadow: 0 0 10px #FFD700; }
+        /* UI */
+        #ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; z-index: 5; }
+        .hud-top { display: flex; justify-content: space-between; padding: 20px; font-size: 28px; color: white; text-shadow: 2px 2px 4px #000; }
+        .stat-box { background: rgba(0,0,0,0.5); padding: 8px 20px; border-radius: 25px; border: 2px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px); display: flex; align-items: center; gap: 10px; }
+        .coin-icon { color: #FFD700; font-size: 32px; }
+        .powerup-indicator { position: absolute; top: 80px; right: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .pu-badge { background: rgba(0, 255, 255, 0.3); border: 2px solid #0ff; padding: 5px 15px; border-radius: 10px; color: #fff; font-size: 20px; display: none; animation: pulse 1s infinite; }
+        
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
         /* Menus */
-        .menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.9) 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; z-index: 10; transition: opacity 0.3s; }
+        .menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, rgba(20,20,30,0.8) 0%, rgba(0,0,0,0.95) 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; z-index: 10; transition: opacity 0.5s; }
         .hidden { opacity: 0; pointer-events: none; }
         
-        h1 { font-size: 60px; color: #FFD700; margin: 0; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 5px 15px rgba(255, 215, 0, 0.5), 3px 3px 0 #d35400; transform: skewX(-10deg); }
-        h2 { font-size: 40px; color: #ff4757; margin: 10px 0; text-shadow: 2px 2px 0 #000; }
-        p { color: #ecf0f1; font-size: 24px; margin-bottom: 30px; }
-
-        .btn-group { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        h1 { font-size: 70px; color: #FFD700; margin: 0; text-transform: uppercase; letter-spacing: 5px; text-shadow: 0 0 20px #FFD700, 4px 4px 0 #d35400; transform: perspective(500px) rotateX(10deg); }
+        p { color: #ecf0f1; font-size: 24px; margin-bottom: 40px; text-shadow: 1px 1px 2px #000; }
+        
         button { 
-            background: linear-gradient(to bottom, #ff9f43, #ee5253); border: 3px solid #fff; padding: 15px 40px; 
-            color: white; font-size: 28px; font-family: 'Lalezar', cursive; border-radius: 50px; cursor: pointer; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5); transition: all 0.1s; text-shadow: 1px 1px 2px #000;
+            background: linear-gradient(to bottom, #ff9f43, #ee5253); border: 4px solid #fff; padding: 15px 50px; 
+            color: white; font-size: 32px; font-family: 'Lalezar', cursive; border-radius: 60px; cursor: pointer; 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        button:active { transform: translateY(5px); box-shadow: 0 5px 10px rgba(0,0,0,0.5); }
-        button.shop-btn { background: linear-gradient(to bottom, #1dd1a1, #10ac84); }
-        button.close-btn { background: linear-gradient(to bottom, #576574, #222f3e); padding: 10px 30px; font-size: 20px; }
+        button:hover { transform: scale(1.1) translateY(-5px); box-shadow: 0 20px 40px rgba(238, 82, 83, 0.6); }
+        button:active { transform: scale(0.95); }
 
-        /* Shop Modal */
-        #shop-modal { background: rgba(0,0,0,0.85); z-index: 20; }
-        .shop-container { background: #2c3e50; padding: 30px; border-radius: 20px; border: 4px solid #f1c40f; text-align: center; max-width: 90%; width: 400px; box-shadow: 0 0 50px rgba(241, 196, 15, 0.3); }
-        .shop-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.1); padding: 15px; margin: 15px 0; border-radius: 10px; color: white; font-size: 22px; }
-        .buy-btn { background: #f1c40f; color: #000; border: none; padding: 8px 20px; border-radius: 20px; font-size: 18px; cursor: pointer; box-shadow: none; }
-        .buy-btn:disabled { background: #7f8c8d; cursor: not-allowed; }
-
-        /* Controls Hint */
-        .controls-hint { position: absolute; bottom: 20px; width: 100%; text-align: center; color: rgba(255,255,255,0.5); font-size: 16px; pointer-events: none; }
+        /* Shop */
+        #shop-modal { background: rgba(0,0,0,0.9); z-index: 20; }
+        .shop-panel { background: #2c3e50; padding: 40px; border-radius: 30px; border: 5px solid #f1c40f; text-align: center; width: 80%; max-width: 500px; box-shadow: 0 0 100px rgba(241, 196, 15, 0.2); }
+        .shop-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 20px; margin: 20px 0; border-radius: 15px; color: white; font-size: 24px; border: 1px solid rgba(255,255,255,0.1); }
+        .buy-btn { background: #27ae60; border: none; padding: 10px 25px; font-size: 20px; border-radius: 15px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .buy-btn:disabled { background: #7f8c8d; cursor: not-allowed; transform: none; box-shadow: none; }
     </style>
-    <!-- Three.js Core -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
-    <!-- Game Canvas Container -->
     <div id="canvas-container"></div>
 
-    <!-- HUD -->
-    <div id="ui-layer">
-        <div class="hud">
-            <div class="hud-box">امتیاز: <span id="score">0</span></div>
-            <div class="hud-box"><span class="coin-icon">🪙</span> <span id="coins">0</span></div>
+    <div id="ui">
+        <div class="hud-top">
+            <div class="stat-box">امتیاز: <span id="score">0</span></div>
+            <div class="stat-box"><span class="coin-icon">🪙</span> <span id="coins">0</span></div>
         </div>
-        <div class="controls-hint">Swipe یا Arrow Keys | بالا: پرش | پایین: غلت</div>
+        <div class="powerup-indicator">
+            <div id="pu-magnet" class="pu-badge">آهنربا فعال!</div>
+            <div id="pu-shield" class="pu-badge">سپر فعال!</div>
+        </div>
     </div>
 
     <!-- Main Menu -->
     <div id="main-menu" class="menu">
         <h1>SUBWAY PRO</h1>
-        <p>نسخه فوق حرفه‌ای سه بعدی</p>
-        <div class="btn-group">
-            <button id="start-btn">شروع بازی</button>
-            <button id="shop-btn" class="shop-btn">فروشگاه 🛒</button>
-        </div>
+        <p>نسخه واقعی - گرافیک Ultra</p>
+        <button id="start-btn">شروع دویدن</button>
+        <button id="shop-btn" style="margin-top: 20px; background: linear-gradient(to bottom, #1dd1a1, #10ac84); font-size: 24px; padding: 10px 30px;">فروشگاه 🛒</button>
     </div>
 
-    <!-- Shop Modal -->
+    <!-- Shop -->
     <div id="shop-modal" class="menu hidden">
-        <div class="shop-container">
-            <h2>فروشگاه</h2>
-            <p>سکه‌های شما: <span id="shop-coins" style="color:#f1c40f">0</span> 🪙</p>
+        <div class="shop-panel">
+            <h2 style="color: #f1c40f; font-size: 40px; margin-top: 0;">فروشگاه</h2>
+            <p>سکه‌ها: <span id="shop-coins" style="color:#f1c40f">0</span></p>
             
             <div class="shop-item">
-                <span>آهنربا (جذب سکه)</span>
-                <button class="buy-btn" id="buy-magnet" onclick="buyItem('magnet', 50)">50 🪙</button>
+                <span>آهنربا (۱۰ ثانیه)</span>
+                <button class="buy-btn" id="buy-magnet" onclick="game.buyItem('magnet', 50)">۵۰ سکه</button>
             </div>
             <div class="shop-item">
-                <span>سپر محافظ (یک جان)</span>
-                <button class="buy-btn" id="buy-shield" onclick="buyItem('shield', 100)">100 🪙</button>
+                <span>سپر محافظ</span>
+                <button class="buy-btn" id="buy-shield" onclick="game.buyItem('shield', 100)">۱۰۰ سکه</button>
             </div>
             
-            <button class="close-btn" onclick="closeShop()" style="margin-top: 20px;">بستن</button>
+            <button onclick="game.closeShop()" style="margin-top: 20px; background: #576574; font-size: 20px; padding: 10px 30px;">بستن</button>
         </div>
     </div>
 
-    <!-- Game Over Menu -->
-    <div id="game-over-menu" class="menu hidden">
-        <h2>GAME OVER</h2>
+    <!-- Game Over -->
+    <div id="game-over" class="menu hidden">
+        <h1 style="color: #ff4757; text-shadow: 0 0 20px #ff4757;">GAME OVER</h1>
         <p>امتیاز نهایی: <span id="final-score">0</span></p>
-        <div class="btn-group">
-            <button id="retry-btn">تلاش مجدد</button>
-            <button id="menu-btn" class="close-btn">منو اصلی</button>
-        </div>
+        <button id="retry-btn">تلاش مجدد</button>
+        <button onclick="game.showMenu()" style="margin-top: 20px; background: #576574; font-size: 20px; padding: 10px 30px;">منو اصلی</button>
     </div>
 
-    <script>
-        // --- GAME CONFIGURATION & STATE ---
-        const CONFIG = {
-            laneWidth: 3,
-            baseSpeed: 0.8,
-            maxSpeed: 2.5,
-            jumpForce: 0.45,
-            gravity: 0.025,
-            colors: {
-                sky: 0x87CEEB,
-                ground: 0x333333,
-                trainRed: 0xe74c3c,
-                trainYellow: 0xf1c40f,
-                trainBlue: 0x3498db
-            }
-        };
+<script>
+/**
+ * SUBWAY SURFERS 3D - ULTIMATE ENGINE
+ * Features: Smooth Lerp Movement, Procedural Animation, Dynamic Trains, Power-ups
+ */
 
-        let state = {
+const CONFIG = {
+    laneWidth: 3.5,
+    baseSpeed: 0.6,
+    maxSpeed: 2.0,
+    jumpForce: 0.6,
+    gravity: 0.035,
+    colors: {
+        sky: 0x87CEEB,
+        ground: 0x222222,
+        trainRed: 0xe74c3c,
+        trainYellow: 0xf1c40f,
+        trainBlue: 0x3498db,
+        trainGreen: 0x2ecc71
+    }
+};
+
+class Game {
+    constructor() {
+        this.state = {
             isPlaying: false,
             score: 0,
-            coins: parseInt(localStorage.getItem('subwayCoins')) || 0,
+            coins: parseInt(localStorage.getItem('subway_coins_v2')) || 0,
             speed: CONFIG.baseSpeed,
-            lane: 1, // 0: Left, 1: Center, 2: Right
+            lane: 1, // 0, 1, 2
             targetX: 0,
             velY: 0,
             isJumping: false,
             isRolling: false,
-            rollTimer: 0,
+            rollTime: 0,
             inventory: { magnet: 0, shield: 0 },
-            distance: 0
+            activePowerups: { magnet: 0, shield: false }
         };
 
-        // --- THREE.JS SETUP ---
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(CONFIG.colors.sky);
-        scene.fog = new THREE.FogExp2(CONFIG.colors.sky, 0.015);
+        this.entities = {
+            trains: [],
+            coins: [],
+            powerups: [],
+            particles: []
+        };
 
-        const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 200);
-        camera.position.set(0, 4, 8);
-        camera.lookAt(0, 1, -10);
+        this.initThree();
+        this.createWorld();
+        this.createPlayer();
+        this.setupInputs();
+        this.updateUI();
+        this.animate();
+    }
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimize for mobile
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        document.getElementById('canvas-container').appendChild(renderer.domElement);
+    initThree() {
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(CONFIG.colors.sky);
+        this.scene.fog = new THREE.FogExp2(CONFIG.colors.sky, 0.012);
+
+        this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
+        this.camera.position.set(0, 5, 10);
+        this.camera.lookAt(0, 0, -10);
+
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.getElementById('canvas-container').appendChild(this.renderer.domElement);
 
         // Lights
-        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
-        scene.add(hemiLight);
+        const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+        this.scene.add(hemi);
 
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        dirLight.position.set(10, 20, 10);
-        dirLight.castShadow = true;
-        dirLight.shadow.camera.top = 20;
-        dirLight.shadow.camera.bottom = -20;
-        dirLight.shadow.camera.left = -20;
-        dirLight.shadow.camera.right = 20;
-        dirLight.shadow.mapSize.width = 2048;
-        dirLight.shadow.mapSize.height = 2048;
-        scene.add(dirLight);
+        this.sun = new THREE.DirectionalLight(0xffffff, 0.9);
+        this.sun.position.set(20, 40, 20);
+        this.sun.castShadow = true;
+        this.sun.shadow.mapSize.width = 2048;
+        this.sun.shadow.mapSize.height = 2048;
+        this.sun.shadow.camera.left = -30;
+        this.sun.shadow.camera.right = 30;
+        this.sun.shadow.camera.top = 30;
+        this.sun.shadow.camera.bottom = -30;
+        this.scene.add(this.sun);
 
-        // --- ASSETS GENERATION (Procedural High Quality) ---
-        
-        // 1. Environment
-        const floorGeo = new THREE.PlaneGeometry(100, 400);
-        const floorMat = new THREE.MeshStandardMaterial({ color: CONFIG.colors.ground, roughness: 0.8 });
-        const floor = new THREE.Mesh(floorGeo, floorMat);
-        floor.rotation.x = -Math.PI / 2;
-        floor.position.z = -100;
-        floor.receiveShadow = true;
-        scene.add(floor);
+        window.addEventListener('resize', () => {
+            this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.camera.updateProjectionMatrix();
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    }
 
-        // Tracks & Sleepers
-        const trackGroup = new THREE.Group();
+    createWorld() {
+        // Ground
+        const groundGeo = new THREE.PlaneGeometry(200, 400);
+        const groundMat = new THREE.MeshStandardMaterial({ color: CONFIG.colors.ground, roughness: 0.8 });
+        this.ground = new THREE.Mesh(groundGeo, groundMat);
+        this.ground.rotation.x = -Math.PI / 2;
+        this.ground.position.z = -100;
+        this.ground.receiveShadow = true;
+        this.scene.add(this.ground);
+
+        // Tracks (Rails & Sleepers)
+        this.trackGroup = new THREE.Group();
         const railMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.8, roughness: 0.2 });
-        const sleeperMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9 });
-        
+        const sleeperMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
+
         for(let i=-1; i<=1; i++) {
-            // Rails
-            const railGeo = new THREE.BoxGeometry(0.15, 0.1, 400);
-            const rail1 = new THREE.Mesh(railGeo, railMat); rail1.position.set(i*CONFIG.laneWidth - 0.8, 0.05, -100);
-            const rail2 = new THREE.Mesh(railGeo, railMat); rail2.position.set(i*CONFIG.laneWidth + 0.8, 0.05, -100);
-            trackGroup.add(rail1, rail2);
+            const r1 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1, 400), railMat);
+            r1.position.set(i*CONFIG.laneWidth - 0.9, 0.05, -100);
+            const r2 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1, 400), railMat);
+            r2.position.set(i*CONFIG.laneWidth + 0.9, 0.05, -100);
+            this.trackGroup.add(r1, r2);
         }
-        // Sleepers
-        for(let j=0; j<80; j++) {
-            const sleeper = new THREE.Mesh(new THREE.BoxGeometry(10, 0.1, 0.4), sleeperMat);
-            sleeper.position.set(0, 0.01, -j * 5);
-            sleeper.receiveShadow = true;
-            trackGroup.add(sleeper);
-        }
-        scene.add(trackGroup);
 
-        // City Buildings (Instanced for performance)
-        const buildingGeo = new THREE.BoxGeometry(1, 1, 1);
-        const buildingMat = new THREE.MeshStandardMaterial({ color: 0x95a5a6 });
-        for(let i=0; i<40; i++) {
-            const h = 10 + Math.random() * 20;
-            const w = 4 + Math.random() * 4;
-            const d = 4 + Math.random() * 4;
+        for(let j=0; j<100; j++) {
+            const s = new THREE.Mesh(new THREE.BoxGeometry(12, 0.15, 0.5), sleeperMat);
+            s.position.set(0, 0.02, -j * 4);
+            s.receiveShadow = true;
+            this.trackGroup.add(s);
+        }
+        this.scene.add(this.trackGroup);
+
+        // Buildings (Procedural City)
+        for(let i=0; i<50; i++) {
+            const h = 10 + Math.random() * 30;
+            const w = 5 + Math.random() * 5;
+            const d = 5 + Math.random() * 5;
+            const geo = new THREE.BoxGeometry(w, h, d);
+            const mat = new THREE.MeshStandardMaterial({ color: new THREE.Color().setHSL(Math.random(), 0.5, 0.5) });
             
-            const bLeft = new THREE.Mesh(buildingGeo, new THREE.MeshStandardMaterial({color: new THREE.Color().setHSL(Math.random(), 0.5, 0.5)}));
-            bLeft.scale.set(w, h, d);
-            bLeft.position.set(-8 - Math.random()*5, h/2, -i * 15 - Math.random()*10);
-            bLeft.castShadow = true; bLeft.receiveShadow = true;
-            scene.add(bLeft);
+            const bL = new THREE.Mesh(geo, mat);
+            bL.position.set(-12 - Math.random()*10, h/2, -i * 15);
+            bL.castShadow = true; bL.receiveShadow = true;
+            this.scene.add(bL);
 
-            const bRight = new THREE.Mesh(buildingGeo, new THREE.MeshStandardMaterial({color: new THREE.Color().setHSL(Math.random(), 0.5, 0.5)}));
-            bRight.scale.set(w, h, d);
-            bRight.position.set(8 + Math.random()*5, h/2, -i * 15 - Math.random()*10);
-            bRight.castShadow = true; bRight.receiveShadow = true;
-            scene.add(bRight);
+            const bR = new THREE.Mesh(geo, mat);
+            bR.position.set(12 + Math.random()*10, h/2, -i * 15);
+            bR.castShadow = true; bR.receiveShadow = true;
+            this.scene.add(bR);
         }
+    }
 
-        // 2. Player Character (High Detail Procedural)
-        const playerGroup = new THREE.Group();
+    createPlayer() {
+        this.player = new THREE.Group();
         
         // Materials
-        const skinMat = new THREE.MeshStandardMaterial({ color: 0xffccaa, roughness: 0.6 });
-        const hoodieMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.7 });
-        const capMat = new THREE.MeshStandardMaterial({ color: 0x0055ff, roughness: 0.4, metalness: 0.1 });
-        const shoeMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5 });
+        const skin = new THREE.MeshStandardMaterial({ color: 0xffccaa });
+        const hoodie = new THREE.MeshStandardMaterial({ color: 0x1a1a1a });
+        const cap = new THREE.MeshStandardMaterial({ color: 0x0055ff });
+        const pants = new THREE.MeshStandardMaterial({ color: 0x111111 });
+        const shoe = new THREE.MeshStandardMaterial({ color: 0xffffff });
 
-        // Body
-        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.9, 0.4), hoodieMat);
-        torso.position.y = 1.1; torso.castShadow = true;
-        playerGroup.add(torso);
+        // Torso
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.5), hoodie);
+        torso.position.y = 1.2; torso.castShadow = true;
+        this.player.add(torso);
 
         // Head
-        const head = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.45), skinMat);
-        head.position.y = 1.75; head.castShadow = true;
-        playerGroup.add(head);
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), skin);
+        head.position.y = 1.9; head.castShadow = true;
+        this.player.add(head);
 
         // Cap
-        const capBase = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.15, 16), capMat);
-        capBase.position.y = 1.95;
-        const capBrim = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.05, 0.3), capMat);
-        capBrim.position.set(0, 1.9, -0.25);
-        playerGroup.add(capBase, capBrim);
+        const capMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.15, 16), cap);
+        capMesh.position.y = 2.1;
+        const brim = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.05, 0.35), cap);
+        brim.position.set(0, 2.05, -0.25);
+        this.player.add(capMesh, brim);
 
-        // Arms (Pivoted for animation)
-        const armGeo = new THREE.BoxGeometry(0.2, 0.7, 0.2);
-        const leftArmPivot = new THREE.Group(); leftArmPivot.position.set(-0.45, 1.4, 0);
-        const leftArm = new THREE.Mesh(armGeo, hoodieMat); leftArm.position.y = -0.35; leftArm.castShadow = true;
-        leftArmPivot.add(leftArm); playerGroup.add(leftArmPivot);
-
-        const rightArmPivot = new THREE.Group(); rightArmPivot.position.set(0.45, 1.4, 0);
-        const rightArm = new THREE.Mesh(armGeo, hoodieMat); rightArm.position.y = -0.35; rightArm.castShadow = true;
-        rightArmPivot.add(rightArm); playerGroup.add(rightArmPivot);
-
-        // Legs (Pivoted for animation)
-        const legGeo = new THREE.BoxGeometry(0.25, 0.8, 0.25);
-        const leftLegPivot = new THREE.Group(); leftLegPivot.position.set(-0.2, 0.7, 0);
-        const leftLeg = new THREE.Mesh(legGeo, new THREE.MeshStandardMaterial({color: 0x111111})); leftLeg.position.y = -0.4; leftLeg.castShadow = true;
-        const leftShoe = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.15, 0.4), shoeMat); leftShoe.position.set(0, -0.8, -0.05);
-        leftLegPivot.add(leftLeg, leftShoe); playerGroup.add(leftLegPivot);
-
-        const rightLegPivot = new THREE.Group(); rightLegPivot.position.set(0.2, 0.7, 0);
-        const rightLeg = new THREE.Mesh(legGeo, new THREE.MeshStandardMaterial({color: 0x111111})); rightLeg.position.y = -0.4; rightLeg.castShadow = true;
-        const rightShoe = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.15, 0.4), shoeMat); rightShoe.position.set(0, -0.8, -0.05);
-        rightLegPivot.add(rightLeg, rightShoe); playerGroup.add(rightLegPivot);
-
-        // Shield Visual (Hidden by default)
-        const shieldMesh = new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 16), new THREE.MeshBasicMaterial({color: 0x00ffff, transparent: true, opacity: 0.3, wireframe: true}));
-        shieldMesh.visible = false;
-        playerGroup.add(shieldMesh);
-
-        scene.add(playerGroup);
-
-        // --- GAME ENTITIES ---
-        let trains = [];
-        let coinMeshes = [];
-        let magnetActive = false;
-        let magnetTimer = 0;
-
-        // Function to create a REALISTIC train
-        function createTrain(laneIndex, isMoving, moveDirection) {
-            const trainGroup = new THREE.Group();
-            const length = 12 + Math.random() * 10;
-            const colorArr = [CONFIG.colors.trainRed, CONFIG.colors.trainYellow, CONFIG.colors.trainBlue];
-            const mainColor = colorArr[Math.floor(Math.random() * colorArr.length)];
-            
-            // Main Body (Rounded look using standard material with high metalness)
-            const bodyMat = new THREE.MeshStandardMaterial({ color: mainColor, metalness: 0.6, roughness: 0.3 });
-            const body = new THREE.Mesh(new THREE.BoxGeometry(2.4, 3, length), bodyMat);
-            body.position.y = 1.5;
-            body.castShadow = true; body.receiveShadow = true;
-            trainGroup.add(body);
-
-            // Roof
-            const roof = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.2, length), new THREE.MeshStandardMaterial({color: 0xdddddd, metalness: 0.8}));
-            roof.position.y = 3.0;
-            trainGroup.add(roof);
-
-            // Windows (Dark glass)
-            const winMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.1 });
-            const winCount = Math.floor(length / 2.5);
-            for(let i=0; i<winCount; i++) {
-                const winL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1, 1.5), winMat);
-                winL.position.set(-1.21, 2, -length/2 + 2 + i*2.5);
-                const winR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1, 1.5), winMat);
-                winR.position.set(1.21, 2, -length/2 + 2 + i*2.5);
-                trainGroup.add(winL, winR);
-            }
-
-            // Front Lights
-            const lightGeo = new THREE.CircleGeometry(0.2, 16);
-            const lightMat = new THREE.MeshBasicMaterial({ color: 0xffffaa });
-            const l1 = new THREE.Mesh(lightGeo, lightMat); l1.position.set(-0.8, 1, length/2 + 0.01);
-            const l2 = new THREE.Mesh(lightGeo, lightMat); l2.position.set(0.8, 1, length/2 + 0.01);
-            trainGroup.add(l1, l2);
-
-            // Position
-            trainGroup.position.set((laneIndex - 1) * CONFIG.laneWidth, 0, -80);
-            
-            // Custom Data for Logic
-            trainGroup.userData = { 
-                isObstacle: true, 
-                length: length, 
-                isMoving: isMoving, 
-                moveSpeed: isMoving ? (moveDirection === 'forward' ? CONFIG.baseSpeed + 0.5 : -(CONFIG.baseSpeed + 1.5)) : 0,
-                type: 'train'
-            };
-
-            scene.add(trainGroup);
-            trains.push(trainGroup);
-        }
-
-        function createBarrier(laneIndex) {
-            const group = new THREE.Group();
-            const bar = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.8, 0.3), new THREE.MeshStandardMaterial({color: 0xffaa00}));
-            bar.position.y = 1.2; // Must roll under
-            bar.castShadow = true;
-            
-            const leg1 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.2, 0.2), new THREE.MeshStandardMaterial({color: 0x555}));
-            leg1.position.set(-1, 0.6, 0);
-            const leg2 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.2, 0.2), new THREE.MeshStandardMaterial({color: 0x555}));
-            leg2.position.set(1, 0.6, 0);
-            
-            group.add(bar, leg1, leg2);
-            group.position.set((laneIndex - 1) * CONFIG.laneWidth, 0, -80);
-            group.userData = { isObstacle: true, type: 'barrier_high' }; // Must roll
-            scene.add(group);
-            trains.push(group); // Add to same array for management
-        }
-
-        function spawnCoin(x, y, z) {
-            const geo = new THREE.CylinderGeometry(0.4, 0.4, 0.1, 16);
-            const mat = new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 1.0, roughness: 0.2, emissive: 0x554400 });
-            const coin = new THREE.Mesh(geo, mat);
-            coin.rotation.x = Math.PI / 2;
-            coin.position.set(x, y, z);
-            coin.castShadow = true;
-            scene.add(coin);
-            coinMeshes.push(coin);
-        }
-
-        // --- GAME LOGIC ---
-
-        function spawnLogic() {
-            if (!state.isPlaying) return;
-            
-            // Spawn rate increases with speed
-            if (Math.random() < 0.02 + (state.speed * 0.005)) {
-                const lane = Math.floor(Math.random() * 3);
-                
-                // Check distance from last obstacle in this lane to prevent impossible walls
-                let safeToSpawn = true;
-                for(let t of trains) {
-                    if (Math.abs(t.position.x - ((lane-1)*CONFIG.laneWidth)) < 0.1 && t.position.z > -100) {
-                        safeToSpawn = false; break;
-                    }
-                }
-
-                if (safeToSpawn) {
-                    const rand = Math.random();
-                    if (rand < 0.6) {
-                        // 60% chance Train
-                        const isMoving = Math.random() > 0.5;
-                        const dir = Math.random() > 0.5 ? 'forward' : 'backward';
-                        createTrain(lane, isMoving, dir);
-                        
-                        // Spawn coins on top of train sometimes
-                        if(Math.random() > 0.5) {
-                            for(let i=0; i<5; i++) spawnCoin((lane-1)*CONFIG.laneWidth, 3.5, -85 - i*2);
-                        }
-                    } else if (rand < 0.8) {
-                        // 20% chance High Barrier (Must roll)
-                        createBarrier(lane);
-                        for(let i=0; i<3; i++) spawnCoin((lane-1)*CONFIG.laneWidth, 1, -82 - i*2);
-                    } else {
-                        // 20% chance just coins on ground
-                        for(let i=0; i<5; i++) spawnCoin((lane-1)*CONFIG.laneWidth, 1, -80 - i*2);
-                    }
-                }
-            }
-        }
-
-        function updatePhysics() {
-            // Player Lane Movement (Smooth Lerp)
-            playerGroup.position.x += (state.targetX - playerGroup.position.x) * 0.2;
-
-            // Jump & Gravity
-            playerGroup.position.y += state.velY;
-            state.velY -= CONFIG.gravity;
-            if (playerGroup.position.y <= 0) {
-                playerGroup.position.y = 0;
-                state.velY = 0;
-                state.isJumping = false;
-            }
-
-            // Roll Logic
-            if (state.isRolling) {
-                playerGroup.scale.y = 0.5; // Shrink
-                playerGroup.position.y = Math.max(0, playerGroup.position.y); // Force down if in air
-                state.rollTimer--;
-                if (state.rollTimer <= 0) {
-                    state.isRolling = false;
-                    playerGroup.scale.y = 1;
-                }
-            }
-
-            // Animate Running (Sin wave based on speed)
-            if (!state.isJumping && !state.isRolling) {
-                const runSpeed = state.speed * 0.5;
-                leftLegPivot.rotation.x = Math.sin(Date.now() * 0.015 * runSpeed) * 0.8;
-                rightLegPivot.rotation.x = -Math.sin(Date.now() * 0.015 * runSpeed) * 0.8;
-                leftArmPivot.rotation.x = -Math.sin(Date.now() * 0.015 * runSpeed) * 0.8;
-                rightArmPivot.rotation.x = Math.sin(Date.now() * 0.015 * runSpeed) * 0.8;
-                // Bobbing
-                playerGroup.position.y = Math.abs(Math.sin(Date.now() * 0.03 * runSpeed)) * 0.1;
-            } else if (state.isJumping) {
-                leftLegPivot.rotation.x = -0.5; rightLegPivot.rotation.x = 0.2;
-                leftArmPivot.rotation.x = -2.5; rightArmPivot.rotation.x = -2.5; // Hands up
-            } else if (state.isRolling) {
-                leftLegPivot.rotation.x = 1.5; rightLegPivot.rotation.x = 1.5;
-                leftArmPivot.rotation.x = 0; rightArmPivot.rotation.x = 0;
-            }
-
-            // Move Trains & Obstacles
-            for (let i = trains.length - 1; i >= 0; i--) {
-                let t = trains[i];
-                // Base movement towards player + own movement
-                t.position.z += state.speed + t.userData.moveSpeed;
-
-                // Collision Detection (AABB simplified)
-                const dz = Math.abs(t.position.z - playerGroup.position.z);
-                const dx = Math.abs(t.position.x - playerGroup.position.x);
-                
-                // Hitbox logic
-                let hitZ = t.userData.length ? t.userData.length / 2 + 0.5 : 1;
-                let hitY = true;
-
-                if (t.userData.type === 'barrier_high') {
-                    // If rolling, pass under
-                    if (state.isRolling) hitY = false;
-                } else if (t.userData.type === 'train') {
-                    // If on top of train? (Simplified: if jumping high enough and close, maybe safe, but for now trains are deadly unless we implement climbing. Let's keep it simple: deadly)
-                    // Actually, let's allow jumping ONTO trains if we wanted, but standard is dodging.
-                    if(state.isJumping && playerGroup.position.y > 2.5) hitY = false; // Jump over low parts? No, trains are tall.
-                }
-
-                if (dz < hitZ && dx < 1.2 && hitY) {
-                    handleCrash();
-                }
-
-                if (t.position.z > 15) {
-                    scene.remove(t);
-                    trains.splice(i, 1);
-                }
-            }
-
-            // Move Coins & Magnet Logic
-            for (let i = coinMeshes.length - 1; i >= 0; i--) {
-                let c = coinMeshes[i];
-                c.position.z += state.speed;
-                c.rotation.z += 0.1;
-
-                // Magnet Effect
-                if (magnetActive) {
-                    const dir = new THREE.Vector3().subVectors(playerGroup.position, c.position);
-                    if (dir.length() < 8) {
-                        c.position.add(dir.normalize().multiplyScalar(0.5)); // Pull towards player
-                    }
-                }
-
-                // Collection
-                const dist = c.position.distanceTo(new THREE.Vector3(playerGroup.position.x, playerGroup.position.y + 1, playerGroup.position.z));
-                if (dist < 1.5) {
-                    state.coins++;
-                    state.score += 5;
-                    updateHUD();
-                    scene.remove(c);
-                    coinMeshes.splice(i, 1);
-                } else if (c.position.z > 10) {
-                    scene.remove(c);
-                    coinMeshes.splice(i, 1);
-                }
-            }
-
-            // Magnet Timer
-            if (magnetActive) {
-                magnetTimer--;
-                if (magnetTimer <= 0) magnetActive = false;
-            }
-
-            // Environment Loop (Illusion)
-            trackGroup.position.z += state.speed;
-            if (trackGroup.position.z > 5) trackGroup.position.z = 0;
-
-            // Increase Difficulty
-            state.speed = Math.min(CONFIG.maxSpeed, CONFIG.baseSpeed + (state.score * 0.0005));
-            state.score += state.speed * 0.1;
-            updateHUD();
-        }
-
-        function handleCrash() {
-            if (state.inventory.shield > 0) {
-                state.inventory.shield--;
-                shieldMesh.visible = false;
-                // Push back obstacles slightly to prevent instant re-crash
-                trains.forEach(t => t.position.z += 5);
-                // Visual feedback
-                const flash = new THREE.Mesh(new THREE.PlaneGeometry(100,100), new THREE.MeshBasicMaterial({color: 0x00ffff, transparent:true, opacity:0.5}));
-                flash.position.z = -5; scene.add(flash);
-                setTimeout(()=>scene.remove(flash), 100);
-            } else {
-                endGame();
-            }
-        }
-
-        // --- CONTROLS ---
-        function moveLeft() { if (state.lane > 0) { state.lane--; state.targetX = (state.lane - 1) * CONFIG.laneWidth; } }
-        function moveRight() { if (state.lane < 2) { state.lane++; state.targetX = (state.lane - 1) * CONFIG.laneWidth; } }
-        function jump() { if (!state.isJumping && !state.isRolling) { state.velY = CONFIG.jumpForce; state.isJumping = true; } }
-        function roll() { 
-            if (!state.isRolling) { 
-                state.isRolling = true; 
-                state.rollTimer = 40; // Frames to roll
-                if(state.isJumping) { state.velY = -0.5; } // Fast fall if in air
-            } 
-        }
-
-        window.addEventListener('keydown', (e) => {
-            if (!state.isPlaying) return;
-            if (e.key === 'ArrowLeft') moveLeft();
-            if (e.key === 'ArrowRight') moveRight();
-            if (e.key === 'ArrowUp') jump();
-            if (e.key === 'ArrowDown') roll();
-        });
-
-        // Touch Swipe
-        let touchStartX = 0, touchStartY = 0;
-        document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; }, {passive: false});
-        document.addEventListener('touchend', e => {
-            if (!state.isPlaying) return;
-            const dx = e.changedTouches[0].screenX - touchStartX;
-            const dy = e.changedTouches[0].screenY - touchStartY;
-            if (Math.abs(dx) > Math.abs(dy)) {
-                if (dx > 40) moveRight(); else if (dx < -40) moveLeft(); // Note: RTL might feel inverted, but standard is swipe right = go right
-            } else {
-                if (dy < -40) jump(); else if (dy > 40) roll();
-            }
-        }, {passive: false});
-
-        // --- UI & GAME FLOW ---
-        const uiScore = document.getElementById('score');
-        const uiCoins = document.getElementById('coins');
-        const uiFinalScore = document.getElementById('final-score');
-        const uiShopCoins = document.getElementById('shop-coins');
+        // Limbs (Pivots for animation)
+        this.limbs = {};
         
-        function updateHUD() {
-            uiScore.innerText = Math.floor(state.score);
-            uiCoins.innerText = state.coins;
+        // Arms
+        const armGeo = new THREE.BoxGeometry(0.25, 0.8, 0.25);
+        this.limbs.armL = new THREE.Group(); this.limbs.armL.position.set(-0.55, 1.6, 0);
+        const meshArmL = new THREE.Mesh(armGeo, hoodie); meshArmL.position.y = -0.4; meshArmL.castShadow = true;
+        this.limbs.armL.add(meshArmL); this.player.add(this.limbs.armL);
+
+        this.limbs.armR = new THREE.Group(); this.limbs.armR.position.set(0.55, 1.6, 0);
+        const meshArmR = new THREE.Mesh(armGeo, hoodie); meshArmR.position.y = -0.4; meshArmR.castShadow = true;
+        this.limbs.armR.add(meshArmR); this.player.add(this.limbs.armR);
+
+        // Legs
+        const legGeo = new THREE.BoxGeometry(0.3, 0.9, 0.3);
+        this.limbs.legL = new THREE.Group(); this.limbs.legL.position.set(-0.25, 0.7, 0);
+        const meshLegL = new THREE.Mesh(legGeo, pants); meshLegL.position.y = -0.45; meshLegL.castShadow = true;
+        const shoeL = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.2, 0.5), shoe); shoeL.position.set(0, -0.9, -0.05);
+        this.limbs.legL.add(meshLegL, shoeL); this.player.add(this.limbs.legL);
+
+        this.limbs.legR = new THREE.Group(); this.limbs.legR.position.set(0.25, 0.7, 0);
+        const meshLegR = new THREE.Mesh(legGeo, pants); meshLegR.position.y = -0.45; meshLegR.castShadow = true;
+        const shoeR = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.2, 0.5), shoe); shoeR.position.set(0, -0.9, -0.05);
+        this.limbs.legR.add(meshLegR, shoeR); this.player.add(this.limbs.legR);
+
+        // Shield Visual
+        this.shieldMesh = new THREE.Mesh(
+            new THREE.SphereGeometry(1.5, 16, 16), 
+            new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.3, wireframe: true })
+        );
+        this.shieldMesh.visible = false;
+        this.player.add(this.shieldMesh);
+
+        this.scene.add(this.player);
+    }
+
+    createTrain(lane, type) {
+        const group = new THREE.Group();
+        const length = 15 + Math.random() * 15;
+        const colorKey = Object.keys(CONFIG.colors)[2 + Math.floor(Math.random() * 4)]; // Random train color
+        const color = CONFIG.colors[colorKey];
+
+        // Main Body (Rounded Box approximation)
+        const bodyMat = new THREE.MeshStandardMaterial({ color: color, metalness: 0.6, roughness: 0.2 });
+        const body = new THREE.Mesh(new THREE.BoxGeometry(2.8, 3.2, length), bodyMat);
+        body.position.y = 1.6; body.castShadow = true; body.receiveShadow = true;
+        group.add(body);
+
+        // Roof details
+        const roof = new THREE.Mesh(new THREE.BoxGeometry(2.9, 0.2, length), new THREE.MeshStandardMaterial({color: 0xcccccc}));
+        roof.position.y = 3.2; group.add(roof);
+
+        // Windows
+        const winMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.1 });
+        const winCount = Math.floor(length / 3);
+        for(let i=0; i<winCount; i++) {
+            const wL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 1.8), winMat);
+            wL.position.set(-1.41, 2.0, -length/2 + 2 + i*3);
+            const wR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 1.8), winMat);
+            wR.position.set(1.41, 2.0, -length/2 + 2 + i*3);
+            group.add(wL, wR);
         }
 
-        function saveData() {
-            localStorage.setItem('subwayCoins', state.coins);
-        }
+        // Logic Data
+        let moveSpeed = 0;
+        if (type === 'movingTowards') moveSpeed = -(CONFIG.baseSpeed + 1.0); // Fast towards player
+        if (type === 'movingWith') moveSpeed = CONFIG.baseSpeed - 0.2; // Slowly with player
 
-        function startGame() {
-            document.getElementById('main-menu').classList.add('hidden');
-            document.getElementById('game-over-menu').classList.add('hidden');
+        group.position.set((lane - 1) * CONFIG.laneWidth, 0, -100);
+        group.userData = { type: 'train', length: length, moveSpeed: moveSpeed, hitbox: length/2 };
+        
+        this.scene.add(group);
+        this.entities.trains.push(group);
+    }
+
+    createBarrier(lane) {
+        const group = new THREE.Group();
+        // High barrier (must roll)
+        const bar = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.5, 0.5), new THREE.MeshStandardMaterial({color: 0xffaa00}));
+        bar.position.y = 1.5; bar.castShadow = true;
+        const leg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.5), new THREE.MeshStandardMaterial({color: 0x555}));
+        leg1.position.set(-1, 0.75, 0);
+        const leg2 = leg1.clone(); leg2.position.set(1, 0.75, 0);
+        group.add(bar, leg1, leg2);
+        
+        group.position.set((lane - 1) * CONFIG.laneWidth, 0, -100);
+        group.userData = { type: 'barrier_high', hitbox: 0.5 };
+        this.scene.add(group);
+        this.entities.trains.push(group);
+    }
+
+    createCoin(x, y, z) {
+        const geo = new THREE.CylinderGeometry(0.4, 0.4, 0.1, 16);
+        const mat = new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 1, roughness: 0.2, emissive: 0x443300 });
+        const coin = new THREE.Mesh(geo, mat);
+        coin.rotation.x = Math.PI / 2;
+        coin.position.set(x, y, z);
+        coin.castShadow = true;
+        this.scene.add(coin);
+        this.entities.coins.push(coin);
+    }
+
+    createPowerup(lane) {
+        const type = Math.random() > 0.5 ? 'magnet' : 'shield';
+        const color = type === 'magnet' ? 0xff0000 : 0x00ffff;
+        
+        const group = new THREE.Group();
+        const box = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshStandardMaterial({color: color, emissive: color, emissiveIntensity: 0.5}));
+        const glow = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), new THREE.MeshBasicMaterial({color: color, transparent: true, opacity: 0.3}));
+        group.add(box, glow);
+        
+        group.position.set((lane - 1) * CONFIG.laneWidth, 1.5, -100);
+        group.userData = { type: type, rotSpeed: 0.05 };
+        
+        this.scene.add(group);
+        this.entities.powerups.push(group);
+    }
+
+    spawnLogic() {
+        if (Math.random() < 0.03 + (this.state.speed * 0.005)) {
+            const lane = Math.floor(Math.random() * 3);
             
-            // Reset State
-            state.isPlaying = true;
-            state.score = 0;
-            state.speed = CONFIG.baseSpeed;
-            state.lane = 1;
-            state.targetX = 0;
-            state.velY = 0;
-            state.isJumping = false;
-            state.isRolling = false;
-            playerGroup.position.set(0, 0, 0);
-            playerGroup.scale.y = 1;
-            
-            // Apply Inventory
-            magnetActive = state.inventory.magnet > 0;
-            magnetTimer = magnetActive ? 500 : 0; // Lasts ~8 seconds
-            if (magnetActive) state.inventory.magnet--;
-            
-            shieldMesh.visible = state.inventory.shield > 0;
+            // Check safety
+            let safe = true;
+            for(let t of this.entities.trains) {
+                if (Math.abs(t.position.x - ((lane-1)*CONFIG.laneWidth)) < 0.1 && t.position.z > -120) safe = false;
+            }
 
-            // Clear Entities
-            trains.forEach(t => scene.remove(t)); trains = [];
-            coinMeshes.forEach(c => scene.remove(c)); coinMeshes = [];
-            
-            updateHUD();
+            if (safe) {
+                const r = Math.random();
+                if (r < 0.5) {
+                    const types = ['static', 'movingTowards', 'movingWith'];
+                    this.createTrain(lane, types[Math.floor(Math.random()*types.length)]);
+                    // Coins on train
+                    if(Math.random()>0.5) for(let i=0; i<5; i++) this.createCoin((lane-1)*CONFIG.laneWidth, 3.8, -105 - i*2.5);
+                } else if (r < 0.7) {
+                    this.createBarrier(lane);
+                    for(let i=0; i<3; i++) this.createCoin((lane-1)*CONFIG.laneWidth, 1, -102 - i*2);
+                } else if (r < 0.8) {
+                    this.createPowerup(lane);
+                } else {
+                    for(let i=0; i<5; i++) this.createCoin((lane-1)*CONFIG.laneWidth, 1, -100 - i*2);
+                }
+            }
+        }
+    }
+
+    updatePhysics() {
+        // Smooth Lane Switch (Lerp)
+        this.player.position.x += (this.state.targetX - this.player.position.x) * 0.15;
+
+        // Jump & Gravity
+        this.player.position.y += this.state.velY;
+        this.state.velY -= CONFIG.gravity;
+        if (this.player.position.y <= 0) {
+            this.player.position.y = 0;
+            this.state.velY = 0;
+            this.state.isJumping = false;
         }
 
-        function endGame() {
-            state.isPlaying = false;
-            saveData();
-            uiFinalScore.innerText = Math.floor(state.score);
-            document.getElementById('game-over-menu').classList.remove('hidden');
-        }
-
-        function showMainMenu() {
-            document.getElementById('game-over-menu').classList.add('hidden');
-            document.getElementById('main-menu').classList.remove('hidden');
-            updateHUD();
-        }
-
-        // Shop Logic
-        function openShop() {
-            document.getElementById('main-menu').classList.add('hidden');
-            document.getElementById('shop-modal').classList.remove('hidden');
-            updateShopUI();
-        }
-        function closeShop() {
-            document.getElementById('shop-modal').classList.add('hidden');
-            document.getElementById('main-menu').classList.remove('hidden');
-        }
-        function updateShopUI() {
-            uiShopCoins.innerText = state.coins;
-            document.getElementById('buy-magnet').disabled = state.coins < 50;
-            document.getElementById('buy-shield').disabled = state.coins < 100;
-        }
-        window.buyItem = function(item, cost) {
-            if (state.coins >= cost) {
-                state.coins -= cost;
-                state.inventory[item]++;
-                saveData();
-                updateShopUI();
-                updateHUD();
+        // Roll
+        if (this.state.isRolling) {
+            this.player.scale.y = 0.5;
+            this.state.rollTime--;
+            if (this.state.rollTime <= 0) {
+                this.state.isRolling = false;
+                this.player.scale.y = 1;
             }
         }
 
-        // Button Listeners
-        document.getElementById('start-btn').addEventListener('click', startGame);
-        document.getElementById('retry-btn').addEventListener('click', startGame);
-        document.getElementById('menu-btn').addEventListener('click', showMainMenu);
-        document.getElementById('shop-btn').addEventListener('click', openShop);
-
-        // Resize Handler
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // --- MAIN LOOP ---
-        function animate() {
-            requestAnimationFrame(animate);
-            if (state.isPlaying) {
-                updatePhysics();
-                spawnLogic();
-            }
-            renderer.render(scene, camera);
+        // Procedural Animation (Running)
+        if (!this.state.isJumping && !this.state.isRolling) {
+            const t = Date.now() * 0.015 * (this.state.speed / CONFIG.baseSpeed);
+            this.limbs.legL.rotation.x = Math.sin(t) * 0.8;
+            this.limbs.legR.rotation.x = -Math.sin(t) * 0.8;
+            this.limbs.armL.rotation.x = -Math.sin(t) * 0.8;
+            this.limbs.armR.rotation.x = Math.sin(t) * 0.8;
+            this.player.position.y = Math.abs(Math.sin(t*2)) * 0.1; // Bobbing
+            this.player.rotation.z = (this.state.targetX - this.player.position.x) * -0.1; // Tilt
+        } else if (this.state.isJumping) {
+            this.limbs.legL.rotation.x = -0.5; this.limbs.legR.rotation.x = 0.2;
+            this.limbs.armL.rotation.x = -2.5; this.limbs.armR.rotation.x = -2.5;
+            this.player.rotation.z = 0;
+        } else if (this.state.isRolling) {
+            this.limbs.legL.rotation.x = 1.5; this.limbs.legR.rotation.x = 1.5;
+            this.limbs.armL.rotation.x = 0; this.limbs.armR.rotation.x = 0;
         }
 
-        // Init
-        updateHUD();
-        animate();
+        // Move Entities
+        const speed = this.state.speed;
 
-    </script>
+        // Trains
+        for (let i = this.entities.trains.length - 1; i >= 0; i--) {
+            let t = this.entities.trains[i];
+            t.position.z += speed + t.userData.moveSpeed;
+
+            // Collision
+            const dz = Math.abs(t.position.z - this.player.position.z);
+            const dx = Math.abs(t.position.x - this.player.position.x);
+            
+            let hit = false;
+            if (dz < t.userData.hitbox + 0.5 && dx < 1.2) {
+                if (t.userData.type === 'barrier_high') {
+                    if (!this.state.isRolling) hit = true;
+                } else {
+                    // Train collision (unless jumping very high? No, trains are tall)
+                    if (this.player.position.y < 2.5) hit = true;
+                }
+            }
+
+            if (hit) this.crash();
+
+            if (t.position.z > 20) {
+                this.scene.remove(t);
+                this.entities.trains.splice(i, 1);
+            }
+        }
+
+        // Coins
+        for (let i = this.entities.coins.length - 1; i >= 0; i--) {
+            let c = this.entities.coins[i];
+            c.position.z += speed;
+            c.rotation.z += 0.1;
+
+            // Magnet
+            if (this.state.activePowerups.magnet > 0) {
+                const dist = c.position.distanceTo(this.player.position);
+                if (dist < 10) {
+                    const dir = new THREE.Vector3().subVectors(this.player.position, c.position).normalize();
+                    c.position.add(dir.multiplyScalar(0.8));
+                }
+            }
+
+            // Collect
+            if (c.position.distanceTo(new THREE.Vector3(this.player.position.x, this.player.position.y+1, this.player.position.z)) < 1.5) {
+                this.state.coins++;
+                this.state.score += 5;
+                this.updateUI();
+                this.scene.remove(c);
+                this.entities.coins.splice(i, 1);
+            } else if (c.position.z > 10) {
+                this.scene.remove(c);
+                this.entities.coins.splice(i, 1);
+            }
+        }
+
+        // Powerups
+        for (let i = this.entities.powerups.length - 1; i >= 0; i--) {
+            let p = this.entities.powerups[i];
+            p.position.z += speed;
+            p.rotation.y += p.userData.rotSpeed;
+            p.children[1].rotation.y -= p.userData.rotSpeed; // Counter rotate glow
+
+            if (p.position.distanceTo(this.player.position) < 1.5) {
+                this.activatePowerup(p.userData.type);
+                this.scene.remove(p);
+                this.entities.powerups.splice(i, 1);
+            } else if (p.position.z > 10) {
+                this.scene.remove(p);
+                this.entities.powerups.splice(i, 1);
+            }
+        }
+
+        // Powerup Timers
+        if (this.state.activePowerups.magnet > 0) {
+            this.state.activePowerups.magnet--;
+            if (this.state.activePowerups.magnet <= 0) document.getElementById('pu-magnet').style.display = 'none';
+        }
+
+        // Environment Loop
+        this.trackGroup.position.z += speed;
+        if (this.trackGroup.position.z > 4) this.trackGroup.position.z = 0;
+
+        // Difficulty
+        this.state.speed = Math.min(CONFIG.maxSpeed, CONFIG.baseSpeed + (this.state.score * 0.0002));
+        this.state.score += this.state.speed * 0.1;
+        this.updateUI();
+    }
+
+    activatePowerup(type) {
+        if (type === 'magnet') {
+            this.state.activePowerups.magnet = 600; // ~10 seconds
+            document.getElementById('pu-magnet').style.display = 'block';
+        } else if (type === 'shield') {
+            this.state.activePowerups.shield = true;
+            this.shieldMesh.visible = true;
+            document.getElementById('pu-shield').style.display = 'block';
+        }
+    }
+
+    crash() {
+        if (this.state.activePowerups.shield) {
+            this.state.activePowerups.shield = false;
+            this.shieldMesh.visible = false;
+            document.getElementById('pu-shield').style.display = 'none';
+            // Push back
+            this.entities.trains.forEach(t => t.position.z += 10);
+            // Flash
+            const flash = new THREE.Mesh(new THREE.PlaneGeometry(100,100), new THREE.MeshBasicMaterial({color: 0x00ffff, transparent:true, opacity:0.5}));
+            flash.position.z = -5; this.scene.add(flash);
+            setTimeout(()=>this.scene.remove(flash), 100);
+        } else {
+            this.gameOver();
+        }
+    }
+
+    setupInputs() {
+        const handleKey = (e) => {
+            if (!this.state.isPlaying) return;
+            if (e.key === 'ArrowLeft') this.moveLane(-1);
+            if (e.key === 'ArrowRight') this.moveLane(1);
+            if (e.key === 'ArrowUp') this.jump();
+            if (e.key === 'ArrowDown') this.roll();
+        };
+        window.addEventListener('keydown', handleKey);
+
+        let tx = 0, ty = 0;
+        document.addEventListener('touchstart', e => { tx = e.changedTouches[0].screenX; ty = e.changedTouches[0].screenY; }, {passive:false});
+        document.addEventListener('touchend', e => {
+            if (!this.state.isPlaying) return;
+            const dx = e.changedTouches[0].screenX - tx;
+            const dy = e.changedTouches[0].screenY - ty;
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (dx > 40) this.moveLane(1); else if (dx < -40) this.moveLane(-1);
+            } else {
+                if (dy < -40) this.jump(); else if (dy > 40) this.roll();
+            }
+        }, {passive:false});
+    }
+
+    moveLane(dir) {
+        this.state.lane = Math.max(0, Math.min(2, this.state.lane + dir));
+        this.state.targetX = (this.state.lane - 1) * CONFIG.laneWidth;
+    }
+
+    jump() {
+        if (!this.state.isJumping && !this.state.isRolling) {
+            this.state.velY = CONFIG.jumpForce;
+            this.state.isJumping = true;
+        }
+    }
+
+    roll() {
+        if (!this.state.isRolling) {
+            this.state.isRolling = true;
+            this.state.rollTime = 40;
+            if (this.state.isJumping) this.state.velY = -0.8; // Slam down
+        }
+    }
+
+    start() {
+        document.getElementById('main-menu').classList.add('hidden');
+        document.getElementById('game-over').classList.add('hidden');
+        
+        this.state.isPlaying = true;
+        this.state.score = 0;
+        this.state.speed = CONFIG.baseSpeed;
+        this.state.lane = 1;
+        this.state.targetX = 0;
+        this.state.velY = 0;
+        this.state.isJumping = false;
+        this.state.isRolling = false;
+        this.player.position.set(0,0,0);
+        this.player.scale.y = 1;
+        
+        // Use inventory
+        if (this.state.inventory.magnet > 0) {
+            this.activatePowerup('magnet');
+            this.state.inventory.magnet--;
+        }
+        if (this.state.inventory.shield > 0) {
+            this.activatePowerup('shield');
+            this.state.inventory.shield--;
+        }
+
+        // Clear
+        [...this.entities.trains, ...this.entities.coins, ...this.entities.powerups].forEach(o => this.scene.remove(o));
+        this.entities = { trains: [], coins: [], powerups: [], particles: [] };
+        
+        this.updateUI();
+    }
+
+    gameOver() {
+        this.state.isPlaying = false;
+        localStorage.setItem('subway_coins_v2', this.state.coins);
+        document.getElementById('final-score').innerText = Math.floor(this.state.score);
+        document.getElementById('game-over').classList.remove('hidden');
+    }
+
+    showMenu() {
+        document.getElementById('game-over').classList.add('hidden');
+        document.getElementById('main-menu').classList.remove('hidden');
+        this.updateUI();
+    }
+
+    openShop() {
+        document.getElementById('main-menu').classList.add('hidden');
+        document.getElementById('shop-modal').classList.remove('hidden');
+        this.updateShopUI();
+    }
+
+    closeShop() {
+        document.getElementById('shop-modal').classList.add('hidden');
+        document.getElementById('main-menu').classList.remove('hidden');
+    }
+
+    buyItem(item, cost) {
+        if (this.state.coins >= cost) {
+            this.state.coins -= cost;
+            this.state.inventory[item]++;
+            localStorage.setItem('subway_coins_v2', this.state.coins);
+            this.updateShopUI();
+            this.updateUI();
+        }
+    }
+
+    updateUI() {
+        document.getElementById('score').innerText = Math.floor(this.state.score);
+        document.getElementById('coins').innerText = this.state.coins;
+    }
+
+    updateShopUI() {
+        document.getElementById('shop-coins').innerText = this.state.coins;
+        document.getElementById('buy-magnet').disabled = this.state.coins < 50;
+        document.getElementById('buy-shield').disabled = this.state.coins < 100;
+    }
+
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        if (this.state.isPlaying) {
+            this.updatePhysics();
+            this.spawnLogic();
+        }
+        this.renderer.render(this.scene, this.camera);
+    }
+}
+
+// Init
+const game = new Game();
+document.getElementById('start-btn').onclick = () => game.start();
+document.getElementById('retry-btn').onclick = () => game.start();
+document.getElementById('shop-btn').onclick = () => game.openShop();
+
+</script>
 </body>
 </html>
