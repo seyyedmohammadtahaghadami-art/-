@@ -3,53 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Subway Runner Pro - Ultimate</title>
+    <title>Subway Runner Pro - Ultimate 3D</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lalezar&display=swap');
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Lalezar', cursive; touch-action: none; user-select: none; }
+        
+        body { 
+            margin: 0; overflow: hidden; background: #000; 
+            font-family: 'Lalezar', cursive; touch-action: none; user-select: none; 
+        }
         canvas { display: block; width: 100%; height: 100%; }
         
-        /* UI Overlay - Exact match to your request structure */
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; z-index: 5; }
+        /* UI Layer */
+        #ui-layer { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; z-index: 5; 
+        }
         
-        .hud-top { display: flex; justify-content: space-between; padding: 20px; font-size: 28px; color: white; text-shadow: 2px 2px 4px #000; }
-        .stat-box { background: rgba(0,0,0,0.5); padding: 8px 20px; border-radius: 25px; border: 2px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px); }
+        .hud-top { 
+            display: flex; justify-content: space-between; padding: 20px; 
+            font-size: 32px; color: white; text-shadow: 2px 2px 4px #000; 
+        }
+        .stat-box { 
+            background: rgba(0,0,0,0.6); padding: 10px 25px; border-radius: 30px; 
+            border: 2px solid rgba(255,255,255,0.3); backdrop-filter: blur(5px); 
+            display: flex; align-items: center; gap: 10px;
+        }
+        .coin-icon { color: #FFD700; font-size: 36px; }
         
         /* Powerup Indicators */
-        #powerups { position: absolute; top: 80px; right: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .pu-badge { background: rgba(0, 255, 255, 0.3); border: 2px solid #0ff; padding: 5px 15px; border-radius: 10px; color: #fff; font-size: 18px; display: none; animation: pulse 1s infinite; }
+        #powerups { 
+            position: absolute; top: 90px; right: 20px; 
+            display: flex; flex-direction: column; gap: 10px; 
+        }
+        .pu-badge { 
+            background: rgba(0, 255, 255, 0.4); border: 2px solid #0ff; 
+            padding: 8px 20px; border-radius: 15px; color: #fff; font-size: 20px; 
+            display: none; animation: pulse 1s infinite; box-shadow: 0 0 10px #0ff;
+        }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
-        /* Menus - Styled like your file but better */
+        /* Menus */
         .menu-screen { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             background: radial-gradient(circle, rgba(20,20,30,0.85) 0%, rgba(0,0,0,0.95) 100%); 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            pointer-events: auto; z-index: 10; transition: opacity 0.3s; 
+            pointer-events: auto; z-index: 10; transition: opacity 0.4s; 
         }
         .hidden { opacity: 0; pointer-events: none; }
         
-        h1 { font-size: 60px; color: #FFD700; margin: 0; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 0 20px #FFD700, 4px 4px 0 #d35400; }
-        h2 { font-size: 40px; color: #ff4757; margin: 10px 0; text-shadow: 2px 2px 0 #000; }
-        p { color: #ecf0f1; font-size: 22px; margin-bottom: 30px; }
-        .subtitle { font-size: 18px; color: #aaa; margin-top: -20px; margin-bottom: 30px; }
+        h1 { 
+            font-size: 70px; color: #FFD700; margin: 0; text-transform: uppercase; 
+            letter-spacing: 5px; text-shadow: 0 0 30px #FFD700, 5px 5px 0 #d35400; 
+            transform: perspective(500px) rotateX(10deg);
+        }
+        h2 { font-size: 45px; color: #ff4757; margin: 10px 0; text-shadow: 3px 3px 0 #000; }
+        p { color: #ecf0f1; font-size: 24px; margin-bottom: 40px; text-shadow: 1px 1px 2px #000; }
+        .subtitle { font-size: 20px; color: #bdc3c7; margin-top: -30px; margin-bottom: 40px; }
 
         button { 
-            background: linear-gradient(to bottom, #ff9f43, #ee5253); border: 3px solid #fff; padding: 15px 50px; 
-            color: white; font-size: 28px; font-family: 'Lalezar', cursive; border-radius: 50px; cursor: pointer; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5); transition: transform 0.1s; margin: 10px;
+            background: linear-gradient(to bottom, #ff9f43, #ee5253); border: 4px solid #fff; 
+            padding: 15px 60px; color: white; font-size: 32px; font-family: 'Lalezar', cursive; 
+            border-radius: 60px; cursor: pointer; box-shadow: 0 15px 30px rgba(0,0,0,0.6); 
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); margin: 10px;
         }
+        button:hover { transform: scale(1.05) translateY(-5px); box-shadow: 0 20px 40px rgba(238, 82, 83, 0.6); }
         button:active { transform: scale(0.95); }
-        .btn-secondary { background: linear-gradient(to bottom, #576574, #222f3e); font-size: 20px; padding: 10px 30px; }
+        .btn-secondary { 
+            background: linear-gradient(to bottom, #576574, #222f3e); font-size: 24px; padding: 12px 40px; 
+        }
 
         /* Shop Modal */
         #shop-modal { background: rgba(0,0,0,0.9); z-index: 20; }
-        .shop-panel { background: #2c3e50; padding: 30px; border-radius: 20px; border: 4px solid #f1c40f; text-align: center; width: 85%; max-width: 450px; }
-        .shop-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.1); padding: 15px; margin: 15px 0; border-radius: 10px; color: white; font-size: 20px; }
-        .buy-btn { background: #27ae60; border: none; padding: 8px 20px; border-radius: 15px; cursor: pointer; color: white; font-family: 'Lalezar'; font-size: 18px; }
-        .buy-btn:disabled { background: #7f8c8d; cursor: not-allowed; }
-
+        .shop-panel { 
+            background: #2c3e50; padding: 40px; border-radius: 30px; 
+            border: 5px solid #f1c40f; text-align: center; width: 85%; max-width: 500px; 
+            box-shadow: 0 0 100px rgba(241, 196, 15, 0.2);
+        }
+        .shop-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(255,255,255,0.1); padding: 20px; margin: 20px 0; 
+            border-radius: 15px; color: white; font-size: 24px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .buy-btn { 
+            background: #27ae60; border: none; padding: 10px 25px; border-radius: 20px; 
+            cursor: pointer; color: white; font-family: 'Lalezar'; font-size: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .buy-btn:disabled { background: #7f8c8d; cursor: not-allowed; transform: none; box-shadow: none; }
     </style>
+    <!-- Three.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
@@ -60,21 +101,21 @@
     <div id="ui-layer">
         <div class="hud-top">
             <div class="stat-box">امتیاز: <span id="score">0</span></div>
-            <div class="stat-box">سکه: <span id="coins">0</span></div>
+            <div class="stat-box"><span class="coin-icon">🪙</span> <span id="coins">0</span></div>
         </div>
         <div id="powerups">
-            <div id="pu-magnet" class="pu-badge">آهنربا فعال</div>
-            <div id="pu-shield" class="pu-badge">سپر فعال</div>
+            <div id="pu-magnet" class="pu-badge">آهنربا فعال!</div>
+            <div id="pu-shield" class="pu-badge">سپر فعال!</div>
         </div>
     </div>
 
-    <!-- Start Screen (Matches your file structure) -->
+    <!-- Start Screen -->
     <div id="start-screen" class="menu-screen">
         <h1>SUBWAY PRO</h1>
-        <p class="subtitle">نسخه نهایی APK - گرافیک واقعی</p>
+        <p class="subtitle">نسخه نهایی APK - فیزیک واقعی قطار</p>
         <button id="start-btn">شروع دویدن</button>
         <button id="shop-btn" class="btn-secondary">فروشگاه 🛒</button>
-        <p style="font-size: 16px; margin-top: 20px; opacity: 0.7;">کنترل: Swipe یا Arrow Keys</p>
+        <p style="font-size: 18px; margin-top: 30px; opacity: 0.8;">کنترل: Swipe یا Arrow Keys | بالا: پرش روی قطار</p>
     </div>
 
     <!-- Shop Screen -->
@@ -92,13 +133,13 @@
                 <button class="buy-btn" id="buy-shield">100 سکه</button>
             </div>
             
-            <button id="close-shop" class="btn-secondary" style="margin-top: 20px;">بستن</button>
+            <button id="close-shop" class="btn-secondary" style="margin-top: 30px;">بستن</button>
         </div>
     </div>
 
-    <!-- Game Over Screen (Matches your file structure) -->
+    <!-- Game Over Screen -->
     <div id="game-over-screen" class="menu-screen hidden">
-        <h1 style="color: #ff4757; text-shadow: 0 0 20px #ff4757;">GAME OVER</h1>
+        <h1 style="color: #ff4757; text-shadow: 0 0 30px #ff4757;">GAME OVER</h1>
         <p>امتیاز نهایی: <span id="final-score">0</span></p>
         <button id="retry-btn">تلاش مجدد</button>
         <button id="menu-btn" class="btn-secondary">منو</button>
@@ -106,16 +147,19 @@
 
 <script>
 /**
- * SUBWAY RUNNER PRO - ULTIMATE SINGLE FILE ENGINE
- * Features: Train Climbing, Smooth Lerp, All Obstacles, Powerups, Real Graphics
+ * SUBWAY RUNNER PRO - ULTIMATE ENGINE
+ * Author: AI Assistant
+ * Features: Train Climbing, Smooth Physics, Powerups, Dynamic Obstacles
  */
 
+// --- CONFIGURATION ---
 const CONFIG = {
     laneWidth: 3.5,
     baseSpeed: 0.6,
     maxSpeed: 2.2,
-    jumpForce: 0.65,
+    jumpForce: 0.7,
     gravity: 0.035,
+    trainHeight: 3.2,
     colors: {
         sky: 0x87CEEB,
         ground: 0x222222,
@@ -127,6 +171,7 @@ const CONFIG = {
 
 class SubwayGame {
     constructor() {
+        // Game State
         this.state = {
             isPlaying: false,
             score: 0,
@@ -138,12 +183,18 @@ class SubwayGame {
             isJumping: false,
             isRolling: false,
             rollTimer: 0,
-            onTrain: false, // New: Is player on top of a train?
             inventory: { magnet: 0, shield: 0 },
             activePowerups: { magnet: 0, shield: false }
         };
 
-        this.entities = { trains: [], barriers: [], coins: [], powerups: [] };
+        // Entity Arrays
+        this.entities = {
+            trains: [],
+            barriers: [],
+            coins: [],
+            powerups: []
+        };
+
         this.initThree();
         this.createWorld();
         this.createPlayer();
@@ -152,10 +203,11 @@ class SubwayGame {
         this.animate();
     }
 
+    // --- THREE.JS SETUP ---
     initThree() {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(CONFIG.colors.sky);
-        this.scene.fog = new THREE.FogExp2(CONFIG.colors.sky, 0.015);
+        this.scene.fog = new THREE.FogExp2(CONFIG.colors.sky, 0.012);
 
         this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
         this.camera.position.set(0, 5, 10);
@@ -168,17 +220,22 @@ class SubwayGame {
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         document.getElementById('canvas-container').appendChild(this.renderer.domElement);
 
-        // Lights
-        const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
-        this.scene.add(hemi);
-        const sun = new THREE.DirectionalLight(0xffffff, 0.9);
-        sun.position.set(20, 40, 20);
-        sun.castShadow = true;
-        sun.shadow.mapSize.width = 2048; sun.shadow.mapSize.height = 2048;
-        sun.shadow.camera.left = -30; sun.shadow.camera.right = 30;
-        sun.shadow.camera.top = 30; sun.shadow.camera.bottom = -30;
-        this.scene.add(sun);
+        // Lighting
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+        this.scene.add(hemiLight);
 
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+        dirLight.position.set(20, 40, 20);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        dirLight.shadow.camera.left = -30;
+        dirLight.shadow.camera.right = 30;
+        dirLight.shadow.camera.top = 30;
+        dirLight.shadow.camera.bottom = -30;
+        this.scene.add(dirLight);
+
+        // Resize Handler
         window.addEventListener('resize', () => {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
@@ -186,22 +243,23 @@ class SubwayGame {
         });
     }
 
+    // --- WORLD GENERATION ---
     createWorld() {
         // Ground
-        const ground = new THREE.Mesh(
-            new THREE.PlaneGeometry(200, 400),
-            new THREE.MeshStandardMaterial({ color: CONFIG.colors.ground, roughness: 0.8 })
-        );
-        ground.rotation.x = -Math.PI / 2;
-        ground.position.z = -100;
-        ground.receiveShadow = true;
-        this.scene.add(ground);
+        const groundGeo = new THREE.PlaneGeometry(200, 400);
+        const groundMat = new THREE.MeshStandardMaterial({ color: CONFIG.colors.ground, roughness: 0.8 });
+        this.ground = new THREE.Mesh(groundGeo, groundMat);
+        this.ground.rotation.x = -Math.PI / 2;
+        this.ground.position.z = -100;
+        this.ground.receiveShadow = true;
+        this.scene.add(this.ground);
 
-        // Tracks
+        // Tracks Group (for looping illusion)
         this.trackGroup = new THREE.Group();
-        const railMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.8 });
+        const railMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.8, roughness: 0.2 });
         const sleeperMat = new THREE.MeshStandardMaterial({ color: 0x5c4033 });
 
+        // Rails
         for(let i=-1; i<=1; i++) {
             const r1 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1, 400), railMat);
             r1.position.set(i*CONFIG.laneWidth - 0.9, 0.05, -100);
@@ -209,6 +267,8 @@ class SubwayGame {
             r2.position.set(i*CONFIG.laneWidth + 0.9, 0.05, -100);
             this.trackGroup.add(r1, r2);
         }
+
+        // Sleepers
         for(let j=0; j<100; j++) {
             const s = new THREE.Mesh(new THREE.BoxGeometry(12, 0.15, 0.5), sleeperMat);
             s.position.set(0, 0.02, -j * 4);
@@ -217,103 +277,135 @@ class SubwayGame {
         }
         this.scene.add(this.trackGroup);
 
-        // Buildings
-        for(let i=0; i<40; i++) {
-            const h = 10 + Math.random() * 25;
-            const geo = new THREE.BoxGeometry(5 + Math.random()*5, h, 5 + Math.random()*5);
+        // City Buildings (Procedural)
+        for(let i=0; i<50; i++) {
+            const h = 10 + Math.random() * 30;
+            const w = 5 + Math.random() * 5;
+            const d = 5 + Math.random() * 5;
+            const geo = new THREE.BoxGeometry(w, h, d);
             const mat = new THREE.MeshStandardMaterial({ color: new THREE.Color().setHSL(Math.random(), 0.5, 0.5) });
             
             const bL = new THREE.Mesh(geo, mat);
             bL.position.set(-12 - Math.random()*10, h/2, -i * 15);
-            bL.castShadow = true; this.scene.add(bL);
+            bL.castShadow = true; bL.receiveShadow = true;
+            this.scene.add(bL);
 
             const bR = new THREE.Mesh(geo, mat);
             bR.position.set(12 + Math.random()*10, h/2, -i * 15);
-            bR.castShadow = true; this.scene.add(bR);
+            bR.castShadow = true; bR.receiveShadow = true;
+            this.scene.add(bR);
         }
     }
 
+    // --- PLAYER CREATION ---
     createPlayer() {
         this.player = new THREE.Group();
-        const skin = new THREE.MeshStandardMaterial({ color: 0xffccaa });
-        const hoodie = new THREE.MeshStandardMaterial({ color: 0x1a1a1a });
-        const cap = new THREE.MeshStandardMaterial({ color: 0x0055ff });
-        const pants = new THREE.MeshStandardMaterial({ color: 0x111111 });
-        const shoe = new THREE.MeshStandardMaterial({ color: 0xffffff });
-
-        // Body parts
-        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.5), hoodie); torso.position.y = 1.2; torso.castShadow = true;
-        const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), skin); head.position.y = 1.9; head.castShadow = true;
-        const capMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.15, 16), cap); capMesh.position.y = 2.1;
-        const brim = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.05, 0.35), cap); brim.position.set(0, 2.05, -0.25);
         
-        this.player.add(torso, head, capMesh, brim);
+        // Materials
+        const skinMat = new THREE.MeshStandardMaterial({ color: 0xffccaa });
+        const hoodieMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a });
+        const capMat = new THREE.MeshStandardMaterial({ color: 0x0055ff });
+        const pantsMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+        const shoeMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
 
-        // Limbs for animation
+        // Torso
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.5), hoodieMat);
+        torso.position.y = 1.2; torso.castShadow = true;
+        this.player.add(torso);
+
+        // Head
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), skinMat);
+        head.position.y = 1.9; head.castShadow = true;
+        this.player.add(head);
+
+        // Cap
+        const capBase = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.15, 16), capMat);
+        capBase.position.y = 2.1;
+        const capBrim = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.05, 0.35), capMat);
+        capBrim.position.set(0, 2.05, -0.25);
+        this.player.add(capBase, capBrim);
+
+        // Limbs (Pivots for Animation)
         this.limbs = {};
         const armGeo = new THREE.BoxGeometry(0.25, 0.8, 0.25);
         const legGeo = new THREE.BoxGeometry(0.3, 0.9, 0.3);
 
+        // Arms
         this.limbs.armL = new THREE.Group(); this.limbs.armL.position.set(-0.55, 1.6, 0);
-        this.limbs.armL.add(new THREE.Mesh(armGeo, hoodie)); this.limbs.armL.children[0].position.y = -0.4; this.limbs.armL.children[0].castShadow=true;
-        
-        this.limbs.armR = new THREE.Group(); this.limbs.armR.position.set(0.55, 1.6, 0);
-        this.limbs.armR.add(new THREE.Mesh(armGeo, hoodie)); this.limbs.armR.children[0].position.y = -0.4; this.limbs.armR.children[0].castShadow=true;
+        const meshArmL = new THREE.Mesh(armGeo, hoodieMat); meshArmL.position.y = -0.4; meshArmL.castShadow = true;
+        this.limbs.armL.add(meshArmL); this.player.add(this.limbs.armL);
 
+        this.limbs.armR = new THREE.Group(); this.limbs.armR.position.set(0.55, 1.6, 0);
+        const meshArmR = new THREE.Mesh(armGeo, hoodieMat); meshArmR.position.y = -0.4; meshArmR.castShadow = true;
+        this.limbs.armR.add(meshArmR); this.player.add(this.limbs.armR);
+
+        // Legs
         this.limbs.legL = new THREE.Group(); this.limbs.legL.position.set(-0.25, 0.7, 0);
-        const meshLegL = new THREE.Mesh(legGeo, pants); meshLegL.position.y = -0.45; meshLegL.castShadow=true;
-        const shoeL = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.2, 0.5), shoe); shoeL.position.set(0, -0.9, -0.05);
-        this.limbs.legL.add(meshLegL, shoeL);
+        const meshLegL = new THREE.Mesh(legGeo, pantsMat); meshLegL.position.y = -0.45; meshLegL.castShadow = true;
+        const shoeL = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.2, 0.5), shoeMat); shoeL.position.set(0, -0.9, -0.05);
+        this.limbs.legL.add(meshLegL, shoeL); this.player.add(this.limbs.legL);
 
         this.limbs.legR = new THREE.Group(); this.limbs.legR.position.set(0.25, 0.7, 0);
-        const meshLegR = new THREE.Mesh(legGeo, pants); meshLegR.position.y = -0.45; meshLegR.castShadow=true;
-        const shoeR = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.2, 0.5), shoe); shoeR.position.set(0, -0.9, -0.05);
-        this.limbs.legR.add(meshLegR, shoeR);
-
-        this.player.add(this.limbs.armL, this.limbs.armR, this.limbs.legL, this.limbs.legR);
+        const meshLegR = new THREE.Mesh(legGeo, pantsMat); meshLegR.position.y = -0.45; meshLegR.castShadow = true;
+        const shoeR = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.2, 0.5), shoeMat); shoeR.position.set(0, -0.9, -0.05);
+        this.limbs.legR.add(meshLegR, shoeR); this.player.add(this.limbs.legR);
 
         // Shield Visual
-        this.shieldMesh = new THREE.Mesh(new THREE.SphereGeometry(1.5, 16, 16), new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.3, wireframe: true }));
+        this.shieldMesh = new THREE.Mesh(
+            new THREE.SphereGeometry(1.5, 16, 16), 
+            new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.3, wireframe: true })
+        );
         this.shieldMesh.visible = false;
         this.player.add(this.shieldMesh);
 
         this.scene.add(this.player);
     }
 
-    // --- ENTITY CREATION ---
+    // --- ENTITY SPAWNING ---
 
     createTrain(lane, type) {
         const group = new THREE.Group();
-        const length = 12 + Math.random() * 12;
-        const colorKey = ['trainRed', 'trainYellow', 'trainBlue'][Math.floor(Math.random()*3)];
+        const length = 12 + Math.random() * 15;
+        const colorKeys = ['trainRed', 'trainYellow', 'trainBlue'];
+        const colorKey = colorKeys[Math.floor(Math.random() * colorKeys.length)];
         const color = CONFIG.colors[colorKey];
 
-        // Realistic Train Body
-        const body = new THREE.Mesh(new THREE.BoxGeometry(2.8, 3.2, length), new THREE.MeshStandardMaterial({ color: color, metalness: 0.6, roughness: 0.2 }));
-        body.position.y = 1.6; body.castShadow = true; body.receiveShadow = true;
+        // Main Body
+        const bodyMat = new THREE.MeshStandardMaterial({ color: color, metalness: 0.6, roughness: 0.2 });
+        const body = new THREE.Mesh(new THREE.BoxGeometry(2.8, CONFIG.trainHeight, length), bodyMat);
+        body.position.y = CONFIG.trainHeight / 2; 
+        body.castShadow = true; body.receiveShadow = true;
         
         // Roof
         const roof = new THREE.Mesh(new THREE.BoxGeometry(2.9, 0.2, length), new THREE.MeshStandardMaterial({color: 0xcccccc}));
-        roof.position.y = 3.2;
+        roof.position.y = CONFIG.trainHeight;
 
         // Windows
         const winMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.1 });
         const winCount = Math.floor(length / 3);
         for(let i=0; i<winCount; i++) {
-            const wL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 1.8), winMat); wL.position.set(-1.41, 2.0, -length/2 + 2 + i*3);
-            const wR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 1.8), winMat); wR.position.set(1.41, 2.0, -length/2 + 2 + i*3);
+            const wL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 1.8), winMat);
+            wL.position.set(-1.41, CONFIG.trainHeight * 0.6, -length/2 + 2 + i*3);
+            const wR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 1.8), winMat);
+            wR.position.set(1.41, CONFIG.trainHeight * 0.6, -length/2 + 2 + i*3);
             group.add(wL, wR);
         }
 
         group.add(body, roof);
         
+        // Movement Logic
         let moveSpeed = 0;
-        if (type === 'movingTowards') moveSpeed = -(CONFIG.baseSpeed + 1.2);
-        if (type === 'movingWith') moveSpeed = CONFIG.baseSpeed - 0.3;
+        if (type === 'movingTowards') moveSpeed = -(CONFIG.baseSpeed + 1.5); // Fast towards player
+        if (type === 'movingWith') moveSpeed = CONFIG.baseSpeed - 0.2; // Slowly with player
 
         group.position.set((lane - 1) * CONFIG.laneWidth, 0, -100);
-        // userData: type 'train', height 3.2, length for collision
-        group.userData = { type: 'train', height: 3.2, length: length, moveSpeed: moveSpeed, climbable: true };
+        group.userData = { 
+            type: 'train', 
+            length: length, 
+            moveSpeed: moveSpeed, 
+            height: CONFIG.trainHeight,
+            climbable: true 
+        };
         
         this.scene.add(group);
         this.entities.trains.push(group);
@@ -326,16 +418,17 @@ class SubwayGame {
             // Must roll under
             const bar = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.5, 0.5), new THREE.MeshStandardMaterial({color: 0xffaa00}));
             bar.position.y = 1.5; bar.castShadow = true;
-            const leg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.5), new THREE.MeshStandardMaterial({color: 0x555})); leg1.position.set(-1, 0.75, 0);
+            const leg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.5), new THREE.MeshStandardMaterial({color: 0x555}));
+            leg1.position.set(-1, 0.75, 0);
             const leg2 = leg1.clone(); leg2.position.set(1, 0.75, 0);
             group.add(bar, leg1, leg2);
-            group.userData = { type: 'barrier_high', hitboxY: 1.5 };
+            group.userData = { type: 'barrier_high' };
         } else {
             // Must jump over
             const bar = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.0, 0.5), new THREE.MeshStandardMaterial({color: 0xe67e22}));
             bar.position.y = 0.5; bar.castShadow = true;
             group.add(bar);
-            group.userData = { type: 'barrier_low', hitboxY: 1.0 };
+            group.userData = { type: 'barrier_low' };
         }
 
         group.position.set((lane - 1) * CONFIG.laneWidth, 0, -100);
@@ -344,10 +437,9 @@ class SubwayGame {
     }
 
     createCoin(x, y, z) {
-        const coin = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.4, 0.4, 0.1, 16),
-            new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 1, roughness: 0.2, emissive: 0x443300 })
-        );
+        const geo = new THREE.CylinderGeometry(0.4, 0.4, 0.1, 16);
+        const mat = new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 1, roughness: 0.2, emissive: 0x443300 });
+        const coin = new THREE.Mesh(geo, mat);
         coin.rotation.x = Math.PI / 2;
         coin.position.set(x, y, z);
         coin.castShadow = true;
@@ -371,80 +463,108 @@ class SubwayGame {
         this.entities.powerups.push(group);
     }
 
-    // --- GAME LOGIC ---
-
     spawnLogic() {
+        // Spawn rate increases with speed
         if (Math.random() < 0.035 + (this.state.speed * 0.005)) {
             const lane = Math.floor(Math.random() * 3);
             
-            // Safety check: don't spawn on top of existing obstacles too close
+            // Safety Check: Don't spawn on top of existing obstacles
             let safe = true;
-            for(let t of this.entities.trains) if (Math.abs(t.position.x - ((lane-1)*CONFIG.laneWidth)) < 0.1 && t.position.z > -110) safe = false;
-            for(let b of this.entities.barriers) if (Math.abs(b.position.x - ((lane-1)*CONFIG.laneWidth)) < 0.1 && b.position.z > -110) safe = false;
+            for(let t of this.entities.trains) {
+                if (Math.abs(t.position.x - ((lane-1)*CONFIG.laneWidth)) < 0.1 && t.position.z > -110) safe = false;
+            }
+            for(let b of this.entities.barriers) {
+                if (Math.abs(b.position.x - ((lane-1)*CONFIG.laneWidth)) < 0.1 && b.position.z > -110) safe = false;
+            }
 
             if (safe) {
                 const r = Math.random();
-                if (r < 0.4) {
-                    // Train
+                if (r < 0.45) {
+                    // Train (45%)
                     const types = ['static', 'movingTowards', 'movingWith'];
                     this.createTrain(lane, types[Math.floor(Math.random()*types.length)]);
-                    // Coins on train roof
-                    if(Math.random()>0.4) for(let i=0; i<4; i++) this.createCoin((lane-1)*CONFIG.laneWidth, 3.8, -105 - i*2.5);
-                } else if (r < 0.6) {
-                    // High Barrier (Roll)
+                    // Coins on roof
+                    if(Math.random()>0.5) {
+                        for(let i=0; i<4; i++) this.createCoin((lane-1)*CONFIG.laneWidth, CONFIG.trainHeight + 0.5, -105 - i*2.5);
+                    }
+                } else if (r < 0.65) {
+                    // High Barrier (20%)
                     this.createBarrier(lane, 'high');
                     for(let i=0; i<3; i++) this.createCoin((lane-1)*CONFIG.laneWidth, 1, -102 - i*2);
-                } else if (r < 0.8) {
-                    // Low Barrier (Jump)
+                } else if (r < 0.85) {
+                    // Low Barrier (20%)
                     this.createBarrier(lane, 'low');
-                    for(let i=0; i<3; i++) this.createCoin((lane-1)*CONFIG.laneWidth, 2, -102 - i*2); // Arc coins
-                } else if (r < 0.9) {
-                    // Powerup
+                    for(let i=0; i<3; i++) this.createCoin((lane-1)*CONFIG.laneWidth, 2, -102 - i*2);
+                } else if (r < 0.95) {
+                    // Powerup (10%)
                     this.createPowerup(lane);
                 } else {
-                    // Just coins
+                    // Just Coins (5%)
                     for(let i=0; i<5; i++) this.createCoin((lane-1)*CONFIG.laneWidth, 1, -100 - i*2);
                 }
             }
         }
     }
 
-    updatePhysics() {
-        // 1. Smooth Lane Movement
-        this.player.position.x += (this.state.targetX - this.player.position.x) * 0.15;
-        this.player.rotation.z = (this.state.targetX - this.player.position.x) * -0.1; // Tilt
+    // --- PHYSICS & LOGIC ---
 
-        // 2. Vertical Physics (Jump & Gravity)
+    updatePhysics() {
+        // 1. Smooth Lane Movement (Lerp)
+        this.player.position.x += (this.state.targetX - this.player.position.x) * 0.15;
+        this.player.rotation.z = (this.state.targetX - this.player.position.x) * -0.1; // Tilt effect
+
+        // 2. Vertical Physics (Gravity)
         this.player.position.y += this.state.velY;
         this.state.velY -= CONFIG.gravity;
 
-        // 3. Train Climbing Logic
+        // 3. TRAIN CLIMBING LOGIC (THE FIX)
         let onTrainSurface = false;
-        let trainY = 0;
-        
-        // Check if standing on a train
+        let currentTrainHeight = 0;
+        let hitTrainSide = false;
+
         for (let t of this.entities.trains) {
-            const dz = Math.abs(t.position.z - this.player.position.z);
+            const dz = t.position.z - this.player.position.z; // Distance from player to train center
             const dx = Math.abs(t.position.x - this.player.position.x);
-            // If horizontally aligned and within length of train
-            if (dx < 1.5 && dz < t.userData.length / 2) {
-                // If player is above or at the level of the train roof
-                if (this.player.position.y >= t.userData.height - 0.5 && this.player.position.y <= t.userData.height + 1) {
-                    onTrainSurface = true;
-                    trainY = t.userData.height;
-                } else if (this.player.position.y < t.userData.height - 0.5 && !this.state.isJumping) {
-                    // Hit the side of the train (Crash)
-                    if (dz < t.userData.length/2 - 1) this.crash();
+            
+            // Check horizontal alignment
+            if (dx < 1.5) {
+                // Check if within train length
+                // Train extends from t.z - length/2 to t.z + length/2
+                if (dz < t.userData.length/2 && dz > -t.userData.length/2) {
+                    
+                    // CASE A: Player is ON TOP of the train
+                    if (this.player.position.y >= t.userData.height - 0.5) {
+                        onTrainSurface = true;
+                        currentTrainHeight = t.userData.height;
+                    } 
+                    // CASE B: Player is in front/below and hitting the train
+                    else if (dz > 0 && dz < t.userData.length/2 + 1) {
+                        // If jumping high enough, climb up!
+                        if (this.state.isJumping && this.player.position.y > t.userData.height - 1.5) {
+                            this.player.position.y = t.userData.height;
+                            this.state.velY = 0;
+                            this.state.isJumping = false;
+                            onTrainSurface = true;
+                            currentTrainHeight = t.userData.height;
+                        } else {
+                            // Crash!
+                            hitTrainSide = true;
+                        }
+                    }
                 }
             }
         }
 
+        if (hitTrainSide) {
+            this.crash();
+            return; // Stop physics update for this frame
+        }
+
         if (onTrainSurface) {
-            if (this.player.position.y <= trainY) {
-                this.player.position.y = trainY;
+            if (this.player.position.y <= currentTrainHeight) {
+                this.player.position.y = currentTrainHeight;
                 this.state.velY = 0;
                 this.state.isJumping = false;
-                this.state.onTrain = true;
             }
         } else {
             // Ground logic
@@ -452,7 +572,6 @@ class SubwayGame {
                 this.player.position.y = 0;
                 this.state.velY = 0;
                 this.state.isJumping = false;
-                this.state.onTrain = false;
             }
         }
 
@@ -466,14 +585,14 @@ class SubwayGame {
             }
         }
 
-        // 5. Procedural Animation
+        // 5. Procedural Animation (Running)
         if (!this.state.isJumping && !this.state.isRolling) {
             const t = Date.now() * 0.015 * (this.state.speed / CONFIG.baseSpeed);
             this.limbs.legL.rotation.x = Math.sin(t) * 0.8;
             this.limbs.legR.rotation.x = -Math.sin(t) * 0.8;
             this.limbs.armL.rotation.x = -Math.sin(t) * 0.8;
             this.limbs.armR.rotation.x = Math.sin(t) * 0.8;
-            if(!onTrainSurface) this.player.position.y = Math.abs(Math.sin(t*2)) * 0.1; // Bobbing only on ground
+            if(!onTrainSurface) this.player.position.y = Math.abs(Math.sin(t*2)) * 0.1; // Bobbing
         } else if (this.state.isJumping) {
             this.limbs.legL.rotation.x = -0.5; this.limbs.legR.rotation.x = 0.2;
             this.limbs.armL.rotation.x = -2.5; this.limbs.armR.rotation.x = -2.5;
@@ -497,18 +616,12 @@ class SubwayGame {
             let b = this.entities.barriers[i];
             b.position.z += speed;
 
-            // Collision
             const dz = Math.abs(b.position.z - this.player.position.z);
             const dx = Math.abs(b.position.x - this.player.position.x);
             
             if (dz < 1.0 && dx < 1.2) {
-                let hit = false;
-                if (b.userData.type === 'barrier_high') {
-                    if (!this.state.isRolling) hit = true; // Must roll
-                } else if (b.userData.type === 'barrier_low') {
-                    if (this.player.position.y < 1.0) hit = true; // Must jump
-                }
-                if (hit) this.crash();
+                if (b.userData.type === 'barrier_high' && !this.state.isRolling) this.crash();
+                if (b.userData.type === 'barrier_low' && this.player.position.y < 1.0) this.crash();
             }
 
             if (b.position.z > 20) { this.scene.remove(b); this.entities.barriers.splice(i, 1); }
@@ -520,7 +633,7 @@ class SubwayGame {
             c.position.z += speed;
             c.rotation.z += 0.1;
 
-            // Magnet
+            // Magnet Effect
             if (this.state.activePowerups.magnet > 0) {
                 const dist = c.position.distanceTo(this.player.position);
                 if (dist < 12) {
@@ -529,7 +642,7 @@ class SubwayGame {
                 }
             }
 
-            // Collect
+            // Collection
             const playerBox = new THREE.Vector3(this.player.position.x, this.player.position.y + 1, this.player.position.z);
             if (c.position.distanceTo(playerBox) < 1.5) {
                 this.state.coins++;
@@ -570,7 +683,7 @@ class SubwayGame {
         this.trackGroup.position.z += speed;
         if (this.trackGroup.position.z > 4) this.trackGroup.position.z = 0;
 
-        // Difficulty
+        // Difficulty Scaling
         this.state.speed = Math.min(CONFIG.maxSpeed, CONFIG.baseSpeed + (this.state.score * 0.0002));
         this.state.score += this.state.speed * 0.1;
         this.updateUI();
@@ -578,7 +691,7 @@ class SubwayGame {
 
     activatePowerup(type) {
         if (type === 'magnet') {
-            this.state.activePowerups.magnet = 600;
+            this.state.activePowerups.magnet = 600; // ~10 seconds
             document.getElementById('pu-magnet').style.display = 'block';
         } else if (type === 'shield') {
             this.state.activePowerups.shield = true;
@@ -592,8 +705,12 @@ class SubwayGame {
             this.state.activePowerups.shield = false;
             this.shieldMesh.visible = false;
             document.getElementById('pu-shield').style.display = 'none';
-            // Push back obstacles slightly
-            [...this.entities.trains, ...this.entities.barriers].forEach(o => o.position.z += 8);
+            // Push back obstacles to prevent instant re-crash
+            [...this.entities.trains, ...this.entities.barriers].forEach(o => o.position.z += 10);
+            // Visual Flash
+            const flash = new THREE.Mesh(new THREE.PlaneGeometry(100,100), new THREE.MeshBasicMaterial({color: 0x00ffff, transparent:true, opacity:0.5}));
+            flash.position.z = -5; this.scene.add(flash);
+            setTimeout(()=>this.scene.remove(flash), 100);
         } else {
             this.gameOver();
         }
@@ -610,15 +727,22 @@ class SubwayGame {
         });
 
         let tx = 0, ty = 0;
-        document.addEventListener('touchstart', e => { tx = e.changedTouches[0].screenX; ty = e.changedTouches[0].screenY; }, {passive:false});
+        document.addEventListener('touchstart', e => { 
+            tx = e.changedTouches[0].screenX; 
+            ty = e.changedTouches[0].screenY; 
+        }, {passive:false});
+        
         document.addEventListener('touchend', e => {
             if (!this.state.isPlaying) return;
             const dx = e.changedTouches[0].screenX - tx;
             const dy = e.changedTouches[0].screenY - ty;
+            
             if (Math.abs(dx) > Math.abs(dy)) {
-                if (dx > 40) this.moveLane(1); else if (dx < -40) this.moveLane(-1);
+                if (dx > 40) this.moveLane(1); 
+                else if (dx < -40) this.moveLane(-1);
             } else {
-                if (dy < -40) this.jump(); else if (dy > 40) this.roll();
+                if (dy < -40) this.jump(); 
+                else if (dy > 40) this.roll();
             }
         }, {passive:false});
     }
@@ -632,7 +756,7 @@ class SubwayGame {
         if (!this.state.isJumping) {
             this.state.velY = CONFIG.jumpForce;
             this.state.isJumping = true;
-            this.state.isRolling = false; // Cancel roll if jumping
+            this.state.isRolling = false; // Cancel roll
             this.player.scale.y = 1;
         }
     }
@@ -662,8 +786,14 @@ class SubwayGame {
         this.player.scale.y = 1;
         
         // Apply Inventory
-        if (this.state.inventory.magnet > 0) { this.activatePowerup('magnet'); this.state.inventory.magnet--; }
-        if (this.state.inventory.shield > 0) { this.activatePowerup('shield'); this.state.inventory.shield--; }
+        if (this.state.inventory.magnet > 0) { 
+            this.activatePowerup('magnet'); 
+            this.state.inventory.magnet--; 
+        }
+        if (this.state.inventory.shield > 0) { 
+            this.activatePowerup('shield'); 
+            this.state.inventory.shield--; 
+        }
 
         // Clear Entities
         [...this.entities.trains, ...this.entities.barriers, ...this.entities.coins, ...this.entities.powerups].forEach(o => this.scene.remove(o));
@@ -727,7 +857,7 @@ class SubwayGame {
     }
 }
 
-// Initialize Game
+// --- INITIALIZATION ---
 const game = new SubwayGame();
 
 // Button Listeners
