@@ -3,512 +3,554 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Subway Runner Pro - APK Ready</title>
+    <title>Subway Runner Ultimate - Final APK Version</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Lalezar&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@400;700&display=swap');
 
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Lalezar', cursive; touch-action: none; }
-        canvas { display: block; width: 100%; height: 100%; outline: none; }
+        :root { --primary: #FFD700; --accent: #FF4500; --dark: #1a1a1a; --glass: rgba(0,0,0,0.7); }
+        * { box-sizing: border-box; user-select: none; -webkit-user-select: none; touch-action: none; outline: none; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Vazirmatn', sans-serif; color: white; }
         
-        /* UI Overlay - Modern Mobile Style */
-        #ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; box-sizing: border-box; }
-        .hud-row { display: flex; justify-content: space-between; align-items: center; }
-        .pill { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); padding: 8px 20px; border-radius: 30px; color: white; font-size: 22px; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .coin-icon { width: 20px; height: 20px; background: radial-gradient(circle at 30% 30%, #ffd700, #ff8c00); border-radius: 50%; border: 2px solid #fff; }
+        /* 3D Canvas */
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
         
+        /* UI Layer */
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; }
+        .interactive { pointer-events: auto; }
+        .hidden { display: none !important; }
+
+        /* HUD */
+        .hud-top { padding: 15px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .stat-box { background: var(--glass); backdrop-filter: blur(5px); padding: 8px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); font-family: 'Lalezar'; font-size: 20px; display: flex; align-items: center; gap: 8px; }
+        .icon-coin { width: 18px; height: 18px; background: radial-gradient(circle, #ffd700, #b8860b); border-radius: 50%; border: 2px solid #fff; }
+        .icon-dia { width: 16px; height: 16px; background: #00ffff; transform: rotate(45deg); border: 2px solid #fff; }
+
         /* Menus */
-        .menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 20, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; z-index: 10; transition: opacity 0.3s; }
-        .hidden { opacity: 0; pointer-events: none; }
+        .menu-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; overflow-y: auto; }
+        h1 { font-family: 'Lalezar'; font-size: 60px; margin: 0; background: linear-gradient(to bottom, #FFD700, #FF4500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 4px 10px rgba(255,69,0,0.5)); }
+        h2 { font-family: 'Lalezar'; color: #ddd; margin-bottom: 20px; font-weight: normal; }
         
-        h1 { font-size: 70px; margin: 0; background: linear-gradient(to bottom, #FFD700, #FF4500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 5px 10px rgba(255, 69, 0, 0.5)); transform: rotate(-3deg); }
-        h2 { color: #fff; font-weight: normal; margin-bottom: 40px; letter-spacing: 2px; }
-        
-        .btn-main { background: linear-gradient(135deg, #FF4500, #FF8C00); border: none; padding: 15px 60px; font-size: 30px; color: white; border-radius: 50px; cursor: pointer; font-family: 'Lalezar'; box-shadow: 0 10px 0 #B33000, 0 15px 30px rgba(0,0,0,0.5); transition: transform 0.1s; margin: 10px; }
-        .btn-main:active { transform: translateY(10px); box-shadow: 0 0 0 #B33000; }
-        
-        .btn-sec { background: linear-gradient(135deg, #00C9FF, #92FE9D); box-shadow: 0 10px 0 #008B99; color: #004d4d; }
-        .btn-sec:active { box-shadow: 0 0 0 #008B99; }
+        .grid-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 90%; max-width: 500px; margin-top: 20px; }
+        .btn { background: linear-gradient(135deg, #FF4500, #FF8C00); border: none; padding: 12px; border-radius: 12px; color: white; font-family: 'Lalezar'; font-size: 18px; cursor: pointer; box-shadow: 0 6px 0 #B33000; transition: 0.1s; position: relative; top: 0; }
+        .btn:active { top: 6px; box-shadow: none; }
+        .btn-sec { background: linear-gradient(135deg, #00C9FF, #92FE9D); box-shadow: 0 6px 0 #008B99; color: #003333; }
+        .btn-sec:active { box-shadow: none; }
+        .btn-full { grid-column: span 2; }
+        .btn-small { padding: 8px; font-size: 14px; }
 
-        /* Dizzy Effect */
-        #fx-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; transition: all 0.2s; }
-        .dizzy { animation: wobble 0.5s infinite; background: radial-gradient(circle, transparent 40%, rgba(255,0,0,0.4) 100%); }
-        @keyframes wobble { 0% { transform: rotate(0deg); } 25% { transform: rotate(1deg); } 75% { transform: rotate(-1deg); } 100% { transform: rotate(0deg); } }
+        /* Modal Content */
+        .modal-box { background: #222; padding: 20px; border-radius: 15px; border: 2px solid #444; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; text-align: center; position: relative; }
+        .close-x { position: absolute; top: 10px; left: 10px; background: #ff4444; width: 30px; height: 30px; border-radius: 50%; border: none; color: white; font-weight: bold; cursor: pointer; }
+        
+        .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 15px; }
+        .item-card { background: #333; padding: 10px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; }
+        .item-card.selected { border-color: #FFD700; background: #444; }
+        .item-preview { width: 40px; height: 40px; margin: 0 auto 5px; border-radius: 5px; }
+
+        /* Effects */
+        #dizzy-fx { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, transparent 50%, rgba(255,0,0,0.6) 100%); opacity: 0; pointer-events: none; z-index: 5; transition: opacity 0.3s; }
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-8px, 0, 0); } 40%, 60% { transform: translate3d(8px, 0, 0); } }
+
+        /* Loading */
+        #loader { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .bar-bg { width: 200px; height: 10px; background: #333; border-radius: 5px; margin-top: 20px; overflow: hidden; }
+        .bar-fill { width: 0%; height: 100%; background: #FFD700; transition: width 0.2s; }
 
     </style>
-    <!-- Three.js for Real 3D -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
-    <div id="fx-layer"></div>
+    <!-- LOADING -->
+    <div id="loader">
+        <h1 style="font-size: 40px;">SUBWAY ULTIMATE</h1>
+        <div class="bar-bg"><div class="bar-fill" id="load-bar"></div></div>
+        <p style="color: #888; margin-top: 10px;">در حال ساخت دنیا...</p>
+    </div>
 
-    <div id="ui" class="hidden">
-        <div class="hud-row">
-            <div class="pill">امتیاز: <span id="score">0</span></div>
-            <div class="pill"><div class="coin-icon"></div> <span id="coins">0</span></div>
+    <!-- 3D CANVAS -->
+    <div id="canvas-container"></div>
+    <div id="dizzy-fx"></div>
+
+    <!-- HUD -->
+    <div id="ui-layer" class="hidden">
+        <div class="hud-top">
+            <div class="stat-box">امتیاز: <span id="hud-score">0</span></div>
+            <div style="display: flex; gap: 10px;">
+                <div class="stat-box"><div class="icon-coin"></div><span id="hud-coins">0</span></div>
+                <div class="stat-box"><div class="icon-dia"></div><span id="hud-dias">0</span></div>
+            </div>
         </div>
-        <div style="text-align: center; color: rgba(255,255,255,0.7); font-size: 18px;">
-            <span id="status">سلامت کامل</span>
+        <div style="text-align: center; padding-bottom: 20px;">
+            <span id="hud-status" style="background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 10px; font-family: 'Lalezar';">سلامت: ❤❤</span>
         </div>
     </div>
 
-    <div id="start-menu" class="menu">
-        <h1>SUBWAY PRO</h1>
-        <h2>نسخه نهایی APK</h2>
-        <button class="btn-main" onclick="Game.start()">شروع دویدن</button>
-        <div style="color: #888; margin-top: 30px; font-size: 14px;">کنترل: Swipe یا Arrow Keys</div>
+    <!-- MAIN MENU -->
+    <div id="menu-main" class="menu-screen interactive">
+        <h1>SUBWAY RUNNER</h1>
+        <h2>نسخه نهایی و کامل</h2>
+        
+        <div style="display: flex; gap: 15px; margin-bottom: 20px; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 30px;">
+            <span style="color: #FFD700;">● <span id="menu-coins">0</span></span>
+            <span style="color: #00ffff;">◆ <span id="menu-dias">0</span></span>
+            <span style="color: #aaa;">انرژی: <span id="menu-energy">5</span>/5</span>
+        </div>
+
+        <div class="grid-menu">
+            <button class="btn btn-sec btn-full" onclick="Game.start()">▶ شروع بازی</button>
+            <button class="btn" onclick="UI.open('shop')">□ فروشگاه</button>
+            <button class="btn" onclick="UI.open('chars')">● شخصیت‌ها</button>
+            <button class="btn" onclick="UI.open('pets')">◐ حیوانات</button>
+            <button class="btn" onclick="UI.open('bank')">◉ بانک</button>
+            <button class="btn" onclick="UI.open('missions')">△ مأموریت‌ها</button>
+            <button class="btn" onclick="UI.open('daily')">◆ جایزه روزانه</button>
+            <button class="btn" onclick="UI.open('profile')">◐ پروفایل</button>
+            <button class="btn" style="background: #555; box-shadow: 0 6px 0 #333;" onclick="UI.open('settings')">⚙ تنظیمات</button>
+        </div>
     </div>
 
-    <div id="game-over-menu" class="menu hidden">
-        <h1 style="font-size: 50px; color: #ff4444; -webkit-text-fill-color: #ff4444;">GAME OVER</h1>
-        <h2 id="final-score">امتیاز: 0</h2>
-        <button class="btn-sec" onclick="Game.restart()">تلاش مجدد</button>
-        <button class="btn-main" style="font-size: 20px; padding: 10px 40px;" onclick="UI.toMenu()">منو</button>
+    <!-- GAME OVER -->
+    <div id="menu-over" class="menu-screen interactive hidden">
+        <h1 style="color: #ff4444; -webkit-text-fill-color: #ff4444;">GAME OVER</h1>
+        <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; margin: 20px; width: 250px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;"><span>امتیاز:</span> <span id="end-score" style="color: #FFD700;">0</span></div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;"><span>سکه:</span> <span id="end-coins" style="color: #FFD700;">0</span></div>
+            <div style="display: flex; justify-content: space-between;"><span>مسافت:</span> <span id="end-dist" style="color: #00ffff;">0m</span></div>
+        </div>
+        <div class="grid-menu">
+            <button class="btn btn-sec" onclick="Game.restart()">↻ شروع دوباره</button>
+            <button class="btn" onclick="UI.toMain()">⌂ منو</button>
+        </div>
+    </div>
+
+    <!-- MODALS (Shop, Bank, etc) -->
+    <div id="modal-container" class="menu-screen interactive hidden">
+        <div class="modal-box">
+            <button class="close-x" onclick="UI.closeModal()">✕</button>
+            <h2 id="modal-title">عنوان</h2>
+            <div id="modal-content"></div>
+        </div>
     </div>
 
 <script>
 /**
- * SUBWAY RUNNER PRO - HIGH PERFORMANCE ENGINE
- * Optimized for Mobile/APK conversion.
- * Features: Smooth Lerp, Moving Trains, Ramps, Coin Patterns, Side-Collision Logic.
+ * SUBWAY RUNNER ULTIMATE - FINAL ENGINE
+ * Combines Full Logic (from game.html) with High-End 3D Graphics (Three.js)
  */
 
-// --- CONFIGURATION ---
-const CFG = {
-    laneW: 3.5,
-    speedBase: 0.4,
-    speedMax: 1.1,
-    jumpF: 0.38,
-    grav: 0.018,
-    colors: {
-        sky: 0x87CEEB,
-        ground: 0x222222,
-        train: [0xFF3333, 0x33AAFF, 0xFFCC00], // Red, Blue, Yellow
-        building: [0xFF6B6B, 0x4ECDC4, 0xFFE66D, 0xC7F464]
-    }
+// --- DATA & STATE ---
+const DB = {
+    chars: [
+        {id:'c1', name:'جیک', color:0x3366ff, price:0, type:'coin'},
+        {id:'c2', name:'تریکی', color:0xff3333, price:500, type:'coin'},
+        {id:'c3', name:'فرش', color:0x33cc33, price:1000, type:'coin'},
+        {id:'c4', name:'اسپایک', color:0x9933ff, price:50, type:'dia'}
+    ],
+    pets: [
+        {id:'p1', name:'سگ', color:0x8B4513, price:1000, bonus:'سکه +10%'},
+        {id:'p2', name:'گربه', color:0xFFA500, price:1500, bonus:'پرش بلند'}
+    ],
+    missions: [
+        {id:1, title:'جمع ۵۰۰ سکه', target:500, reward:50, type:'coins'},
+        {id:2, title:'دویدن ۱۰۰ متر', target:1000, reward:5, type:'dist'}
+    ]
 };
 
-// --- GLOBALS ---
-let scene, cam, renderer;
-let player, pGroup;
-let world = { obs: [], coins: [], parts: [] };
-let state = { 
-    active: false, score: 0, coins: 0, speed: CFG.speedBase, 
-    lane: 0, y: 0, vy: 0, jumping: false, sliding: false, 
-    onObj: null, health: 2, dizzy: false 
+let Save = {
+    coins: 0, dias: 0, energy: 5, highScore: 0, totalDist: 0, games: 0, level: 1, xp: 0, bank: 0, streak: 1,
+    inventory: {chars:['c1'], pets:[]},
+    equipped: {char:'c1', pet:null},
+    missions: [{id:1, cur:0, done:false}, {id:2, cur:0, done:false}]
 };
-let clock = new THREE.Clock();
+
+// --- THREE.JS GLOBALS ---
+let scene, cam, renderer, clock;
+let player, pGroup;
+let world = {obs:[], coins:[], parts:[]};
+let state = {active:false, score:0, coins:0, dist:0, speed:0.4, lane:0, y:0, vy:0, jump:false, slide:false, onObj:null, hp:2, dizzy:false};
 
 // --- INIT ---
 function init() {
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(CFG.colors.sky);
-    scene.fog = new THREE.FogExp2(CFG.colors.sky, 0.015);
+    // Load Save
+    const s = localStorage.getItem('subwayUltimateSave');
+    if(s) Save = JSON.parse(s);
 
+    // Scene
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87CEEB);
+    scene.fog = new THREE.FogExp2(0x87CEEB, 0.012);
+
+    // Camera
     cam = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
     cam.position.set(0, 4, 7);
-    cam.lookAt(0, 1, -5);
-
-    renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    
+    // Renderer
+    renderer = new THREE.WebGLRenderer({antialias:true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    document.body.appendChild(renderer.domElement);
+    document.getElementById('canvas-container').appendChild(renderer.domElement);
 
     // Lights
-    const amb = new THREE.AmbientLight(0xffffff, 0.7);
-    scene.add(amb);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
     const sun = new THREE.DirectionalLight(0xffffff, 0.8);
     sun.position.set(10, 20, 10);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
-    sun.shadow.camera.near = 0.5; sun.shadow.camera.far = 50;
     sun.shadow.camera.left = -20; sun.shadow.camera.right = 20;
     sun.shadow.camera.top = 20; sun.shadow.camera.bottom = -20;
     scene.add(sun);
 
     createEnv();
     createPlayer();
-    
-    // Inputs
-    window.addEventListener('resize', onResize);
-    document.addEventListener('keydown', e => {
-        if(!state.active) return;
-        if(e.key === 'ArrowLeft') move(-1);
-        if(e.key === 'ArrowRight') move(1);
-        if(e.key === 'ArrowUp') jump();
-        if(e.key === 'ArrowDown') slide();
-    });
-    
-    let tx=0, ty=0;
-    document.addEventListener('touchstart', e => { tx=e.touches[0].clientX; ty=e.touches[0].clientY; });
-    document.addEventListener('touchend', e => {
-        if(!state.active) return;
-        const dx = e.changedTouches[0].clientX - tx;
-        const dy = e.changedTouches[0].clientY - ty;
-        if(Math.abs(dx) > Math.abs(dy)) { dx>30 ? move(1) : (dx<-30 ? move(-1) : 0); }
-        else { dy<-30 ? jump() : (dy>30 ? slide() : 0); }
-    });
+    setupInput();
 
-    animate();
+    // Fake Load
+    let p = 0;
+    const int = setInterval(() => {
+        p += 10;
+        document.getElementById('load-bar').style.width = p + '%';
+        if(p >= 100) {
+            clearInterval(int);
+            document.getElementById('loader').style.display = 'none';
+            UI.updateMenu();
+            animate();
+        }
+    }, 50);
 }
 
 // --- ASSETS ---
 function createEnv() {
     // Ground
-    const gGeo = new THREE.PlaneGeometry(40, 200);
-    const gMat = new THREE.MeshStandardMaterial({ color: CFG.colors.ground, roughness: 0.8 });
-    const ground = new THREE.Mesh(gGeo, gMat);
-    ground.rotation.x = -Math.PI/2;
-    ground.position.z = -50;
-    ground.receiveShadow = true;
-    scene.add(ground);
+    const g = new THREE.Mesh(new THREE.PlaneGeometry(40, 200), new THREE.MeshStandardMaterial({color:0x333333}));
+    g.rotation.x = -Math.PI/2; g.position.z = -50; g.receiveShadow = true; scene.add(g);
 
     // Rails
-    const rGeo = new THREE.BoxGeometry(0.2, 0.1, 200);
-    const rMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.8, roughness: 0.2 });
-    [-CFG.laneW, 0, CFG.laneW].forEach(x => {
-        const r1 = new THREE.Mesh(rGeo, rMat); r1.position.set(x-0.7, 0.05, -50); scene.add(r1);
-        const r2 = new THREE.Mesh(rGeo, rMat); r2.position.set(x+0.7, 0.05, -50); scene.add(r2);
+    const rMat = new THREE.MeshStandardMaterial({color:0x888888, metalness:0.8});
+    [-3.5, 0, 3.5].forEach(x => {
+        const r1 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 200), rMat); r1.position.set(x-0.7, 0.05, -50); scene.add(r1);
+        const r2 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 200), rMat); r2.position.set(x+0.7, 0.05, -50); scene.add(r2);
     });
 
-    // Buildings (Instanced for performance would be better, but simple loop for now)
-    const bGeo = new THREE.BoxGeometry(1, 1, 1);
-    for(let i=0; i<40; i++) {
+    // Buildings
+    for(let i=0; i<30; i++) {
         const h = 10 + Math.random()*20;
-        const mat = new THREE.MeshStandardMaterial({ color: CFG.colors.building[i%4] });
-        const bL = new THREE.Mesh(bGeo, mat);
-        bL.scale.set(6, h, 6);
-        bL.position.set(-12 - Math.random()*5, h/2, -i*6);
-        bL.castShadow = true; bL.receiveShadow = true;
-        scene.add(bL);
-        
-        const bR = bL.clone();
-        bR.position.set(12 + Math.random()*5, h/2, -i*6);
-        scene.add(bR);
-        
-        world.parts.push(bL, bR);
+        const mat = new THREE.MeshStandardMaterial({color: Math.random()*0xffffff});
+        const b = new THREE.Mesh(new THREE.BoxGeometry(6, h, 6), mat);
+        b.position.set(-12, h/2, -i*8); b.castShadow=true; scene.add(b); world.parts.push(b);
+        const b2 = b.clone(); b2.position.set(12, h/2, -i*8); scene.add(b2); world.parts.push(b2);
     }
 }
 
 function createPlayer() {
     pGroup = new THREE.Group();
-    
-    // Body
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.9, 0.4), new THREE.MeshStandardMaterial({ color: 0x111111 }));
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.9, 0.4), new THREE.MeshStandardMaterial({color:0x111111}));
     body.position.y = 1.1; body.castShadow = true; pGroup.add(body);
-    
-    // Head
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.45), new THREE.MeshStandardMaterial({ color: 0xffccaa }));
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.45), new THREE.MeshStandardMaterial({color:0xffccaa}));
     head.position.y = 1.8; head.castShadow = true; pGroup.add(head);
-    
-    // Cap
-    const cap = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.15, 0.5), new THREE.MeshStandardMaterial({ color: 0x0055ff }));
+    const cap = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.15, 0.5), new THREE.MeshStandardMaterial({color:0x0055ff}));
     cap.position.y = 2.05; pGroup.add(cap);
-    
-    // Legs
     const legGeo = new THREE.BoxGeometry(0.25, 0.7, 0.25);
-    const legMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
-    const lL = new THREE.Mesh(legGeo, legMat); lL.position.set(-0.18, 0.35, 0); pGroup.add(lL);
-    const lR = new THREE.Mesh(legGeo, legMat); lR.position.set(0.18, 0.35, 0); pGroup.add(lR);
-
-    player = pGroup;
-    scene.add(player);
+    const lL = new THREE.Mesh(legGeo, new THREE.MeshStandardMaterial({color:0x333333})); lL.position.set(-0.18, 0.35, 0); pGroup.add(lL);
+    const lR = new THREE.Mesh(legGeo, new THREE.MeshStandardMaterial({color:0x333333})); lR.position.set(0.18, 0.35, 0); pGroup.add(lR);
+    player = pGroup; scene.add(player);
+    updatePlayerSkin();
 }
 
-// --- GAMEPLAY LOGIC ---
-function spawnRow(z) {
+function updatePlayerSkin() {
+    const c = DB.chars.find(x => x.id === Save.equipped.char);
+    if(c && pGroup.children[0]) pGroup.children[0].material.color.setHex(c.color);
+}
+
+// --- GAMEPLAY ---
+function spawn(z) {
     const type = Math.random();
     const lanes = [-1, 0, 1];
-    
-    // Pattern Generator (Ensuring playability)
-    if (type < 0.3) {
-        // Train with Ramp
-        const l = lanes[Math.floor(Math.random()*3)];
-        createTrain(l, z, false, true);
-        // Coins on other lanes
-        lanes.forEach(ol => { if(ol!==l) createCoinLine(ol, z); });
-    } else if (type < 0.5) {
-        // Moving Train (Danger)
-        const l = lanes[Math.floor(Math.random()*3)];
-        createTrain(l, z, true, false);
-        lanes.forEach(ol => { if(ol!==l) createCoinLine(ol, z); });
-    } else if (type < 0.7) {
-        // Overhead Barrier (Slide under)
-        const l = lanes[Math.floor(Math.random()*3)];
-        createBarrier(l, z, 'high');
-        lanes.forEach(ol => { if(ol!==l) createCoinLine(ol, z); });
-    } else if (type < 0.85) {
-        // Low Barrier (Jump over)
-        const l = lanes[Math.floor(Math.random()*3)];
-        createBarrier(l, z, 'low');
-        lanes.forEach(ol => { if(ol!==l) createCoinLine(ol, z); });
-    } else {
-        // Just Coins (Rest)
-        const l = lanes[Math.floor(Math.random()*3)];
-        createCoinLine(l, z);
+    const l = lanes[Math.floor(Math.random()*3)];
+
+    if(type < 0.3) { // Train + Ramp
+        const t = new THREE.Mesh(new THREE.BoxGeometry(2.6, 3.2, 14), new THREE.MeshStandardMaterial({color: Math.random()>0.5?0xff3333:0xffcc00}));
+        t.position.set(l*3.5, 1.6, z); t.castShadow=true;
+        const ramp = new THREE.Mesh(new THREE.BoxGeometry(2, 0.2, 2), new THREE.MeshStandardMaterial({color:0x555555}));
+        ramp.position.set(0, -1.4, 6.5); ramp.rotation.x = -0.4; t.add(ramp);
+        scene.add(t);
+        world.obs.push({mesh:t, type:'train', lane:l, z:z, w:2.6, h:3.2, d:14, spd:0, ramp:true});
+        lanes.forEach(ol => { if(ol!==l) addCoins(ol, z); });
+    } else if(type < 0.5) { // Moving Train
+        const t = new THREE.Mesh(new THREE.BoxGeometry(2.6, 3.2, 14), new THREE.MeshStandardMaterial({color:0x3366ff}));
+        t.position.set(l*3.5, 1.6, z); t.castShadow=true;
+        scene.add(t);
+        world.obs.push({mesh:t, type:'train', lane:l, z:z, w:2.6, h:3.2, d:14, spd:0.3});
+        lanes.forEach(ol => { if(ol!==l) addCoins(ol, z); });
+    } else if(type < 0.7) { // High Barrier (Slide)
+        const b = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1, 0.5), new THREE.MeshStandardMaterial({color:0xff0055}));
+        b.position.set(l*3.5, 2.2, z); b.castShadow=true;
+        scene.add(b);
+        world.obs.push({mesh:b, type:'high', lane:l, z:z, w:2.5, h:1, d:0.5, spd:0});
+        lanes.forEach(ol => { if(ol!==l) addCoins(ol, z); });
+    } else if(type < 0.85) { // Low Barrier (Jump)
+        const b = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1, 0.5), new THREE.MeshStandardMaterial({color:0xffaa00}));
+        b.position.set(l*3.5, 0.5, z); b.castShadow=true;
+        scene.add(b);
+        world.obs.push({mesh:b, type:'low', lane:l, z:z, w:2.5, h:1, d:0.5, spd:0});
+        lanes.forEach(ol => { if(ol!==l) addCoins(ol, z); });
+    } else { // Coins Only
+        addCoins(l, z);
     }
 }
 
-function createTrain(lane, z, moving, hasRamp) {
-    const geo = new THREE.BoxGeometry(2.6, 3.2, 14);
-    const mat = new THREE.MeshStandardMaterial({ color: CFG.colors.train[Math.floor(Math.random()*3)], roughness: 0.3, metalness: 0.6 });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(lane * CFG.laneW, 1.6, z);
-    mesh.castShadow = true; mesh.receiveShadow = true;
-    
-    // Windows
-    const win = new THREE.Mesh(new THREE.BoxGeometry(2.7, 0.8, 3), new THREE.MeshStandardMaterial({ color: 0x111111 }));
-    win.position.y = 0.5; mesh.add(win);
-
-    // Ramp
-    if (hasRamp) {
-        const ramp = new THREE.Mesh(new THREE.BoxGeometry(2, 0.2, 2), new THREE.MeshStandardMaterial({ color: 0x555555 }));
-        ramp.position.set(0, -1.4, 6.5); // Front of train
-        ramp.rotation.x = -0.4;
-        mesh.add(ramp);
-    }
-
-    scene.add(mesh);
-    world.obs.push({ mesh, type: 'train', lane, z, w: 2.6, h: 3.2, d: 14, speed: moving ? 0.25 : 0, hasRamp });
-}
-
-function createBarrier(lane, z, type) {
-    const isHigh = type === 'high';
-    const geo = new THREE.BoxGeometry(2.5, 1, 0.5);
-    const mat = new THREE.MeshStandardMaterial({ color: isHigh ? 0xff0055 : 0xffaa00 });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(lane * CFG.laneW, isHigh ? 2.2 : 0.5, z);
-    mesh.castShadow = true;
-    scene.add(mesh);
-    world.obs.push({ mesh, type: 'barrier', sub: type, lane, z, w: 2.5, h: 1, d: 0.5, speed: 0 });
-}
-
-function createCoinLine(lane, z) {
-    for(let i=0; i<6; i++) {
-        const c = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.08, 16), new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 1, roughness: 0.2 }));
-        c.rotation.x = Math.PI/2;
-        c.position.set(lane * CFG.laneW, 1, z - i*2);
+function addCoins(l, z) {
+    for(let i=0; i<5; i++) {
+        const c = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.08, 16), new THREE.MeshStandardMaterial({color:0xFFD700, metalness:1}));
+        c.rotation.x = Math.PI/2; c.position.set(l*3.5, 1, z-i*2);
         scene.add(c);
-        world.coins.push({ mesh: c, z: z - i*2, active: true });
+        world.coins.push({mesh:c, z:z-i*2, active:true});
     }
 }
 
-// --- CONTROLS ---
-function move(dir) { state.lane = Math.max(-1, Math.min(1, state.lane + dir)); }
-function jump() { 
-    if (!state.jumping && !state.sliding) {
-        state.vy = CFG.jumpF;
-        state.jumping = true;
-        state.onObj = null; // Leave surface
-    }
+function setupInput() {
+    window.addEventListener('resize', () => { cam.aspect = window.innerWidth/window.innerHeight; cam.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+    document.addEventListener('keydown', e => {
+        if(!state.active) return;
+        if(e.key==='ArrowLeft') move(-1); if(e.key==='ArrowRight') move(1);
+        if(e.key==='ArrowUp') jump(); if(e.key==='ArrowDown') slide();
+    });
+    let tx=0, ty=0;
+    document.addEventListener('touchstart', e => { tx=e.touches[0].clientX; ty=e.touches[0].clientY; });
+    document.addEventListener('touchend', e => {
+        if(!state.active) return;
+        const dx = e.changedTouches[0].clientX - tx; const dy = e.changedTouches[0].clientY - ty;
+        if(Math.abs(dx)>Math.abs(dy)) { dx>30?move(1):(dx<-30?move(-1):0); }
+        else { dy<-30?jump():(dy>30?slide():0); }
+    });
 }
-function slide() {
-    if (!state.jumping && !state.sliding) {
-        state.sliding = true;
-        setTimeout(() => { state.sliding = false; player.scale.y = 1; player.position.y = state.onObj ? state.onObj.h/2 + 0.01 : 0; }, 800);
-        player.scale.y = 0.5;
-    }
-}
+
+function move(d) { state.lane = Math.max(-1, Math.min(1, state.lane+d)); }
+function jump() { if(!state.jump && !state.slide) { state.vy=0.38; state.jump=true; state.onObj=null; } }
+function slide() { if(!state.jump && !state.slide) { state.slide=true; setTimeout(()=>{state.slide=false; player.scale.y=1; player.position.y=state.onObj?state.onObj.h/2:0;}, 800); player.scale.y=0.5; } }
 
 function hit() {
-    if (state.dizzy) {
-        endGame();
-    } else {
-        state.health--;
-        state.dizzy = true;
-        state.speed *= 0.5;
-        document.getElementById('fx-layer').classList.add('dizzy');
-        document.getElementById('status').innerText = "سرگیجه! مراقب باش";
-        document.getElementById('status').style.color = "#ff4444";
-        
-        setTimeout(() => {
-            state.dizzy = false;
-            state.speed = Math.min(state.speed * 2, CFG.speedMax);
-            document.getElementById('fx-layer').classList.remove('dizzy');
-            document.getElementById('status').innerText = "سلامت کامل";
-            document.getElementById('status').style.color = "rgba(255,255,255,0.7)";
+    if(state.dizzy) { Game.over(); }
+    else {
+        state.hp--; state.dizzy=true; state.speed*=0.5;
+        document.getElementById('dizzy-fx').style.opacity = 1;
+        document.getElementById('hud-status').innerText = "سرگیجه! ❤";
+        document.getElementById('hud-status').style.color = "#ff4444";
+        document.body.classList.add('shake');
+        setTimeout(()=>document.body.classList.remove('shake'), 500);
+        setTimeout(()=>{
+            state.dizzy=false; state.speed=Math.min(state.speed*2, 1.1);
+            document.getElementById('dizzy-fx').style.opacity = 0;
+            document.getElementById('hud-status').innerText = "سلامت: ❤❤";
+            document.getElementById('hud-status').style.color = "white";
         }, 3000);
+        if(state.hp<=0) Game.over();
     }
 }
 
-// --- LOOP ---
 function update() {
-    if (!state.active) return;
-
+    if(!state.active) return;
     const dt = clock.getDelta();
-    
-    // Player X (Smooth)
-    const targetX = state.lane * CFG.laneW;
-    player.position.x += (targetX - player.position.x) * 0.2;
-    player.rotation.z = (targetX - player.position.x) * 0.05;
 
-    // Player Y (Physics)
-    let groundY = 0;
-    state.onObj = null;
+    // Player X
+    const tx = state.lane * 3.5;
+    player.position.x += (tx - player.position.x) * 0.2;
+    player.rotation.z = (tx - player.position.x) * 0.05;
 
-    // Check Obstacles for "On Top" logic
-    for (let o of world.obs) {
-        o.z += (state.speed + o.speed);
-        o.mesh.position.z = o.z;
-        
-        // Simple AABB for landing
-        if (o.type === 'train') {
-            const dz = Math.abs(o.z); // Player is at z=0
-            const dx = Math.abs(player.position.x - o.mesh.position.x);
-            
-            if (dz < o.d/2 && dx < o.w/2) {
-                // We are within train bounds horizontally
-                if (player.position.y >= o.h/2 - 0.5 && state.vy <= 0) {
-                    groundY = o.h/2;
-                    state.onObj = o;
-                }
+    // Player Y & Physics
+    let gy = 0; state.onObj = null;
+    for(let o of world.obs) {
+        o.z += (state.speed + o.spd); o.mesh.position.z = o.z;
+        if(o.type==='train') {
+            if(Math.abs(o.z)<o.d/2 && Math.abs(player.position.x - o.mesh.position.x)<o.w/2) {
+                if(player.position.y >= o.h/2 - 0.5 && state.vy<=0) { gy=o.h/2; state.onObj=o; }
             }
         }
     }
 
-    if (state.jumping) {
-        player.position.y += state.vy;
-        state.vy -= CFG.grav;
-        if (player.position.y <= groundY) {
-            player.position.y = groundY;
-            state.jumping = false;
-            state.vy = 0;
-        }
+    if(state.jump) {
+        player.position.y += state.vy; state.vy -= 0.018;
+        if(player.position.y <= gy) { player.position.y=gy; state.jump=false; state.vy=0; }
     } else {
-        // Stick to ground or train
-        player.position.y += (groundY - player.position.y) * 0.2;
+        player.position.y += (gy - player.position.y) * 0.2;
     }
-
-    // Slide Visuals
-    if (state.sliding) {
-        player.position.y = groundY; // Stay low
-    }
+    if(state.slide) player.position.y = gy;
 
     // Collisions
-    const pBox = new THREE.Box3().setFromObject(player);
-    pBox.expandByScalar(-0.2); // Forgiveness
-
-    // Obstacles
-    for (let i = world.obs.length - 1; i >= 0; i--) {
+    const pb = new THREE.Box3().setFromObject(player); pb.expandByScalar(-0.2);
+    for(let i=world.obs.length-1; i>=0; i--) {
         let o = world.obs[i];
-        if (o.z > 10) { scene.remove(o.mesh); world.obs.splice(i, 1); continue; }
-
-        const oBox = new THREE.Box3().setFromObject(o.mesh);
-        if (pBox.intersectsBox(oBox)) {
-            // If we are on top, it's fine (handled above)
-            if (state.onObj === o) continue;
-
-            // Side vs Front
-            const zDiff = Math.abs(o.z);
-            if (zDiff < 1.5) {
-                // Frontal hit
-                if (o.type === 'barrier' && o.sub === 'high' && state.sliding) continue; // Slide under
-                if (o.type === 'barrier' && o.sub === 'low' && player.position.y > 1) continue; // Jump over
-                
-                endGame();
-            } else {
-                // Side clip
-                hit();
-                // Push player away slightly
-                player.position.x += (player.position.x > o.mesh.position.x ? 1 : -1);
-            }
+        if(o.z>10) { scene.remove(o.mesh); world.obs.splice(i,1); continue; }
+        const ob = new THREE.Box3().setFromObject(o.mesh);
+        if(pb.intersectsBox(ob)) {
+            if(state.onObj===o) continue;
+            if(Math.abs(o.z)<1.5) {
+                if(o.type==='high' && state.slide) continue;
+                if(o.type==='low' && player.position.y>1) continue;
+                Game.over();
+            } else { hit(); player.position.x += (player.position.x>o.mesh.position.x?1:-1); }
         }
     }
 
     // Coins
-    for (let i = world.coins.length - 1; i >= 0; i--) {
-        let c = world.coins[i];
-        c.z += state.speed;
-        c.mesh.position.z = c.z;
-        c.mesh.rotation.z += 0.1;
-
-        if (c.z > 10) { scene.remove(c.mesh); world.coins.splice(i, 1); continue; }
-
-        const cBox = new THREE.Box3().setFromObject(c.mesh);
-        if (pBox.intersectsBox(cBox)) {
-            scene.remove(c.mesh);
-            world.coins.splice(i, 1);
-            state.coins++;
-            state.score += 10;
-            UI.update();
+    for(let i=world.coins.length-1; i>=0; i--) {
+        let c = world.coins[i]; c.z+=state.speed; c.mesh.position.z=c.z; c.mesh.rotation.z+=0.1;
+        if(c.z>10) { scene.remove(c.mesh); world.coins.splice(i,1); continue; }
+        if(pb.intersectsBox(new THREE.Box3().setFromObject(c.mesh))) {
+            scene.remove(c.mesh); world.coins.splice(i,1); state.coins++; state.score+=10; UI.updateHUD();
         }
     }
 
     // World Scroll
-    world.parts.forEach(p => {
-        p.position.z += state.speed;
-        if (p.position.z > 10) p.position.z -= 240; // Loop buildings
-    });
+    world.parts.forEach(p => { p.position.z+=state.speed; if(p.position.z>10) p.position.z-=240; });
+    if(world.obs.length<5 && Math.random()<0.05) spawn(-80);
 
-    // Spawning
-    if (world.obs.length < 5 && Math.random() < 0.05) {
-        spawnRow(-80);
-    }
-
-    // Speed Up
-    state.speed = Math.min(state.speed + 0.0001, CFG.speedMax);
-    state.score += state.speed;
-    UI.update();
-
-    // Camera Follow
-    cam.position.x += (player.position.x * 0.3 - cam.position.x) * 0.1;
-    cam.lookAt(player.position.x * 0.5, 1, -5);
+    state.speed = Math.min(state.speed+0.0001, 1.1);
+    state.score += state.speed; state.dist += state.speed;
+    UI.updateHUD();
+    cam.position.x += (player.position.x*0.3 - cam.position.x)*0.1;
+    cam.lookAt(player.position.x*0.5, 1, -5);
 }
 
-function animate() {
-    requestAnimationFrame(animate);
-    update();
-    renderer.render(scene, cam);
-}
+function animate() { requestAnimationFrame(animate); update(); renderer.render(scene, cam); }
 
-function onResize() {
-    cam.aspect = window.innerWidth / window.innerHeight;
-    cam.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-// --- GAME CONTROL ---
+// --- SYSTEMS ---
 const Game = {
     start: () => {
-        document.getElementById('start-menu').classList.add('hidden');
-        document.getElementById('game-over-menu').classList.add('hidden');
-        document.getElementById('ui').classList.remove('hidden');
+        if(Save.energy <= 0) { alert("انرژی کافی ندارید!"); return; }
+        Save.energy--; UI.save();
+        document.getElementById('menu-main').classList.add('hidden');
+        document.getElementById('menu-over').classList.add('hidden');
+        document.getElementById('ui-layer').classList.remove('hidden');
         
-        // Reset
-        world.obs.forEach(o => scene.remove(o.mesh)); world.obs = [];
-        world.coins.forEach(c => scene.remove(c.mesh)); world.coins = [];
+        world.obs.forEach(o=>scene.remove(o.mesh)); world.obs=[];
+        world.coins.forEach(c=>scene.remove(c.mesh)); world.coins=[];
         
-        state.score = 0; state.coins = 0; state.speed = CFG.speedBase;
-        state.lane = 0; state.y = 0; state.vy = 0; state.jumping = false; state.sliding = false;
-        state.health = 2; state.dizzy = false;
-        
-        player.position.set(0,0,0);
-        player.scale.set(1,1,1);
-        
-        state.active = true;
-        clock.start();
+        state = {active:true, score:0, coins:0, dist:0, speed:0.4, lane:0, y:0, vy:0, jump:false, slide:false, onObj:null, hp:2, dizzy:false};
+        player.position.set(0,0,0); player.scale.set(1,1,1);
+        clock = new THREE.Clock(); clock.start();
+        UI.updateHUD();
     },
     restart: () => Game.start(),
     over: () => {
         state.active = false;
-        document.getElementById('final-score').innerText = "امتیاز: " + Math.floor(state.score);
-        document.getElementById('game-over-menu').classList.remove('hidden');
-        document.getElementById('ui').classList.add('hidden');
+        Save.coins += state.coins;
+        Save.totalDist += Math.floor(state.dist);
+        if(state.score > Save.highScore) Save.highScore = Math.floor(state.score);
+        Save.games++;
+        
+        // Missions
+        Save.missions.forEach(m => {
+            if(m.done) return;
+            const def = DB.missions.find(x=>x.id===m.id);
+            if(def.type==='coins') m.cur += state.coins;
+            if(def.type==='dist') m.cur += state.dist;
+            if(m.cur >= def.target) { m.done=true; m.cur=def.target; Save.coins+=def.reward; alert("مأموریت انجام شد: "+def.title); }
+        });
+
+        UI.save();
+        document.getElementById('end-score').innerText = Math.floor(state.score);
+        document.getElementById('end-coins').innerText = state.coins;
+        document.getElementById('end-dist').innerText = Math.floor(state.dist) + 'm';
+        document.getElementById('menu-over').classList.remove('hidden');
+        document.getElementById('ui-layer').classList.add('hidden');
     }
 };
-// Alias for HTML onclick
-function endGame() { Game.over(); }
 
 const UI = {
-    update: () => {
-        document.getElementById('score').innerText = Math.floor(state.score);
-        document.getElementById('coins').innerText = state.coins;
+    save: () => localStorage.setItem('subwayUltimateSave', JSON.stringify(Save)),
+    updateMenu: () => {
+        document.getElementById('menu-coins').innerText = Save.coins;
+        document.getElementById('menu-dias').innerText = Save.dias;
+        document.getElementById('menu-energy').innerText = Save.energy;
     },
-    toMenu: () => {
-        document.getElementById('game-over-menu').classList.add('hidden');
-        document.getElementById('start-menu').classList.remove('hidden');
-    }
+    updateHUD: () => {
+        document.getElementById('hud-score').innerText = Math.floor(state.score);
+        document.getElementById('hud-coins').innerText = state.coins;
+        document.getElementById('hud-dias').innerText = Save.dias;
+    },
+    toMain: () => {
+        document.getElementById('menu-over').classList.add('hidden');
+        document.getElementById('menu-main').classList.remove('hidden');
+        UI.updateMenu();
+    },
+    open: (type) => {
+        const m = document.getElementById('modal-container');
+        const t = document.getElementById('modal-title');
+        const c = document.getElementById('modal-content');
+        m.classList.remove('hidden');
+        c.innerHTML = '';
+
+        if(type === 'shop' || type === 'chars') {
+            t.innerText = type==='shop' ? 'فروشگاه' : 'شخصیت‌ها';
+            const list = type==='shop' ? [...DB.chars, ...DB.pets] : DB.chars;
+            const grid = document.createElement('div'); grid.className='item-grid';
+            list.forEach(item => {
+                const owned = Save.inventory.chars.includes(item.id) || Save.inventory.pets.includes(item.id);
+                const div = document.createElement('div'); div.className='item-card';
+                div.innerHTML = `<div class="item-preview" style="background:#${item.color.toString(16).padStart(6,'0')}"></div><div style="font-size:12px">${item.name}</div><div style="font-size:10px;color:#FFD700">${owned?'✓':item.price}</div>`;
+                div.onclick = () => {
+                    if(owned) {
+                        if(item.id.startsWith('c')) Save.equipped.char = item.id;
+                        else Save.equipped.pet = item.id;
+                        updatePlayerSkin(); UI.save(); alert("انتخاب شد");
+                    } else {
+                        if(Save.coins >= item.price) {
+                            Save.coins -= item.price;
+                            if(item.id.startsWith('c')) Save.inventory.chars.push(item.id);
+                            else Save.inventory.pets.push(item.id);
+                            UI.save(); UI.updateMenu(); alert("خرید موفق");
+                        } else alert("سکه کافی نیست");
+                    }
+                };
+                grid.appendChild(div);
+            });
+            c.appendChild(grid);
+        } else if(type === 'bank') {
+            t.innerText = 'بانک';
+            c.innerHTML = `<p>موجودی: ${Save.bank}</p><input type="number" id="bank-amt" placeholder="مقدار" style="padding:10px;border-radius:5px;border:none;width:100px;text-align:center"><br><br><button class="btn btn-small" onclick="Bank.dep()">سپرده</button> <button class="btn btn-small" style="background:#555" onclick="Bank.with()">برداشت</button>`;
+        } else if(type === 'missions') {
+            t.innerText = 'مأموریت‌ها';
+            Save.missions.forEach(m => {
+                const def = DB.missions.find(x=>x.id===m.id);
+                const d = document.createElement('div'); d.style.background='#333'; d.style.padding='10px'; d.style.marginBottom='10px'; d.style.borderRadius='8px';
+                d.innerHTML = `<strong>${def.title}</strong><br><small>${Math.floor(m.cur)}/${def.target} | جایزه: ${def.reward}</small>`;
+                c.appendChild(d);
+            });
+        } else if(type === 'daily') {
+            t.innerText = 'جایزه روزانه';
+            c.innerHTML = `<p>روز متوالی: ${Save.streak}</p><button class="btn" onclick="Daily.get()">دریافت جایزه</button>`;
+        } else if(type === 'profile') {
+            t.innerText = 'پروفایل';
+            c.innerHTML = `<p>سطح: ${Save.level}</p><p>بازی‌ها: ${Save.games}</p><p>بهترین: ${Save.highScore}</p><p>مسافت کل: ${Save.totalDist}m</p>`;
+        } else if(type === 'pets') {
+             t.innerText = 'حیوانات';
+             const grid = document.createElement('div'); grid.className='item-grid';
+             DB.pets.forEach(item => {
+                const owned = Save.inventory.pets.includes(item.id);
+                const div = document.createElement('div'); div.className='item-card';
+                div.innerHTML = `<div class="item-preview" style="background:#${item.color.toString(16).padStart(6,'0')}"></div><div style="font-size:12px">${item.name}</div>`;
+                div.onclick = () => { if(owned) { Save.equipped.pet=item.id; UI.save(); alert("انتخاب شد"); } else alert("ابتدا بخرید"); };
+                grid.appendChild(div);
+             });
+             c.appendChild(grid);
+        } else if(type === 'settings') {
+            t.innerText = 'تنظیمات';
+            c.innerHTML = `<button class="btn" style="background:#ff4444" onclick="if(confirm('پاک شود؟')){localStorage.clear();location.reload()}">بازنشانی بازی</button>`;
+        }
+    },
+    closeModal: () => document.getElementById('modal-container').classList.add('hidden')
+};
+
+const Bank = {
+    dep: () => { const a = parseInt(document.getElementById('bank-amt').value); if(a>0 && Save.coins>=a){ Save.coins-=a; Save.bank+=a; UI.save(); UI.updateMenu(); alert("انجام شد"); } },
+    with: () => { const a = parseInt(document.getElementById('bank-amt').value); if(a>0 && Save.bank>=a){ Save.bank-=a; Save.coins+=a; UI.save(); UI.updateMenu(); alert("انجام شد"); } }
+};
+
+const Daily = {
+    get: () => { Save.coins += 100 * Save.streak; Save.streak++; UI.save(); UI.updateMenu(); alert("جایزه دریافت شد!"); UI.closeModal(); }
 };
 
 init();
