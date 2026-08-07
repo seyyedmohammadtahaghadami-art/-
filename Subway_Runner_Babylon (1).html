@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Subway Runner V22 - Full Edition</title>
+    <title>Subway Runner V23 - Cinematic</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lalezar&display=swap');
 
@@ -71,8 +71,8 @@
 
     <!-- Main Menu -->
     <div id="main-menu" class="menu-screen interactive">
-        <h1>SUBWAY V22</h1>
-        <p style="color:#aaa; margin-bottom:20px;">نسخه فول - موسیقی و گرافیک بالا</p>
+        <h1>SUBWAY V23</h1>
+        <p style="color:#aaa; margin-bottom:20px;">نسخه سینمایی - دوربین هوشمند</p>
         <div style="margin-bottom:15px; font-size:20px; color:#f1c40f;">سکه: <span id="menu-coins">0</span> | رکورد: <span id="menu-high">0</span></div>
         <button class="btn" onclick="game.start()">شروع دویدن 🏃‍♂️</button>
         <button class="btn btn-blue" onclick="ui.showShop()">فروشگاه 🛒</button>
@@ -136,19 +136,14 @@
     <script type="module">
         import * as THREE from 'three';
 
-        // --- ADVANCED AUDIO SYSTEM (Music + SFX) ---
+        // --- ADVANCED AUDIO SYSTEM ---
         const audio = {
-            ctx: null, 
-            muted: false,
-            musicGain: null,
-            musicInterval: null,
-            
+            ctx: null, muted: false, musicInterval: null,
             init() { 
                 if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); 
                 if (this.ctx.state === 'suspended') this.ctx.resume(); 
                 this.startMusic();
             },
-            
             playTone(freq, type, dur, vol = 0.1) {
                 if (this.muted || !this.ctx) return;
                 const o = this.ctx.createOscillator(), g = this.ctx.createGain();
@@ -157,18 +152,14 @@
                 g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
                 o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime + dur);
             },
-            
             coin() { this.playTone(1200, 'sine', 0.1, 0.1); setTimeout(()=>this.playTone(1800, 'sine', 0.1, 0.1), 50); },
             jump() { this.playTone(300, 'square', 0.2, 0.1); },
             crash() { this.playTone(100, 'sawtooth', 0.5, 0.2); },
             powerup() { this.playTone(600, 'triangle', 0.1, 0.1); setTimeout(()=>this.playTone(900, 'triangle', 0.2, 0.1), 100); },
-            
             startMusic() {
                 if(this.musicInterval) clearInterval(this.musicInterval);
                 if(this.muted) return;
-                
-                // Simple Bassline Loop
-                const notes = [110, 110, 130, 110, 146, 130]; // A2, C3, D3...
+                const notes = [110, 110, 130, 110, 146, 130];
                 let step = 0;
                 this.musicInterval = setInterval(() => {
                     if(this.muted || !game.isPlaying) return;
@@ -178,19 +169,15 @@
                     osc.frequency.value = notes[step % notes.length];
                     gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.start();
-                    osc.stop(this.ctx.currentTime + 0.3);
+                    osc.connect(gain); gain.connect(this.ctx.destination);
+                    osc.start(); osc.stop(this.ctx.currentTime + 0.3);
                     step++;
-                }, 250); // 120 BPM approx
+                }, 250);
             },
-
             toggleMute() { 
                 this.muted = !this.muted; 
                 document.getElementById('mute-text').innerText = this.muted ? "خاموش" : "روشن"; 
-                if(!this.muted) this.startMusic();
-                else clearInterval(this.musicInterval);
+                if(!this.muted) this.startMusic(); else clearInterval(this.musicInterval);
             }
         };
 
@@ -208,7 +195,10 @@
             { id: 'magnet', name: 'آهنربا', icon: '🧲', price: 100 },
             { id: 'jetpack', name: 'جت‌پک', icon: '🚀', price: 300 },
             { id: 'shield', name: 'سپر', icon: '🛡️', price: 200 },
-            { id: 'multiplier', name: 'سکه x2', icon: '💰', price: 500 }
+            { id: 'multiplier', name: 'سکه x2', icon: '💰', price: 500 },
+            { id: 'slowmo', name: 'آهسته', icon: '🐢', price: 150 },
+            { id: 'superjump', name: 'پرش قوی', icon: '⬆️', price: 250 },
+            { id: 'hoverboard', name: 'هاوربرد', icon: '🛹', price: 400 }
         ];
 
         const ACHIEVEMENTS = [
@@ -219,12 +209,12 @@
         ];
 
         let state = {
-            coins: parseInt(localStorage.getItem('v22_coins')) || 0,
-            highScore: parseInt(localStorage.getItem('v22_high')) || 0,
-            unlockedSkins: JSON.parse(localStorage.getItem('v22_skins')) || ['default'],
-            currentSkin: localStorage.getItem('v22_skin') || 'default',
-            achievements: JSON.parse(localStorage.getItem('v22_ach')) || [],
-            ownedPowerups: JSON.parse(localStorage.getItem('v22_pu')) || [],
+            coins: parseInt(localStorage.getItem('v23_coins')) || 0,
+            highScore: parseInt(localStorage.getItem('v23_high')) || 0,
+            unlockedSkins: JSON.parse(localStorage.getItem('v23_skins')) || ['default'],
+            currentSkin: localStorage.getItem('v23_skin') || 'default',
+            achievements: JSON.parse(localStorage.getItem('v23_ach')) || [],
+            ownedPowerups: JSON.parse(localStorage.getItem('v23_pu')) || [],
             stats: { trainsHopped: 0, jetpackUsed: 0 },
             settings: { quality: 'med', shadows: true, shake: true }
         };
@@ -236,9 +226,10 @@
                 this.scene.background = new THREE.Color(0x87CEEB);
                 this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.015);
 
-                // Camera: Optimized for gameplay
+                // Base Camera Position
+                this.baseCamPos = new THREE.Vector3(0, 6, 10);
                 this.camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 200);
-                this.camera.position.set(0, 6, 10); 
+                this.camera.position.copy(this.baseCamPos);
                 this.camera.lookAt(0, 1, -10);
 
                 this.renderer = new THREE.WebGLRenderer({ antialias: state.settings.quality !== 'low' });
@@ -273,14 +264,12 @@
             }
 
             createWorld() {
-                // Ground with texture-like grid
                 const groundGeo = new THREE.PlaneGeometry(100, 600);
                 const groundMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
                 const ground = new THREE.Mesh(groundGeo, groundMat);
                 ground.rotation.x = -Math.PI/2; ground.position.z = -250; ground.receiveShadow = true;
                 this.scene.add(ground);
 
-                // Tracks
                 const railGeo = new THREE.BoxGeometry(0.15, 0.15, 600);
                 const railMat = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.8, roughness: 0.2 });
                 [-2.5, 0, 2.5].forEach(x => {
@@ -294,21 +283,17 @@
 
             createPlayerMesh(color) {
                 const g = new THREE.Group();
-                // Body
                 const bMat = new THREE.MeshStandardMaterial({color: color, roughness: 0.3, metalness: 0.1});
                 const b = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.9, 0.4), bMat);
                 b.position.y = 0.9; b.castShadow = true; g.add(b);
-                // Head
                 const h = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), new THREE.MeshStandardMaterial({color: 0xffccaa}));
                 h.position.y = 1.6; h.castShadow = true; g.add(h);
-                // Limbs
                 const lGeo = new THREE.BoxGeometry(0.2, 0.7, 0.2);
                 const lMat = new THREE.MeshStandardMaterial({color: 0x333});
                 const ll = new THREE.Mesh(lGeo, lMat); ll.position.set(-0.2, 0.35, 0); g.add(ll);
                 const rl = new THREE.Mesh(lGeo, lMat); rl.position.set(0.2, 0.35, 0); g.add(rl);
                 const la = new THREE.Mesh(lGeo, lMat); la.position.set(-0.4, 1.0, 0); g.add(la);
                 const ra = new THREE.Mesh(lGeo, lMat); ra.position.set(0.4, 1.0, 0); g.add(ra);
-                
                 g.userData = { parts: { ll, rl, la, ra } };
                 return g;
             }
@@ -316,27 +301,19 @@
             spawnTrain() {
                 const laneIdx = Math.floor(Math.random() * 3);
                 const length = 30 + Math.random() * 40; 
-                
                 const group = new THREE.Group();
-                // Train Body
                 const bodyMat = new THREE.MeshStandardMaterial({ color: 0x2980b9, metalness: 0.6, roughness: 0.2 });
                 const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 3.5, length), bodyMat);
                 body.position.y = 1.75; body.castShadow = true; body.receiveShadow = true; group.add(body);
-                
-                // Roof
                 const roof = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.2, length-1), new THREE.MeshStandardMaterial({ color: 0xecf0f1 }));
                 roof.position.y = 3.6; group.add(roof);
-
-                // Stripes
                 const stripe = new THREE.Mesh(new THREE.BoxGeometry(2.25, 0.2, length), new THREE.MeshBasicMaterial({ color: 0xf1c40f }));
                 stripe.position.y = 2.5; group.add(stripe);
 
                 group.position.set([-2.5, 0, 2.5][laneIdx], 0, -160);
                 this.scene.add(group);
-                
                 this.objects.push({ mesh: group, type: 'train', lane: laneIdx, length: length, height: 3.5 });
 
-                // Coins on top
                 for(let z = -length/2 + 5; z < length/2 - 5; z+=3) {
                     this.spawnCoin([-2.5, 0, 2.5][laneIdx], 4.0, -160 + z);
                 }
@@ -346,7 +323,6 @@
                 const laneIdx = Math.floor(Math.random() * 3);
                 const type = Math.random() > 0.5 ? 'low' : 'high';
                 const group = new THREE.Group();
-                
                 if(type === 'low') {
                     const m = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 0.5), new THREE.MeshStandardMaterial({color: 0xe67e22}));
                     m.position.y = 0.5; m.castShadow = true; group.add(m);
@@ -358,7 +334,6 @@
                     const p1 = new THREE.Mesh(pGeo, pMat); p1.position.set(-0.9, 1, 0); group.add(p1);
                     const p2 = new THREE.Mesh(pGeo, pMat); p2.position.set(0.9, 1, 0); group.add(p2);
                 }
-
                 group.position.set([-2.5, 0, 2.5][laneIdx], 0, -160);
                 this.scene.add(group);
                 this.objects.push({ mesh: group, type: 'barrier', subType: type, lane: laneIdx });
@@ -373,10 +348,9 @@
 
             spawnPowerup() {
                 const laneIdx = Math.floor(Math.random() * 3);
-                const types = ['magnet', 'shield', 'jetpack', 'multiplier'];
+                const types = ['magnet', 'shield', 'jetpack', 'multiplier', 'slowmo', 'superjump', 'hoverboard'];
                 const type = types[Math.floor(Math.random() * types.length)];
-                const colors = { magnet: 0xe74c3c, shield: 0x3498db, jetpack: 0x9b59b6, multiplier: 0x2ecc71 };
-                
+                const colors = { magnet: 0xe74c3c, shield: 0x3498db, jetpack: 0x9b59b6, multiplier: 0x2ecc71, slowmo: 0x00ffff, superjump: 0xff00ff, hoverboard: 0xffff00 };
                 const p = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshStandardMaterial({ color: colors[type], emissive: colors[type], emissiveIntensity: 0.5 }));
                 p.position.set([-2.5, 0, 2.5][laneIdx], 1.5, -160);
                 this.scene.add(p);
@@ -394,8 +368,6 @@
                 this.isOnTrain = false;
                 this.activeTrain = null;
                 this.stunned = false;
-                this.jetpackFuel = 0;
-                
                 this.activePUs = {};
                 
                 this.objects.forEach(o => this.scene.remove(o.mesh));
@@ -407,6 +379,9 @@
                 this.player.scale.set(1,1,1);
                 this.player.rotation.set(0,0,0);
                 document.getElementById('active-powerups').innerHTML = '';
+                
+                // Reset Camera
+                this.camera.position.copy(this.baseCamPos);
             }
 
             setupInputs() {
@@ -417,32 +392,30 @@
                     if(dir === 'up') this.jump();
                     if(dir === 'down') this.roll();
                 };
-
                 document.addEventListener('keydown', e => {
                     if(e.key === 'ArrowLeft') handle('left');
                     if(e.key === 'ArrowRight') handle('right');
                     if(e.key === 'ArrowUp') handle('up');
                     if(e.key === 'ArrowDown') handle('down');
                 });
-
                 let tx, ty;
                 document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, {passive:false});
                 document.addEventListener('touchend', e => {
                     const dx = e.changedTouches[0].clientX - tx;
                     const dy = e.changedTouches[0].clientY - ty;
                     if(Math.abs(dx) > Math.abs(dy)) {
-                        if(dx > 30) handle('right');
-                        else if(dx < -30) handle('left');
+                        if(dx > 30) handle('right'); else if(dx < -30) handle('left');
                     } else {
-                        if(dy < -30) handle('up');
-                        else if(dy > 30) handle('down');
+                        if(dy < -30) handle('up'); else if(dy > 30) handle('down');
                     }
                 }, {passive:false});
             }
 
             jump() {
                 if(!this.isJumping && !this.activePUs.jetpack) {
-                    this.vy = 0.6;
+                    let force = 0.6;
+                    if(this.activePUs.superjump) force = 0.9;
+                    this.vy = force;
                     this.isJumping = true;
                     this.isOnTrain = false;
                     this.activeTrain = null;
@@ -464,8 +437,7 @@
             activatePowerup(type) {
                 audio.powerup();
                 const container = document.getElementById('active-powerups');
-                const names = { magnet: '🧲 آهنربا', shield: '🛡️ سپر', jetpack: '🚀 جت‌پک', multiplier: '💰 سکه x2' };
-                
+                const names = { magnet: '🧲 آهنربا', shield: '🛡️ سپر', jetpack: '🚀 جت‌پک', multiplier: '💰 سکه x2', slowmo: '🐢 آهسته', superjump: '⬆️ پرش قوی', hoverboard: '🛹 هاوربرد' };
                 const div = document.createElement('div');
                 div.className = 'pu-badge';
                 div.id = `pu-${type}`;
@@ -473,14 +445,11 @@
                 container.appendChild(div);
 
                 this.activePUs[type] = true;
-                
-                if(type === 'jetpack') {
-                    this.jetpackFuel = 100;
-                    state.stats.jetpackUsed++;
-                }
+                if(type === 'jetpack') state.stats.jetpackUsed++;
                 
                 let duration = 8000;
                 if(type === 'jetpack') duration = 6000;
+                if(type === 'slowmo') duration = 5000;
                 
                 setTimeout(() => {
                     this.activePUs[type] = false;
@@ -490,19 +459,23 @@
             }
 
             stumble() {
-                if(this.activePUs.shield) {
-                    this.activePUs.shield = false;
-                    const el = document.getElementById('pu-shield');
-                    if(el) el.remove();
-                    ui.toast("سپر محافظت کرد! 🛡️");
+                if(this.activePUs.shield || this.activePUs.hoverboard) {
+                    if(this.activePUs.hoverboard) {
+                        this.activePUs.hoverboard = false;
+                        const el = document.getElementById('pu-hoverboard');
+                        if(el) el.remove();
+                    } else {
+                        this.activePUs.shield = false;
+                        const el = document.getElementById('pu-shield');
+                        if(el) el.remove();
+                    }
+                    ui.toast("محافظت فعال شد! 🛡️");
                     return;
                 }
-
                 this.stunned = true;
                 this.speed *= 0.4; 
                 document.getElementById('blur-overlay').style.backdropFilter = 'blur(8px)';
                 ui.toast("سرگیجه! مراقب باش 😵");
-                
                 setTimeout(() => {
                     this.stunned = false;
                     this.speed = Math.max(this.speed * 2, 0.4); 
@@ -513,19 +486,15 @@
             checkCollisions() {
                 const pBox = new THREE.Box3().setFromObject(this.player);
                 pBox.expandByScalar(-0.2);
-
                 this.isOnTrain = false;
 
                 for(let obj of this.objects) {
                     const oBox = new THREE.Box3().setFromObject(obj.mesh);
-                    
                     if(obj.type === 'train') {
                         if(Math.abs(this.player.position.z - obj.mesh.position.z) < obj.length/2 + 0.5) {
                             if(Math.abs(this.player.position.x - obj.mesh.position.x) < 1.2) {
                                 const pBottom = this.player.position.y;
                                 const tTop = obj.height;
-                                
-                                // On Top
                                 if(this.vy <= 0 && pBottom >= tTop - 0.5 && pBottom <= tTop + 1.5) {
                                     this.isOnTrain = true;
                                     if(this.activeTrain !== obj) {
@@ -535,9 +504,7 @@
                                     this.player.position.y = tTop;
                                     this.vy = 0;
                                     this.isJumping = false;
-                                } 
-                                // Front Crash
-                                else if (pBottom < tTop - 0.5 && this.player.position.z > obj.mesh.position.z - obj.length/2) {
+                                } else if (pBottom < tTop - 0.5 && this.player.position.z > obj.mesh.position.z - obj.length/2) {
                                     if(Math.abs(this.player.position.z - (obj.mesh.position.z - obj.length/2)) < 1) {
                                         this.gameOver();
                                     } else {
@@ -550,13 +517,12 @@
                         if(pBox.intersectsBox(oBox)) {
                             if(obj.subType === 'high' && this.player.scale.y < 1) continue; 
                             if(obj.subType === 'low' && this.player.position.y > 1) continue; 
-                            if(!this.activePUs.shield) this.gameOver();
+                            if(!this.activePUs.shield && !this.activePUs.hoverboard) this.gameOver();
                             else this.stumble();
                         }
                     }
                 }
 
-                // Coins
                 for(let i=this.coins.length-1; i>=0; i--) {
                     const c = this.coins[i];
                     if(this.activePUs.magnet) {
@@ -571,7 +537,6 @@
                     }
                 }
 
-                // Powerups
                 for(let i=this.powerups.length-1; i>=0; i--) {
                     const p = this.powerups[i];
                     if(pBox.intersectsBox(new THREE.Box3().setFromObject(p.mesh))) {
@@ -594,9 +559,9 @@
                 state.coins += this.runCoins;
                 if(this.score > state.highScore) state.highScore = Math.floor(this.score);
                 
-                localStorage.setItem('v22_coins', state.coins);
-                localStorage.setItem('v22_high', state.highScore);
-                localStorage.setItem('v22_stats', JSON.stringify(state.stats));
+                localStorage.setItem('v23_coins', state.coins);
+                localStorage.setItem('v23_high', state.highScore);
+                localStorage.setItem('v23_stats', JSON.stringify(state.stats));
                 
                 ui.checkAchievements();
                 ui.updateMenu();
@@ -616,10 +581,7 @@
                 this.start();
             }
 
-            setQuality(q) {
-                state.settings.quality = q;
-                location.reload();
-            }
+            setQuality(q) { state.settings.quality = q; location.reload(); }
             toggleShadows(v) { state.settings.shadows = v; this.renderer.shadowMap.enabled = v; }
             toggleShake(v) { state.settings.shake = v; }
 
@@ -627,9 +589,11 @@
                 requestAnimationFrame(() => this.animate());
 
                 if(this.isPlaying) {
+                    let currentSpeed = this.speed;
+                    if(this.activePUs.slowmo) currentSpeed *= 0.5;
                     if(!this.stunned) this.speed = Math.min(0.4 + (this.score * 0.00015), 1.4);
                     
-                    this.score += this.speed;
+                    this.score += currentSpeed;
                     document.getElementById('score').innerText = Math.floor(this.score);
                     document.getElementById('coins').innerText = state.coins + this.runCoins;
 
@@ -637,13 +601,21 @@
                     this.player.position.x += (targetX - this.player.position.x) * 0.2;
                     this.player.rotation.z = (this.player.position.x - targetX) * -0.1;
 
-                    // Jetpack Physics Fix
+                    // --- CAMERA LOGIC (Cinematic) ---
+                    let targetCamY = this.baseCamPos.y;
+                    let targetCamZ = this.baseCamPos.z;
+
                     if(this.activePUs.jetpack) {
-                        this.player.position.y += 0.15; // Fly up
-                        if(this.player.position.y > 8) this.player.position.y = 8;
+                        // Fly Up Logic
+                        this.player.position.y += 0.15; 
+                        if(this.player.position.y > 10) this.player.position.y = 10;
                         this.player.rotation.x = -0.5;
-                        this.vy = 0; // Reset gravity velocity
+                        this.vy = 0; 
                         this.isJumping = false;
+                        
+                        // Camera follows up and pulls back
+                        targetCamY = 12; 
+                        targetCamZ = 14;
                     } else {
                         this.player.rotation.x = 0;
                         if(!this.isOnTrain) {
@@ -654,25 +626,33 @@
                                 this.vy = 0;
                                 this.isJumping = false;
                             }
+                        } else {
+                            // On Train: Camera slightly higher
+                            targetCamY = 8;
                         }
                     }
 
+                    // Smooth Camera Lerp
+                    this.camera.position.y += (targetCamY - this.camera.position.y) * 0.05;
+                    this.camera.position.z += (targetCamZ - this.camera.position.z) * 0.05;
+                    this.camera.lookAt(0, this.player.position.y, -10);
+
                     // Move World
                     this.objects.forEach(o => {
-                        o.mesh.position.z += this.speed;
+                        o.mesh.position.z += currentSpeed;
                         if(o.mesh.position.z > 20) { o.dead = true; this.scene.remove(o.mesh); }
                     });
                     this.objects = this.objects.filter(o => !o.dead);
 
                     this.coins.forEach(c => {
-                        c.position.z += this.speed;
+                        c.position.z += currentSpeed;
                         c.rotation.z += 0.1;
                         if(c.position.z > 10) { c.dead = true; this.scene.remove(c); }
                     });
                     this.coins = this.coins.filter(c => !c.dead);
 
                     this.powerups.forEach(p => {
-                        p.mesh.position.z += this.speed;
+                        p.mesh.position.z += currentSpeed;
                         p.mesh.rotation.y += 0.05;
                         if(p.mesh.position.z > 10) { p.dead = true; this.scene.remove(p.mesh); }
                     });
@@ -686,20 +666,17 @@
                     if(Math.random() < 0.003) this.spawnPowerup();
 
                     if(!this.isJumping && !this.activePUs.jetpack) {
-                        const t = Date.now() * 0.02 * (this.speed/0.4);
+                        const t = Date.now() * 0.02 * (currentSpeed/0.4);
                         this.player.userData.parts.ll.rotation.x = Math.sin(t);
                         this.player.userData.parts.rl.rotation.x = Math.sin(t + Math.PI);
                         this.player.userData.parts.la.rotation.x = Math.sin(t + Math.PI);
                         this.player.userData.parts.ra.rotation.x = Math.sin(t);
                     }
 
-                    // Camera Shake
                     if(state.settings.shake && !this.stunned) {
                         this.camera.position.x = (Math.random() - 0.5) * 0.05;
-                        this.camera.position.y = 6 + (Math.random() - 0.5) * 0.05;
                     } else {
                         this.camera.position.x = 0;
-                        this.camera.position.y = 6;
                     }
 
                     this.checkCollisions();
@@ -751,8 +728,6 @@
             },
             renderShop: () => {
                 document.getElementById('shop-coins').innerText = state.coins;
-                
-                // Skins
                 const sGrid = document.getElementById('skin-grid');
                 sGrid.innerHTML = '';
                 SKINS.forEach(skin => {
@@ -765,7 +740,7 @@
                     div.onclick = () => {
                         if(isUnlocked) {
                             state.currentSkin = skin.id;
-                            localStorage.setItem('v22_skin', skin.id);
+                            localStorage.setItem('v23_skin', skin.id);
                             game.scene.remove(game.player);
                             game.player = game.createPlayerMesh(skin.color);
                             game.scene.add(game.player);
@@ -774,9 +749,9 @@
                             state.coins -= skin.price;
                             state.unlockedSkins.push(skin.id);
                             state.currentSkin = skin.id;
-                            localStorage.setItem('v22_coins', state.coins);
-                            localStorage.setItem('v22_skins', JSON.stringify(state.unlockedSkins));
-                            localStorage.setItem('v22_skin', skin.id);
+                            localStorage.setItem('v23_coins', state.coins);
+                            localStorage.setItem('v23_skins', JSON.stringify(state.unlockedSkins));
+                            localStorage.setItem('v23_skin', skin.id);
                             game.scene.remove(game.player);
                             game.player = game.createPlayerMesh(skin.color);
                             game.scene.add(game.player);
@@ -787,7 +762,6 @@
                     sGrid.appendChild(div);
                 });
 
-                // Powerups Shop
                 const uGrid = document.getElementById('upgrade-grid');
                 uGrid.innerHTML = '';
                 POWERUPS_SHOP.forEach(pu => {
@@ -799,8 +773,8 @@
                         if(!isOwned && state.coins >= pu.price) {
                             state.coins -= pu.price;
                             state.ownedPowerups.push(pu.id);
-                            localStorage.setItem('v22_coins', state.coins);
-                            localStorage.setItem('v22_pu', JSON.stringify(state.ownedPowerups));
+                            localStorage.setItem('v23_coins', state.coins);
+                            localStorage.setItem('v23_pu', JSON.stringify(state.ownedPowerups));
                             ui.renderShop();
                             ui.updateMenu();
                             ui.toast(`${pu.name} خریداری شد!`);
@@ -829,7 +803,6 @@
                         if(ach.type === 'coins') val = state.coins;
                         if(ach.type === 'trains') val = state.stats.trainsHopped || 0;
                         if(ach.type === 'jetpack_used') val = state.stats.jetpackUsed || 0;
-                        
                         if(val >= ach.target) {
                             state.achievements.push(ach.id);
                             newUnlock = true;
@@ -837,7 +810,7 @@
                     }
                 });
                 if(newUnlock) {
-                    localStorage.setItem('v22_ach', JSON.stringify(state.achievements));
+                    localStorage.setItem('v23_ach', JSON.stringify(state.achievements));
                     ui.toast("دستاورد جدید باز شد! 🏆");
                 }
             }
