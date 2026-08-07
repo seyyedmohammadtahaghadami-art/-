@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Subway Runner Pro V8 - گیم‌پلی محور</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Lalezar&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{margin:0;overflow:hidden;background:#06060c;font-family:'Lalezar',cursive;touch-action:none;user-select:none}
+canvas{display:block;width:100%;height:100%}
+#ui-layer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5}
+.hud-top{display:flex;justify-content:space-between;padding:8px 12px;font-size:20px;color:#fff;text-shadow:2px 2px 4px #000}
+.stat-box{background:rgba(0,0,0,.55);padding:4px 12px;border-radius:16px;border:1.5px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:4px}
+#mission-box{position:absolute;top:54px;left:10px;background:rgba(0,0,0,.5);padding:5px 10px;border-radius:10px;border:1px solid rgba(255,215,0,.25);color:#ffe;font-size:12px;max-width:170px}
+#powerups{position:absolute;top:54px;right:8px;display:flex;flex-direction:column;gap:3px}
+.pu-badge{background:rgba(0,190,255,.28);border:1.5px solid #0bf;padding:3px 9px;border-radius:8px;color:#fff;font-size:12px;display:none}
+#chase-warn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:28px;color:#ff3333;text-shadow:0 0 20px #f00;display:none;z-index:6;pointer-events:none}
+.menu-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle,rgba(14,12,22,.96) 0%,rgba(0,0,0,.98) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:auto;z-index:10;transition:opacity .25s;overflow-y:auto;padding:15px 0}
+.hidden{opacity:0;pointer-events:none}
+h1{font-size:42px;color:#FFD700;text-shadow:0 0 20px #FFD700,2px 2px 0 #a32}
+h2{font-size:24px;color:#ff4757;margin:4px 0}
+p{color:#ccc;font-size:14px;margin-bottom:10px}
+.subtitle{font-size:12px;color:#888;margin-top:-4px;margin-bottom:14px}
+button{background:linear-gradient(to bottom,#ff9f43,#ee5253);border:2.5px solid #fff;padding:9px 30px;color:#fff;font-size:19px;font-family:'Lalezar',cursive;border-radius:32px;cursor:pointer;box-shadow:0 5px 14px rgba(0,0,0,.4);margin:4px;transition:.15s}
+button:active{transform:scale(.96)}
+.btn-secondary{background:linear-gradient(to bottom,#4a5568,#1a202c);font-size:14px;padding:7px 18px}
+.panel{background:#101820;padding:14px 12px;border-radius:12px;border:2.5px solid #f1c40f;width:94%;max-width:420px;max-height:85vh;overflow-y:auto}
+.shop-coins{font-size:17px;color:#f1c40f;margin-bottom:8px}
+.section{margin:10px 0 4px;font-size:14px;color:#7fdbff;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:3px}
+.item{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.04);padding:7px 9px;margin:4px 0;border-radius:8px;color:#fff;font-size:13px;gap:6px}
+.item .info{flex:1;text-align:right}
+.item .name{font-size:13px}
+.item .desc{font-size:10px;color:#777}
+.buy-btn{background:#27ae60;border:none;padding:5px 9px;border-radius:9px;cursor:pointer;color:#fff;font-family:'Lalezar';font-size:12px;min-width:50px}
+.buy-btn:disabled{background:#444}
+.buy-btn.owned{background:#3498db}
+.buy-btn.equipped{background:#9b59b6}
+.char-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:8px 0}
+.char-card{background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.1);border-radius:10px;padding:8px;text-align:center;cursor:pointer}
+.char-card.selected{border-color:#f1c40f;background:rgba(241,196,15,.1)}
+.char-card .emoji{font-size:32px}
+.char-card .cname{font-size:12px;margin-top:3px;color:#ddd}
+#pause-screen{z-index:15}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+<div id="canvas-container"></div>
+<div id="ui-layer">
+  <div class="hud-top">
+    <div class="stat-box">امتیاز: <span id="score">0</span></div>
+    <div class="stat-box">🪙 <span id="coins">0</span></div>
+  </div>
+  <div id="mission-box">مأموریت: <span id="mission-text">-</span></div>
+  <div id="powerups">
+    <div id="pu-magnet" class="pu-badge">آهنربا</div>
+    <div id="pu-shield" class="pu-badge">سپر</div>
+    <div id="pu-double" class="pu-badge">×۲</div>
+    <div id="pu-hover" class="pu-badge">هاور</div>
+    <div id="pu-jet" class="pu-badge">جت</div>
+  </div>
+  <div id="chase-warn">⚠ تعقیب!</div>
+</div>
+
+<div id="start-screen" class="menu-screen">
+  <h1>SUBWAY PRO</h1>
+  <p class="subtitle">نسخه ۸ - تمرکز روی گیم‌پلی</p>
+  <button id="start-btn">شروع</button>
+  <button id="char-btn" class="btn-secondary">شخصیت</button>
+  <button id="shop-btn" class="btn-secondary">فروشگاه</button>
+  <button id="ach-btn" class="btn-secondary">دستاورد</button>
+</div>
+
+<div id="pause-screen" class="menu-screen hidden">
+  <h1 style="color:#7fdbff">مکث</h1>
+  <button id="resume-btn">ادامه</button>
+  <button id="pause-menu-btn" class="btn-secondary">منو</button>
+</div>
+
+<div id="char-modal" class="menu-screen hidden">
+  <div class="panel">
+    <h2 style="color:#f1c40f">شخصیت</h2>
+    <div class="char-grid" id="char-grid"></div>
+    <button id="close-char" class="btn-secondary" style="width:100%;margin-top:8px">بستن</button>
+  </div>
+</div>
+
+<div id="shop-modal" class="menu-screen hidden">
+  <div class="panel">
+    <h2 style="color:#f1c40f">فروشگاه</h2>
+    <div class="shop-coins">سکه: <span id="shop-coins">0</span></div>
+    <div class="section">پاورآپ</div>
+    <div class="item"><div class="info"><div class="name">آهنربا</div></div><button class="buy-btn" data-item="magnet" data-cost="50">۵۰</button></div>
+    <div class="item"><div class="info"><div class="name">سپر</div></div><button class="buy-btn" data-item="shield" data-cost="100">۱۰۰</button></div>
+    <div class="item"><div class="info"><div class="name">سکه×۲</div></div><button class="buy-btn" data-item="double" data-cost="120">۱۲۰</button></div>
+    <div class="item"><div class="info"><div class="name">هاوربرد</div></div><button class="buy-btn" data-item="hover" data-cost="180">۱۸۰</button></div>
+    <div class="item"><div class="info"><div class="name">جت‌پک</div></div><button class="buy-btn" data-item="jet" data-cost="220">۲۲۰</button></div>
+    <div class="section">اسکین</div>
+    <div class="item"><div class="info"><div class="name">مشکی</div></div><button class="buy-btn" data-item="skin_black" data-cost="0">رایگان</button></div>
+    <div class="item"><div class="info"><div class="name">قرمز</div></div><button class="buy-btn" data-item="skin_red" data-cost="200">۲۰۰</button></div>
+    <div class="item"><div class="info"><div class="name">آبی</div></div><button class="buy-btn" data-item="skin_blue" data-cost="250">۲۵۰</button></div>
+    <div class="item"><div class="info"><div class="name">طلایی</div></div><button class="buy-btn" data-item="skin_gold" data-cost="500">۵۰۰</button></div>
+    <button id="close-shop" class="btn-secondary" style="width:100%;margin-top:10px">بستن</button>
+  </div>
+</div>
+
+<div id="ach-modal" class="menu-screen hidden">
+  <div class="panel">
+    <h2 style="color:#f1c40f">دستاوردها</h2>
+    <div id="ach-list"></div>
+    <button id="close-ach" class="btn-secondary" style="width:100%;margin-top:10px">بستن</button>
+  </div>
+</div>
+
+<div id="game-over-screen" class="menu-screen hidden">
+  <h1 style="color:#ff4757">GAME OVER</h1>
+  <p>امتیاز: <span id="final-score">0</span></p>
+  <p id="mission-result" style="font-size:13px;color:#f1c40f"></p>
+  <button id="retry-btn">دوباره</button>
+  <button id="menu-btn" class="btn-secondary">منو</button>
+</div>
+
+<script>
+const CONFIG={laneWidth:3.6,baseSpeed:0.45,maxSpeed:2.15,jumpForce:0.68,gravity:0.032,trainHeight:3.1};
+const SKINS={skin_black:0x1a1a1a,skin_red:0xc0392b,skin_blue:0x0984e3,skin_gold:0xf1c40f};
+const CHARS=[
+  {id:'jake',name:'جیک',emoji:'🏃',color:0x1a1a1a,unlock:0},
+  {id:'tricky',name:'تریکی',emoji:'😎',color:0xc0392b,unlock:250},
+  {id:'fresh',name:'فرش',emoji:'🎧',color:0x0984e3,unlock:500},
+  {id:'king',name:'کینگ',emoji:'👑',color:0xf1c40f,unlock:1500}
+];
+const MISSIONS=[
+  {text:'۴۰ سکه جمع کن',type:'coins',target:40,reward:25},
+  {text:'به ۶۰۰ امتیاز برس',type:'score',target:600,reward:40},
+  {text:'۲ پاورآپ بگیر',type:'powerups',target:2,reward:30},
+  {text:'تا ۴۰۰ بدون مرگ',type:'survive',target:400,reward:45}
+];
+const ACH=[
+  {id:'first',name:'شروع',desc:'اولین بازی',reward:15},
+  {id:'coins80',name:'جمع‌کننده',desc:'۸۰ سکه کل',reward:40},
+  {id:'score15',name:'دونده',desc:'۱۵۰۰ امتیاز یک دور',reward:70},
+  {id:'escape',name:'فراری',desc:'از تعقیب فرار کن',reward:50},
+  {id:'jet',name:'پرواز',desc:'جت‌پک استفاده کن',reward:25}
+];
+
+class Game {
+  constructor(){
+    this.s={
+      playing:false,paused:false,score:0,coins:parseInt(localStorage.getItem('sp8_c'))||0,
+      speed:CONFIG.baseSpeed,lane:1,tx:0,vy:0,jumping:false,rolling:false,rollT:0,
+      inv:JSON.parse(localStorage.getItem('sp8_i')||'{"magnet":0,"shield":0,"double":0,"hover":0,"jet":0}'),
+      owned:JSON.parse(localStorage.getItem('sp8_o')||'["skin_black"]'),
+      eq:{skin:localStorage.getItem('sp8_sk')||'skin_black',char:localStorage.getItem('sp8_ch')||'jake'},
+      pu:{magnet:0,shield:false,double:0,hover:0,jet:0},
+      jumpBoost:1,crashCD:0,hovering:false,jetting:false,
+      runCoins:0,runPU:0,mission:null,mProg:0,
+      ach:JSON.parse(localStorage.getItem('sp8_a')||'[]'),
+      totalC:parseInt(localStorage.getItem('sp8_tc'))||0,
+      chased:false,chaseTimer:0,env:'open' // open | tunnel | station
+    };
+    this.e={trains:[],bars:[],coins:[],pus:[],parts:[],enemies:[]};
+    this.builds=[];
+    this.init();this.world();this.player();this.inputs();this.dailyMission();this.ui();this.loop();
+  }
+
+  init(){
+    this.sc=new THREE.Scene();this.sc.background=new THREE.Color(0x4a9cbe);this.sc.fog=new THREE.FogExp2(0x4a9cbe,0.007);
+    this.cam=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,0.1,160);this.cam.position.set(0,6.3,11.5);
+    this.ren=new THREE.WebGLRenderer({antialias:true});this.ren.setSize(innerWidth,innerHeight);this.ren.setPixelRatio(Math.min(devicePixelRatio,1.5));
+    this.ren.shadowMap.enabled=true;document.getElementById('canvas-container').appendChild(this.ren.domElement);
+    this.sc.add(new THREE.HemisphereLight(0xfff5e0,0x445566,0.8));
+    const sun=new THREE.DirectionalLight(0xffeecc,1.15);sun.position.set(10,32,4);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);this.sc.add(sun);
+    addEventListener('resize',()=>{this.cam.aspect=innerWidth/innerHeight;this.cam.updateProjectionMatrix();this.ren.setSize(innerWidth,innerHeight)});
+  }
+
+  world(){
+    const g=new THREE.Mesh(new THREE.PlaneGeometry(48,320),new THREE.MeshStandardMaterial({color:0x2a2a2a,roughness:0.9}));
+    g.rotation.x=-Math.PI/2;g.position.z=-70;g.receiveShadow=true;this.sc.add(g);
+    this.tracks=new THREE.Group();
+    const rm=new THREE.MeshStandardMaterial({color:0x666,metalness:0.8,roughness:0.3});
+    const sm=new THREE.MeshStandardMaterial({color:0x4a3528,roughness:0.9});
+    for(let i=-1;i<=1;i++){const o=i*CONFIG.laneWidth;
+      const r1=new THREE.Mesh(new THREE.BoxGeometry(0.11,0.05,320),rm);r1.position.set(o-0.78,0.03,-70);
+      const r2=new THREE.Mesh(new THREE.BoxGeometry(0.11,0.05,320),rm);r2.position.set(o+0.78,0.03,-70);this.tracks.add(r1,r2)}
+    for(let j=0;j<90;j++){const s=new THREE.Mesh(new THREE.BoxGeometry(9.5,0.09,0.35),sm);s.position.set(0,0.01,-j*3.3);this.tracks.add(s)}
+    this.sc.add(this.tracks);
+    // ساختمان‌ها
+    for(let side=-1;side<=1;side+=2)for(let i=0;i<9;i++){
+      const h=7+Math.random()*13;
+      const b=new THREE.Mesh(new THREE.BoxGeometry(4.5+Math.random()*2.5,h,5.5+Math.random()*2.5),
+        new THREE.MeshStandardMaterial({color:new THREE.Color().setHSL(0.08,0.2,0.27+Math.random()*0.1),roughness:0.9}));
+      b.position.set(side*(10.5+Math.random()*2),h/2,-i*26-Math.random()*5);b.castShadow=true;this.sc.add(b);this.builds.push(b);
+    }
+  }
+
+  player(){
+    this.pl=new THREE.Group();this.pp={};
+    const sk=new THREE.MeshStandardMaterial({color:0xf2c9a8,roughness:0.4});
+    const ch=CHARS.find(c=>c.id===this.s.eq.char)||CHARS[0];
+    this.pp.hm=new THREE.MeshStandardMaterial({color:ch.color,roughness:0.5});
+    const pm=new THREE.MeshStandardMaterial({color:0x1a1a1a,roughness:0.5});
+    const sm=new THREE.MeshStandardMaterial({color:0xf0f0f0,roughness:0.25});
+    const t=new THREE.Mesh(new THREE.SphereGeometry(0.42,14,11),this.pp.hm);t.scale.set(1.05,1.35,0.8);t.position.y=1.32;t.castShadow=true;this.pl.add(t);this.pp.t=t;
+    const h=new THREE.Mesh(new THREE.SphereGeometry(0.29,12,10),sk);h.position.y=2.02;this.pl.add(h);
+    this.lm={};
+    this.lm.aL=new THREE.Group();this.lm.aL.position.set(-0.44,1.55,0);
+    const al=new THREE.Mesh(new THREE.SphereGeometry(0.1,8,6),this.pp.hm);al.scale.set(1,2.1,1);al.position.y=-0.24;this.lm.aL.add(al);this.pl.add(this.lm.aL);this.pp.al=al;
+    this.lm.aR=new THREE.Group();this.lm.aR.position.set(0.44,1.55,0);
+    const ar=new THREE.Mesh(new THREE.SphereGeometry(0.1,8,6),this.pp.hm);ar.scale.set(1,2.1,1);ar.position.y=-0.24;this.lm.aR.add(ar);this.pl.add(this.lm.aR);this.pp.ar=ar;
+    this.lm.lL=new THREE.Group();this.lm.lL.position.set(-0.15,0.68,0);
+    const ll=new THREE.Mesh(new THREE.SphereGeometry(0.11,8,6),pm);ll.scale.set(1,2.3,1);ll.position.y=-0.3;this.lm.lL.add(ll);
+    const sl=new THREE.Mesh(new THREE.SphereGeometry(0.13,8,6),sm);sl.scale.set(1.1,0.55,1.35);sl.position.set(0,-0.75,0.03);this.lm.lL.add(sl);this.pl.add(this.lm.lL);
+    this.lm.lR=new THREE.Group();this.lm.lR.position.set(0.15,0.68,0);
+    const lr=new THREE.Mesh(new THREE.SphereGeometry(0.11,8,6),pm);lr.scale.set(1,2.3,1);lr.position.y=-0.3;this.lm.lR.add(lr);
+    const sr=new THREE.Mesh(new THREE.SphereGeometry(0.13,8,6),sm);sr.scale.set(1.1,0.55,1.35);sr.position.set(0,-0.75,0.03);this.lm.lR.add(sr);this.pl.add(this.lm.lR);
+    this.hb=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.06,1.4),new THREE.MeshStandardMaterial({color:0x00e5ff,metalness:0.7,emissive:0x003344,emissiveIntensity:0.3}));this.hb.position.y=0.07;this.hb.visible=false;this.pl.add(this.hb);
+    this.jp=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.6,0.2),new THREE.MeshStandardMaterial({color:0xff4400,emissive:0x331100,emissiveIntensity:0.4}));this.jp.position.set(0,1.4,0.35);this.jp.visible=false;this.pl.add(this.jp);
+    this.sh=new THREE.Mesh(new THREE.SphereGeometry(1.25,12,9),new THREE.MeshBasicMaterial({color:0x00e5ff,transparent:true,opacity:0.16,wireframe:true}));this.sh.visible=false;this.pl.add(this.sh);
+    this.sc.add(this.pl);
+  }
+
+  applyChar(){const c=CHARS.find(x=>x.id===this.s.eq.char)||CHARS[0];this.pp.hm.color.setHex(c.color);this.pp.t.material=this.pp.hm;this.pp.al.material=this.pp.hm;this.pp.ar.material=this.pp.hm}
+
+  dailyMission(){
+    const d=new Date().toDateString();
+    if(localStorage.getItem('sp8_md')===d&&localStorage.getItem('sp8_m'))this.s.mission=JSON.parse(localStorage.getItem('sp8_m'));
+    else{this.s.mission=MISSIONS[Math.floor(Math.random()*MISSIONS.length)];localStorage.setItem('sp8_md',d);localStorage.setItem('sp8_m',JSON.stringify(this.s.mission))}
+    this.s.mProg=0;document.getElementById('mission-text').textContent=this.s.mission.text;
+  }
+
+  // دشمن (پلیس/سگ)
+  spawnEnemy(){
+    if(this.e.enemies.length>0)return;
+    const g=new THREE.Group();
+    // بدن ساده پلیس
+    const body=new THREE.Mesh(new THREE.SphereGeometry(0.4,10,8),new THREE.MeshStandardMaterial({color:0x1a3a6a}));
+    body.scale.set(1,1.5,0.8);body.position.y=1.1;g.add(body);
+    const head=new THREE.Mesh(new THREE.SphereGeometry(0.28,10,8),new THREE.MeshStandardMaterial({color:0xf0c8a0}));head.position.y=1.85;g.add(head);
+    // کلاه پلیس
+    const hat=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.32,0.18,10),new THREE.MeshStandardMaterial({color:0x111}));hat.position.y=2.1;g.add(hat);
+    g.position.set(0,0,8);
+    g.userData={speed:0.12};
+    this.sc.add(g);this.e.enemies.push(g);
+    this.s.chased=true;this.s.chaseTimer=900; // ~15 ثانیه
+    document.getElementById('chase-warn').style.display='block';
+    setTimeout(()=>document.getElementById('chase-warn').style.display='none',1500);
+  }
+
+  makeTrain(lane,type){
+    const g=new THREE.Group();const len=12.5+Math.random()*7;
+    const cols=[0xc0392b,0xf1c40f,0x2980b9,0x27ae60];const col=cols[Math.floor(Math.random()*4)];
+    const bm=new THREE.MeshStandardMaterial({color:col,metalness:0.55,roughness:0.25});
+    const body=new THREE.Mesh(new THREE.BoxGeometry(2.4,CONFIG.trainHeight*0.85,len),bm);body.position.y=CONFIG.trainHeight*0.45;body.castShadow=true;g.add(body);
+    const roof=new THREE.Mesh(new THREE.BoxGeometry(2.5,0.1,len+0.15),new THREE.MeshStandardMaterial({color:0xccc,metalness:0.65}));roof.position.y=CONFIG.trainHeight;g.add(roof);
+    const wm=new THREE.MeshStandardMaterial({color:0x1a2535,metalness:0.8});
+    for(let i=0;i<Math.floor(len/2.2);i++){const z=-len/2+1.1+i*2.2;
+      const w=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.8,1.1),wm);w.position.set(-1.2,CONFIG.trainHeight*0.5,z);const w2=w.clone();w2.position.x=1.2;g.add(w,w2)}
+    let ms=0;if(type==='to')ms=-(CONFIG.baseSpeed+1.05);if(type==='with')ms=CONFIG.baseSpeed-0.14;
+    g.position.set((lane-1)*CONFIG.laneWidth,0,-85);g.userData={type:'train',len,ms,h:CONFIG.trainHeight};this.sc.add(g);this.e.trains.push(g);
+  }
+
+  makeBar(lane,high){
+    const g=new THREE.Group();
+    if(high){const b=new THREE.Mesh(new THREE.BoxGeometry(2,0.28,0.32),new THREE.MeshStandardMaterial({color:0xffaa00}));b.position.y=1.35;g.add(b);
+      const l=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,1.35),new THREE.MeshStandardMaterial({color:0x444}));l.position.set(-0.7,0.67,0);const l2=l.clone();l2.position.x=0.7;g.add(l,l2);g.userData={type:'high'}}
+    else{const b=new THREE.Mesh(new THREE.BoxGeometry(2,0.7,0.36),new THREE.MeshStandardMaterial({color:0xe67e22}));b.position.y=0.38;g.add(b);g.userData={type:'low'}}
+    g.position.set((lane-1)*CONFIG.laneWidth,0,-85);this.sc.add(g);this.e.bars.push(g);
+  }
+
+  makeCoin(x,y,z){const c=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.28,0.045,10),new THREE.MeshStandardMaterial({color:0xFFD700,metalness:0.9,roughness:0.15,emissive:0x442200,emissiveIntensity:0.1}));c.rotation.x=Math.PI/2;c.position.set(x,y,z);this.sc.add(c);this.e.coins.push(c)}
+  makePU(lane){const types=['magnet','shield','double','hover','jet'];const t=types[Math.floor(Math.random()*types.length)];
+    const cols={magnet:0xff2244,shield:0x00e5ff,double:0xf1c40f,hover:0x00ffcc,jet:0xff6600};
+    const g=new THREE.Group();const b=new THREE.Mesh(new THREE.SphereGeometry(0.32,9,7),new THREE.MeshStandardMaterial({color:cols[t],emissive:cols[t],emissiveIntensity:0.4}));g.add(b);
+    g.position.set((lane-1)*CONFIG.laneWidth,1.25,-85);g.userData={type:t};this.sc.add(g);this.e.pus.push(g)}
+
+  parts(pos,col,n=5){for(let i=0;i<n;i++){const p=new THREE.Mesh(new THREE.SphereGeometry(0.06+Math.random()*0.04,4,3),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.8}));
+    p.position.copy(pos);p.userData={v:new THREE.Vector3((Math.random()-0.5)*0.25,Math.random()*0.2,(Math.random()-0.5)*0.25),life:18+Math.random()*10};this.sc.add(p);this.e.parts.push(p)}}
+
+  spawn(){
+    if(Math.random()<0.022+this.s.speed*0.0028){
+      const lane=Math.floor(Math.random()*3);let ok=true;
+      for(const t of this.e.trains)if(Math.abs(t.position.x-(lane-1)*CONFIG.laneWidth)<0.2&&t.position.z>-100)ok=false;
+      for(const b of this.e.bars)if(Math.abs(b.position.x-(lane-1)*CONFIG.laneWidth)<0.2&&b.position.z>-100)ok=false;
+      if(!ok)return;
+      const r=Math.random();
+      if(r<0.32){const tp=['static','to','with'];this.makeTrain(lane,tp[Math.floor(Math.random()*3)]);if(Math.random()>0.4)for(let i=0;i<3;i++)this.makeCoin((lane-1)*CONFIG.laneWidth,CONFIG.trainHeight+0.38,-90-i*1.9)}
+      else if(r<0.48){this.makeBar(lane,true);for(let i=0;i<2;i++)this.makeCoin((lane-1)*CONFIG.laneWidth,0.8,-88-i*1.6)}
+      else if(r<0.62){this.makeBar(lane,false);for(let i=0;i<2;i++)this.makeCoin((lane-1)*CONFIG.laneWidth,1.6,-88-i*1.6)}
+      else if(r<0.8){this.makePU(lane)}
+      else{for(let i=0;i<4;i++)this.makeCoin((lane-1)*CONFIG.laneWidth,0.8,-85-i*1.6)}
+    }
+  }
+
+  update(){
+    if(this.s.crashCD>0)this.s.crashCD--;
+    this.s.hovering=this.s.pu.hover>0;this.s.jetting=this.s.pu.jet>0;
+    this.hb.visible=this.s.hovering;this.jp.visible=this.s.jetting;
+    if(this.s.jetting){this.pl.position.y=Math.max(this.pl.position.y,4);this.s.vy=0.01;this.s.jumping=false}
+    else if(this.s.hovering){this.pl.position.y=Math.max(this.pl.position.y,0.8);if(this.s.vy<0)this.s.vy*=0.5}
+
+    // تعقیب
+    if(this.s.chased){
+      this.s.chaseTimer--;
+      for(const en of this.e.enemies){
+        en.position.z-=en.userData.speed;
+        en.position.x+=(this.pl.position.x-en.position.x)*0.03;
+        // اگر خیلی نزدیک شد → مرگ
+        if(en.position.z<2 && Math.abs(en.position.x-this.pl.position.x)<1.2 && !this.s.pu.shield && !this.s.hovering && !this.s.jetting){
+          this.die();return;
+        }
+      }
+      if(this.s.chaseTimer<=0){
+        this.s.chased=false;
+        this.e.enemies.forEach(e=>this.sc.remove(e));this.e.enemies=[];
+        if(!this.s.ach.includes('escape')){this.s.ach.push('escape');this.s.coins+=50;localStorage.setItem('sp8_a',JSON.stringify(this.s.ach))}
+      }
+    }
+
+    const lp=this.s.jumping?0.1:0.15;
+    this.pl.position.x+=(this.s.tx-this.pl.position.x)*lp;
+    this.pl.rotation.z=(this.s.tx-this.pl.position.x)*-0.05;
+    if(!this.s.jetting){this.pl.position.y+=this.s.vy;this.s.vy-=CONFIG.gravity}
+
+    let onT=false,tH=0,hit=false;
+    if(!this.s.hovering&&!this.s.jetting){
+      for(const t of this.e.trains){
+        const dx=Math.abs(t.position.x-this.pl.position.x),dz=t.position.z-this.pl.position.z,hf=t.userData.len/2;
+        if(dx<1.2&&dz<hf&&dz>-hf){
+          if(this.pl.position.y>=t.userData.h-0.42){onT=true;tH=t.userData.h}
+          else if(dz>0&&dz<hf+0.65){
+            if(this.s.jumping&&this.pl.position.y>t.userData.h-1.25){this.pl.position.y=t.userData.h;this.s.vy=0;this.s.jumping=false;onT=true;tH=t.userData.h}
+            else if(this.s.crashCD<=0)hit=true}}}}
+    if(hit){this.die();return}
+    if(onT){if(this.pl.position.y<=tH){this.pl.position.y=tH;this.s.vy=0;this.s.jumping=false}}
+    else if(!this.s.hovering&&!this.s.jetting&&this.pl.position.y<=0){this.pl.position.y=0;this.s.vy=0;this.s.jumping=false}
+
+    if(this.s.rolling){this.pl.scale.y=0.45;this.s.rollT--;if(this.s.rollT<=0){this.s.rolling=false;this.pl.scale.y=1}}
+    if(!this.s.jumping&&!this.s.rolling&&!this.s.jetting){
+      const t=Date.now()*0.01*(this.s.speed/CONFIG.baseSpeed),sw=Math.sin(t)*0.45;
+      this.lm.lL.rotation.x=sw;this.lm.lR.rotation.x=-sw;this.lm.aL.rotation.x=-sw*0.7;this.lm.aR.rotation.x=sw*0.7;
+      if(!onT&&!this.s.hovering)this.pl.position.y=Math.abs(Math.sin(t*2))*0.03}
+    else if(this.s.jumping){this.lm.lL.rotation.x=-0.32;this.lm.lR.rotation.x=0.1;this.lm.aL.rotation.x=-1.6;this.lm.aR.rotation.x=-1.6}
+
+    let sp=this.s.speed;
+    for(let i=this.e.trains.length-1;i>=0;i--){const t=this.e.trains[i];t.position.z+=sp+t.userData.ms;if(t.position.z>15){this.sc.remove(t);this.e.trains.splice(i,1)}}
+    for(let i=this.e.bars.length-1;i>=0;i--){
+      const b=this.e.bars[i];b.position.z+=sp;
+      if(!this.s.hovering&&!this.s.jetting){const dz=Math.abs(b.position.z-this.pl.position.z),dx=Math.abs(b.position.x-this.pl.position.x);
+        if(dz<0.75&&dx<0.95&&this.s.crashCD<=0){if(b.userData.type==='high'&&!this.s.rolling)this.die();if(b.userData.type==='low'&&this.pl.position.y<0.75)this.die()}}
+      if(b.position.z>13){this.sc.remove(b);this.e.bars.splice(i,1)}}
+    for(let i=this.e.coins.length-1;i>=0;i--){
+      const c=this.e.coins[i];c.position.z+=sp;c.rotation.z+=0.1;
+      if(this.s.pu.magnet>0){const d=c.position.distanceTo(this.pl.position);if(d<10){const dir=new THREE.Vector3().subVectors(this.pl.position,c.position).normalize();c.position.add(dir.multiplyScalar(0.82))}}
+      const pp=new THREE.Vector3(this.pl.position.x,this.pl.position.y+0.8,this.pl.position.z);
+      if(c.position.distanceTo(pp)<1.25){const g=this.s.pu.double>0?2:1;this.s.coins+=g;this.s.runCoins+=g;this.s.score+=5*g;this.s.totalC+=g;this.parts(c.position.clone(),0xFFD700,3);this.chkMis();this.ui();this.sc.remove(c);this.e.coins.splice(i,1)}
+      else if(c.position.z>8){this.sc.remove(c);this.e.coins.splice(i,1)}}
+    for(let i=this.e.pus.length-1;i>=0;i--){
+      const p=this.e.pus[i];p.position.z+=sp;p.rotation.y+=0.05;
+      if(p.position.distanceTo(this.pl.position)<1.25){this.actPU(p.userData.type);this.s.runPU++;this.parts(p.position.clone(),0x00e5ff,5);this.chkMis();this.sc.remove(p);this.e.pus.splice(i,1)}
+      else if(p.position.z>8){this.sc.remove(p);this.e.pus.splice(i,1)}}
+    for(let i=this.e.parts.length-1;i>=0;i--){const p=this.e.parts[i];p.position.add(p.userData.v);p.userData.v.y-=0.01;p.userData.life--;p.material.opacity=Math.max(0,p.userData.life/22);if(p.userData.life<=0){this.sc.remove(p);this.e.parts.splice(i,1)}}
+
+    ['magnet','double','hover','jet'].forEach(k=>{if(this.s.pu[k]>0){this.s.pu[k]--;if(this.s.pu[k]<=0){const el=document.getElementById('pu-'+k);if(el)el.style.display='none'}}});
+    this.tracks.position.z+=sp;if(this.tracks.position.z>3.3)this.tracks.position.z=0;
+    for(const b of this.builds){b.position.z+=sp*0.07;if(b.position.z>22)b.position.z=-280}
+    this.s.speed=Math.min(CONFIG.maxSpeed,CONFIG.baseSpeed+this.s.score*0.00012);
+    this.s.score+=sp*0.1;this.chkMis();this.ui();
+
+    // شروع تعقیب بعد از مدتی
+    if(!this.s.chased && this.s.score>200 && Math.random()<0.0015)this.spawnEnemy();
+  }
+
+  chkMis(){
+    if(!this.s.mission)return;
+    const m=this.s.mission;
+    if(m.type==='coins')this.s.mProg=this.s.runCoins;
+    else if(m.type==='score'||m.type==='survive')this.s.mProg=Math.floor(this.s.score);
+    else if(m.type==='powerups')this.s.mProg=this.s.runPU;
+    document.getElementById('mission-text').textContent=`${m.text} (${Math.min(this.s.mProg,m.target)}/${m.target})`;
+  }
+
+  actPU(t){
+    if(t==='magnet'){this.s.pu.magnet=650;document.getElementById('pu-magnet').style.display='block'}
+    else if(t==='shield'){this.s.pu.shield=true;this.sh.visible=true;document.getElementById('pu-shield').style.display='block'}
+    else if(t==='double'){this.s.pu.double=800;document.getElementById('pu-double').style.display='block'}
+    else if(t==='hover'){this.s.pu.hover=420;document.getElementById('pu-hover').style.display='block'}
+    else if(t==='jet'){this.s.pu.jet=320;document.getElementById('pu-jet').style.display='block';if(!this.s.ach.includes('jet')){this.s.ach.push('jet');this.s.coins+=25;localStorage.setItem('sp8_a',JSON.stringify(this.s.ach))}}
+  }
+
+  die(){
+    if(this.s.pu.shield){this.s.pu.shield=false;this.sh.visible=false;document.getElementById('pu-shield').style.display='none';this.s.crashCD=28;this.parts(this.pl.position.clone(),0x00e5ff,8);
+      [...this.e.trains,...this.e.bars].forEach(o=>o.position.z+=6);return}
+    this.parts(this.pl.position.clone(),0xff3333,10);this.gameOver();
+  }
+
+  inputs(){
+    addEventListener('keydown',e=>{
+      if(e.key==='Escape'&&this.s.playing){this.togglePause();return}
+      if(!this.s.playing||this.s.paused)return;
+      if(e.key==='ArrowLeft')this.move(-1);if(e.key==='ArrowRight')this.move(1);if(e.key==='ArrowUp')this.jump();if(e.key==='ArrowDown')this.roll();
+    });
+    let tx=0,ty=0;
+    document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;ty=e.changedTouches[0].screenY},{passive:false});
+    document.addEventListener('touchend',e=>{
+      if(!this.s.playing||this.s.paused)return;
+      const dx=e.changedTouches[0].screenX-tx,dy=e.changedTouches[0].screenY-ty;
+      if(Math.abs(dx)>Math.abs(dy)){if(dx>22)this.move(1);else if(dx<-22)this.move(-1)}
+      else{if(dy<-22)this.jump();else if(dy>22)this.roll()}
+    },{passive:false});
+  }
+  move(d){const n=Math.max(0,Math.min(2,this.s.lane+d));if(n===this.s.lane)return;this.s.lane=n;this.s.tx=(this.s.lane-1)*CONFIG.laneWidth}
+  jump(){if(!this.s.jumping&&!this.s.jetting){this.s.vy=CONFIG.jumpForce*this.s.jumpBoost;this.s.jumping=true;this.s.rolling=false;this.pl.scale.y=1}}
+  roll(){if(!this.s.rolling&&!this.s.jetting){this.s.rolling=true;this.s.rollT=30;if(this.s.jumping)this.s.vy=-0.55}}
+
+  togglePause(){
+    if(!this.s.playing)return;
+    this.s.paused=!this.s.paused;
+    document.getElementById('pause-screen').classList.toggle('hidden',!this.s.paused);
+  }
+
+  start(){
+    ['start-screen','game-over-screen','pause-screen'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+    this.s.playing=true;this.s.paused=false;this.s.score=0;this.s.speed=CONFIG.baseSpeed;this.s.lane=1;this.s.tx=0;this.s.vy=0;
+    this.s.jumping=false;this.s.rolling=false;this.s.jumpBoost=1;this.s.crashCD=0;this.s.hovering=false;this.s.jetting=false;
+    this.s.runCoins=0;this.s.runPU=0;this.s.mProg=0;this.s.chased=false;this.s.chaseTimer=0;
+    this.pl.position.set(0,0,0);this.pl.scale.y=1;this.applyChar();
+    ['magnet','shield','double','hover','jet'].forEach(k=>{if(this.s.inv[k]>0){this.actPU(k);this.s.inv[k]--}});
+    localStorage.setItem('sp8_i',JSON.stringify(this.s.inv));
+    [...this.e.trains,...this.e.bars,...this.e.coins,...this.e.pus,...this.e.parts,...this.e.enemies].forEach(o=>this.sc.remove(o));
+    this.e={trains:[],bars:[],coins:[],pus:[],parts:[],enemies:[]};
+    if(!this.s.ach.includes('first')){this.s.ach.push('first');this.s.coins+=15;localStorage.setItem('sp8_a',JSON.stringify(this.s.ach))}
+    this.ui();
+  }
+
+  gameOver(){
+    this.s.playing=false;localStorage.setItem('sp8_c',this.s.coins);localStorage.setItem('sp8_tc',this.s.totalC);
+    document.getElementById('final-score').innerText=Math.floor(this.s.score);
+    let msg='';
+    if(this.s.mission&&this.s.mProg>=this.s.mission.target){this.s.coins+=this.s.mission.reward;msg=`✅ مأموریت +${this.s.mission.reward} سکه`;localStorage.setItem('sp8_c',this.s.coins);this.dailyMission()}
+    else if(this.s.mission)msg=`مأموریت نشد (${this.s.mProg}/${this.s.mission.target})`;
+    document.getElementById('mission-result').textContent=msg;
+    if(this.s.score>=1500&&!this.s.ach.includes('score15')){this.s.ach.push('score15');this.s.coins+=70;localStorage.setItem('sp8_a',JSON.stringify(this.s.ach))}
+    if(this.s.totalC>=80&&!this.s.ach.includes('coins80')){this.s.ach.push('coins80');this.s.coins+=40;localStorage.setItem('sp8_a',JSON.stringify(this.s.ach))}
+    document.getElementById('game-over-screen').classList.remove('hidden');
+  }
+
+  ui(){document.getElementById('score').innerText=Math.floor(this.s.score);document.getElementById('coins').innerText=this.s.coins}
+
+  openShop(){document.getElementById('start-screen').classList.add('hidden');document.getElementById('shop-modal').classList.remove('hidden');this.shopUI()}
+  closeShop(){document.getElementById('shop-modal').classList.add('hidden');document.getElementById('start-screen').classList.remove('hidden')}
+  openChar(){
+    document.getElementById('start-screen').classList.add('hidden');document.getElementById('char-modal').classList.remove('hidden');
+    const g=document.getElementById('char-grid');g.innerHTML='';
+    CHARS.forEach(c=>{const un=this.s.totalC>=c.unlock||c.unlock===0;
+      const card=document.createElement('div');card.className='char-card'+(this.s.eq.char===c.id?' selected':'');
+      card.innerHTML=`<div class="emoji">${c.emoji}</div><div class="cname">${c.name}</div><div style="font-size:10px;color:#888">${un?'باز':c.unlock+' سکه'}</div>`;
+      if(un)card.onclick=()=>{this.s.eq.char=c.id;localStorage.setItem('sp8_ch',c.id);this.applyChar();this.openChar()};
+      g.appendChild(card)});
+  }
+  closeChar(){document.getElementById('char-modal').classList.add('hidden');document.getElementById('start-screen').classList.remove('hidden')}
+  openAch(){
+    document.getElementById('start-screen').classList.add('hidden');document.getElementById('ach-modal').classList.remove('hidden');
+    const l=document.getElementById('ach-list');l.innerHTML='';
+    ACH.forEach(a=>{const d=this.s.ach.includes(a.id);
+      const el=document.createElement('div');el.style.cssText='display:flex;justify-content:space-between;padding:6px 8px;margin:3px 0;background:rgba(255,255,255,.04);border-radius:7px;font-size:12px;color:'+(d?'#2ecc71':'#aaa');
+      el.innerHTML=`<div><b>${a.name}</b><br><span style="font-size:10px">${a.desc}</span></div><div style="color:#f1c40f">${d?'✓':'+'+a.reward}</div>`;l.appendChild(el)});
+  }
+  closeAch(){document.getElementById('ach-modal').classList.add('hidden');document.getElementById('start-screen').classList.remove('hidden')}
+
+  buy(item,cost){
+    if(item.startsWith('skin_')){
+      if(this.s.owned.includes(item)){this.s.eq.skin=item;localStorage.setItem('sp8_sk',item);this.shopUI();return}
+      if(this.s.coins>=cost){this.s.coins-=cost;this.s.owned.push(item);this.s.eq.skin=item;localStorage.setItem('sp8_c',this.s.coins);localStorage.setItem('sp8_o',JSON.stringify(this.s.owned));localStorage.setItem('sp8_sk',item);this.shopUI();this.ui()}
+    }else{if(this.s.coins>=cost){this.s.coins-=cost;this.s.inv[item]=(this.s.inv[item]||0)+1;localStorage.setItem('sp8_c',this.s.coins);localStorage.setItem('sp8_i',JSON.stringify(this.s.inv));this.shopUI();this.ui()}}
+  }
+  shopUI(){
+    document.getElementById('shop-coins').innerText=this.s.coins;
+    document.querySelectorAll('.buy-btn[data-item]').forEach(btn=>{
+      const item=btn.dataset.item,cost=+btn.dataset.cost;
+      if(item.startsWith('skin_')){if(this.s.owned.includes(item)){btn.textContent=this.s.eq.skin===item?'پوشیده':'پوشیدن';btn.classList.toggle('equipped',this.s.eq.skin===item);btn.disabled=false}
+        else{btn.textContent=cost===0?'رایگان':cost;btn.disabled=this.s.coins<cost}}
+      else{const n=this.s.inv[item]||0;btn.textContent=n>0?`${cost}(${n})`:cost;btn.disabled=this.s.coins<cost}
+    });
+  }
+
+  loop(){
+    requestAnimationFrame(()=>this.loop());
+    if(this.s.playing&&!this.s.paused){this.update();this.spawn()}
+    const ty=this.s.jetting?7.8:6.3;
+    this.cam.position.y+=(ty-this.cam.position.y)*0.04;
+    this.cam.position.x+=(this.pl.position.x*0.18-this.cam.position.x)*0.05;
+    this.cam.lookAt(this.pl.position.x*0.12,1.9,this.pl.position.z-8.5);
+    this.ren.render(this.sc,this.cam);
+  }
+}
+
+const game=new Game();
+document.getElementById('start-btn').onclick=()=>game.start();
+document.getElementById('retry-btn').onclick=()=>game.start();
+document.getElementById('menu-btn').onclick=()=>{document.getElementById('game-over-screen').classList.add('hidden');document.getElementById('start-screen').classList.remove('hidden')};
+document.getElementById('resume-btn').onclick=()=>game.togglePause();
+document.getElementById('pause-menu-btn').onclick=()=>{game.s.playing=false;game.s.paused=false;document.getElementById('pause-screen').classList.add('hidden');document.getElementById('start-screen').classList.remove('hidden')};
+document.getElementById('shop-btn').onclick=()=>game.openShop();
+document.getElementById('close-shop').onclick=()=>game.closeShop();
+document.getElementById('char-btn').onclick=()=>game.openChar();
+document.getElementById('close-char').onclick=()=>game.closeChar();
+document.getElementById('ach-btn').onclick=()=>game.openAch();
+document.getElementById('close-ach').onclick=()=>game.closeAch();
+document.querySelectorAll('.buy-btn[data-item]').forEach(b=>b.onclick=()=>game.buy(b.dataset.item,+b.dataset.cost));
+</script>
+</body>
+</html>
