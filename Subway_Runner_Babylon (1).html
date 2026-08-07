@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Subway Runner V24 - Hardcore</title>
+    <title>Subway Runner V24 - Ultimate Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lalezar&display=swap');
 
@@ -16,6 +16,7 @@
         /* HUD */
         #hud { position: absolute; top: 10px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box; text-shadow: 2px 2px 0 #000; font-size: 22px; display: none; }
         .hud-box { background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; border: 2px solid #f1c40f; backdrop-filter: blur(4px); display: flex; align-items: center; gap: 5px; }
+        #mission-hud { position: absolute; top: 60px; right: 20px; background: rgba(0,0,0,0.7); padding: 8px 15px; border-radius: 10px; border-right: 4px solid #e67e22; font-size: 16px; display: none; animation: slideIn 0.3s; }
         
         /* Pause Button */
         #pause-btn { position: absolute; top: 10px; right: 20px; z-index: 25; background: rgba(0,0,0,0.5); border: 2px solid #fff; color: white; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; display: none; pointer-events: auto; }
@@ -37,6 +38,7 @@
         .btn-gray { background: linear-gradient(#7f8c8d, #636e72); box-shadow: 0 5px 0 #4b5456; width: 140px; font-size: 16px; }
         .btn-green { background: linear-gradient(#2ecc71, #27ae60); box-shadow: 0 5px 0 #1e8449; }
         .btn-red { background: linear-gradient(#e74c3c, #c0392b); box-shadow: 0 5px 0 #922b21; }
+        .btn-revive { background: linear-gradient(#9b59b6, #8e44ad); box-shadow: 0 5px 0 #6c3483; animation: pulse 1.5s infinite; }
 
         /* Shop & Grid */
         .grid-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 500px; margin-bottom: 20px; }
@@ -51,11 +53,12 @@
 
         /* Effects */
         #blur-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; backdrop-filter: blur(0px); pointer-events: none; transition: 0.2s; z-index: 5; }
-        #toast { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: #f1c40f; padding: 10px 25px; border-radius: 30px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 30; border: 2px solid #f1c40f; font-size: 18px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        #toast { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: #f1c40f; padding: 10px 25px; border-radius: 30px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 30; border: 2px solid #f1c40f; font-size: 18px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); white-space: nowrap;}
+        #new-record-banner { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%) scale(0); color: #f1c40f; font-size: 40px; text-shadow: 0 0 20px #e67e22; pointer-events: none; z-index: 15; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
         @keyframes slideIn { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
-
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
     </script>
@@ -64,19 +67,22 @@
 
     <div id="blur-overlay"></div>
     <div id="toast">پیام</div>
+    <div id="new-record-banner">🏆 رکورد جدید!</div>
     <button id="pause-btn" onclick="game.togglePause()">⏸️</button>
 
     <!-- HUD -->
     <div id="hud">
         <div class="hud-box">امتیاز: <span id="score">0</span></div>
         <div class="hud-box">🪙 <span id="coins">0</span></div>
+        <div class="hud-box" style="border-color:#aaa; font-size:16px;">رکورد: <span id="hud-high">0</span></div>
     </div>
+    <div id="mission-hud">🎯 مأموریت: <span id="mission-text">...</span> (<span id="mission-prog">0</span>)</div>
     <div id="active-powerups"></div>
 
     <!-- Main Menu -->
     <div id="main-menu" class="menu-screen interactive">
         <h1>SUBWAY V24</h1>
-        <p style="color:#aaa; margin-bottom:20px;">نسخه هاردکور - قطار متحرک</p>
+        <p style="color:#aaa; margin-bottom:20px;">نسخه نهایی - قطار متحرک + ساختمان</p>
         <div style="margin-bottom:15px; font-size:20px; color:#f1c40f;">سکه: <span id="menu-coins">0</span> | رکورد: <span id="menu-high">0</span></div>
         <button class="btn" onclick="game.start()">شروع دویدن 🏃‍♂️</button>
         <button class="btn btn-blue" onclick="ui.showShop()">فروشگاه 🛒</button>
@@ -88,7 +94,7 @@
     <!-- Pause Menu -->
     <div id="pause-menu" class="menu-screen interactive hidden">
         <h1 style="color:#fff">PAUSED</h1>
-        <button class="btn" onclick="game.resume()">ادame ▶️</button>
+        <button class="btn" onclick="game.resume()">ادامه ▶️</button>
         <button class="btn btn-red" onclick="game.quitToMenu()">خروج ❌</button>
     </div>
 
@@ -97,10 +103,10 @@
         <h2>فروشگاه</h2>
         <div style="color:#f1c40f; margin-bottom:10px; font-size:20px;">موجودی: <span id="shop-coins">0</span> 🪙</div>
         
-        <h3 style="width:100%; text-align:center; color:#aaa; font-size:16px; margin-top:10px;">👕 اسکین‌ها (گران‌تر)</h3>
+        <h3 style="width:100%; text-align:center; color:#aaa; font-size:16px; margin-top:10px;">👕 اسکین‌ها (۹ مدل)</h3>
         <div class="grid-container" id="skin-grid"></div>
         
-        <h3 style="width:100%; text-align:center; color:#aaa; font-size:16px;">⚡ پاور-آپ‌ها</h3>
+        <h3 style="width:100%; text-align:center; color:#aaa; font-size:16px;">⚡ ارتقاهای دائمی</h3>
         <div class="grid-container" id="upgrade-grid"></div>
 
         <button class="btn btn-gray" onclick="ui.showMain()">بازگشت</button>
@@ -141,6 +147,7 @@
         <div style="font-size:28px; margin:10px;">امتیاز: <span id="final-score">0</span></div>
         <div style="font-size:18px; color:#aaa;">رکورد: <span id="final-high">0</span></div>
         <div style="font-size:20px; color:#f1c40f; margin-bottom:20px;">سکه: +<span id="final-coins">0</span></div>
+        <button class="btn btn-revive" onclick="game.revive()">ادامه با ۱۰۰ سکه 💎</button>
         <button class="btn" onclick="game.restart()">دوباره 🔄</button>
         <button class="btn btn-gray" onclick="ui.showMain()">منو</button>
     </div>
@@ -168,6 +175,7 @@
             jump() { this.playTone(300, 'square', 0.2, 0.1); },
             crash() { this.playTone(100, 'sawtooth', 0.5, 0.2); },
             powerup() { this.playTone(600, 'triangle', 0.1, 0.1); setTimeout(()=>this.playTone(900, 'triangle', 0.2, 0.1), 100); },
+            revive() { this.playTone(400, 'sine', 0.3, 0.2); setTimeout(()=>this.playTone(800, 'sine', 0.4, 0.2), 200); },
             startMusic() {
                 if(this.musicInterval) clearInterval(this.musicInterval);
                 if(this.muted) return;
@@ -200,24 +208,27 @@
             { id: 'gold', name: 'طلایی', color: 0xf1c40f, price: 1500, icon: '👑' },
             { id: 'cyber', name: 'سایبر', color: 0x00ffff, price: 3000, icon: '🤖' },
             { id: 'zombie', name: 'زامبی', color: 0x27ae60, price: 5000, icon: '🧟' },
-            { id: 'king', name: 'پادشاه', color: 0x8e44ad, price: 10000, icon: '🦸' }
+            { id: 'king', name: 'پادشاه', color: 0x8e44ad, price: 10000, icon: '🦸' },
+            { id: 'ghost', name: 'روح', color: 0xffffff, price: 15000, icon: '👻' },
+            { id: 'fire', name: 'آتشین', color: 0xff4500, price: 20000, icon: '🔥' },
+            { id: 'neon', name: 'نئونی', color: 0x39ff14, price: 30000, icon: '💚' }
         ];
 
         const POWERUPS_SHOP = [
-            { id: 'magnet', name: 'آهنربا', icon: '🧲', price: 200 },
-            { id: 'jetpack', name: 'جت‌پک', icon: '🚀', price: 800 },
-            { id: 'shield', name: 'سپر', icon: '🛡️', price: 500 },
-            { id: 'multiplier', name: 'سکه x2', icon: '💰', price: 1000 },
-            { id: 'slowmo', name: 'آهسته', icon: '🐢', price: 400 },
+            { id: 'magnet', name: 'آهنربا قوی', icon: '🧲', price: 200 },
+            { id: 'shield', name: 'سپر اضافه', icon: '🛡️', price: 500 },
+            { id: 'multiplier', name: 'سکه x2 دائم', icon: '💰', price: 1000 },
+            { id: 'slowmo', name: 'زمان آهسته', icon: '🐢', price: 400 },
             { id: 'superjump', name: 'پرش قوی', icon: '⬆️', price: 600 },
             { id: 'hoverboard', name: 'هاوربرد', icon: '🛹', price: 1200 }
         ];
 
         const ACHIEVEMENTS = [
             { id: 'score_1000', name: 'دوننده تازه کار', desc: '۱۰۰۰ امتیاز', target: 1000, type: 'score' },
-            { id: 'coins_500', name: 'ثروتمند', desc: '۵۰ سکه', target: 500, type: 'coins' },
+            { id: 'coins_500', name: 'ثروتمند', desc: '۵۰۰ سکه', target: 500, type: 'coins' },
             { id: 'train_hopper', name: 'پارکور باز', desc: '۱۰ پرش روی قطار', target: 10, type: 'trains' },
-            { id: 'sky_high', name: 'پرنده', desc: 'استفاده از جت‌پک', target: 1, type: 'jetpack_used' }
+            { id: 'sky_high', name: 'پرنده', desc: 'استفاده از جت‌پک', target: 1, type: 'jetpack_used' },
+            { id: 'survivor', name: 'بازگشت از مرگ', desc: 'استفاده از Revive', target: 1, type: 'revive_used' }
         ];
 
         let state = {
@@ -227,8 +238,9 @@
             currentSkin: localStorage.getItem('v24_skin') || 'default',
             achievements: JSON.parse(localStorage.getItem('v24_ach')) || [],
             ownedPowerups: JSON.parse(localStorage.getItem('v24_pu')) || [],
-            stats: { trainsHopped: 0, jetpackUsed: 0 },
-            settings: { quality: 'med', shadows: true, shake: true }
+            stats: { trainsHopped: 0, jetpackUsed: 0, reviveUsed: 0 },
+            settings: { quality: 'med', shadows: true, shake: true },
+            mission: { type: 'coins', target: 50, current: 0, completed: false }
         };
 
         // --- GAME ENGINE ---
@@ -236,26 +248,34 @@
             constructor() {
                 this.scene = new THREE.Scene();
                 this.scene.background = new THREE.Color(0x87CEEB);
-                this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.015);
+                this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.012);
 
                 this.baseCamPos = new THREE.Vector3(0, 6, 10);
-                this.camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 200);
+                this.camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 300);
                 this.camera.position.copy(this.baseCamPos);
                 this.camera.lookAt(0, 1, -10);
 
                 this.renderer = new THREE.WebGLRenderer({ antialias: state.settings.quality !== 'low' });
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
+                // FIX #4: Pixel Ratio & Tone Mapping
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                this.renderer.toneMappingExposure = 1.2;
                 this.renderer.shadowMap.enabled = state.settings.shadows;
                 this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
                 document.body.appendChild(this.renderer.domElement);
 
-                this.sun = new THREE.DirectionalLight(0xffffff, 1.2);
-                this.sun.position.set(10, 30, 10);
+                // Lighting
+                this.sun = new THREE.DirectionalLight(0xffffff, 1.5);
+                this.sun.position.set(20, 40, 20);
                 this.sun.castShadow = true;
                 this.sun.shadow.mapSize.width = 2048; this.sun.shadow.mapSize.height = 2048;
+                this.sun.shadow.camera.near = 0.5; this.sun.shadow.camera.far = 100;
+                this.sun.shadow.camera.left = -30; this.sun.shadow.camera.right = 30;
+                this.sun.shadow.camera.top = 30; this.sun.shadow.camera.bottom = -30;
                 this.scene.add(this.sun);
-                this.scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-                this.scene.add(new THREE.HemisphereLight(0xffffbb, 0x080820, 0.5));
+                this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+                this.scene.add(new THREE.HemisphereLight(0xffffbb, 0x080820, 0.6));
 
                 this.createWorld();
                 this.player = this.createPlayerMesh(SKINS.find(s=>s.id===state.currentSkin).color);
@@ -264,6 +284,11 @@
                 this.objects = []; 
                 this.coins = [];
                 this.powerups = [];
+                this.environment = [];
+                
+                // FIX #2: Internal Timer System instead of setTimeout
+                this.timers = []; 
+                this.gameTime = 0;
                 
                 this.resetState();
                 this.setupInputs();
@@ -271,24 +296,73 @@
                 
                 window.addEventListener('resize', () => this.onResize());
                 ui.updateMenu();
+                ui.updateMission();
             }
 
             createWorld() {
-                const groundGeo = new THREE.PlaneGeometry(100, 600);
-                const groundMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
+                // Ground
+                const groundGeo = new THREE.PlaneGeometry(200, 800);
+                const groundMat = new THREE.MeshStandardMaterial({ color: 0x2c3e50, roughness: 0.9 });
                 const ground = new THREE.Mesh(groundGeo, groundMat);
-                ground.rotation.x = -Math.PI/2; ground.position.z = -250; ground.receiveShadow = true;
+                ground.rotation.x = -Math.PI/2; ground.position.z = -300; ground.receiveShadow = true;
                 this.scene.add(ground);
 
-                const railGeo = new THREE.BoxGeometry(0.15, 0.15, 600);
-                const railMat = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.8, roughness: 0.2 });
+                // Rails
+                const railGeo = new THREE.BoxGeometry(0.15, 0.15, 800);
+                const railMat = new THREE.MeshStandardMaterial({ color: 0x7f8c8d, metalness: 0.9, roughness: 0.1 });
                 [-2.5, 0, 2.5].forEach(x => {
                     [-0.8, 0.8].forEach(offset => {
                         const r = new THREE.Mesh(railGeo, railMat);
-                        r.position.set(x + offset, 0.08, -250);
+                        r.position.set(x + offset, 0.08, -300);
                         this.scene.add(r);
                     });
                 });
+
+                // Sun Mesh (Visual)
+                const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(5, 16, 16), new THREE.MeshBasicMaterial({color: 0xffdd00}));
+                sunMesh.position.set(50, 60, -200);
+                this.scene.add(sunMesh);
+            }
+
+            spawnEnvironment(zPos) {
+                // Buildings
+                if(Math.random() > 0.3) {
+                    const side = Math.random() > 0.5 ? 1 : -1;
+                    const h = 10 + Math.random() * 30;
+                    const w = 5 + Math.random() * 10;
+                    const d = 10 + Math.random() * 20;
+                    const geo = new THREE.BoxGeometry(w, h, d);
+                    const mat = new THREE.MeshStandardMaterial({ color: Math.random() * 0x555555 + 0x222222 });
+                    const b = new THREE.Mesh(geo, mat);
+                    b.position.set(side * (15 + Math.random() * 20), h/2, zPos);
+                    b.castShadow = true; b.receiveShadow = true;
+                    this.scene.add(b);
+                    this.environment.push(b);
+                }
+                // Clouds
+                if(Math.random() > 0.7) {
+                    const cGroup = new THREE.Group();
+                    for(let i=0; i<3; i++) {
+                        const s = 2 + Math.random() * 3;
+                        const c = new THREE.Mesh(new THREE.SphereGeometry(s, 8, 8), new THREE.MeshStandardMaterial({color: 0xffffff, transparent: true, opacity: 0.8}));
+                        c.position.set((Math.random()-0.5)*5, (Math.random()-0.5)*2, (Math.random()-0.5)*3);
+                        cGroup.add(c);
+                    }
+                    cGroup.position.set((Math.random()-0.5)*80, 20 + Math.random()*15, zPos);
+                    this.scene.add(cGroup);
+                    this.environment.push(cGroup);
+                }
+                // Lamp Posts
+                if(Math.random() > 0.8) {
+                    const side = Math.random() > 0.5 ? 1 : -1;
+                    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 6), new THREE.MeshStandardMaterial({color: 0x333}));
+                    pole.position.set(side * 6, 3, zPos);
+                    const light = new THREE.PointLight(0xffaa00, 1, 15);
+                    light.position.set(0, 3, 0);
+                    pole.add(light);
+                    this.scene.add(pole);
+                    this.environment.push(pole);
+                }
             }
 
             createPlayerMesh(color) {
@@ -313,33 +387,37 @@
                 const length = 30 + Math.random() * 40; 
                 const group = new THREE.Group();
                 
-                // Train Body
                 const bodyMat = new THREE.MeshStandardMaterial({ color: 0x2980b9, metalness: 0.6, roughness: 0.2 });
                 const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 3.5, length), bodyMat);
                 body.position.y = 1.75; body.castShadow = true; body.receiveShadow = true; group.add(body);
                 
-                // Roof
                 const roof = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.2, length-1), new THREE.MeshStandardMaterial({ color: 0xecf0f1 }));
                 roof.position.y = 3.6; group.add(roof);
 
-                // Stripe
                 const stripe = new THREE.Mesh(new THREE.BoxGeometry(2.25, 0.2, length), new THREE.MeshBasicMaterial({ color: 0xf1c40f }));
                 stripe.position.y = 2.5; group.add(stripe);
 
-                group.position.set([-2.5, 0, 2.5][laneIdx], 0, -160);
+                // Headlights
+                const hlGeo = new THREE.CircleGeometry(0.3, 16);
+                const hlMat = new THREE.MeshBasicMaterial({color: 0xffffaa});
+                const hl1 = new THREE.Mesh(hlGeo, hlMat); hl1.position.set(-0.6, 1.5, length/2 + 0.01); group.add(hl1);
+                const hl2 = new THREE.Mesh(hlGeo, hlMat); hl2.position.set(0.6, 1.5, length/2 + 0.01); group.add(hl2);
+                const spot = new THREE.SpotLight(0xffffaa, 2, 30, 0.5, 0.5, 1);
+                spot.position.set(0, 1.5, length/2); spot.target.position.set(0, 0, length/2 + 10);
+                group.add(spot); group.add(spot.target);
+
+                group.position.set([-2.5, 0, 2.5][laneIdx], 0, -200);
                 this.scene.add(group);
                 
-                // Moving Logic: 30% chance to move towards player (fast), 30% same direction (slow), 40% static
                 const rand = Math.random();
                 let moveSpeed = 0;
-                if(rand < 0.3) moveSpeed = 0.8; // Towards player (Danger!)
-                else if(rand < 0.6) moveSpeed = -0.2; // Same direction
+                if(rand < 0.3) moveSpeed = 0.8; 
+                else if(rand < 0.6) moveSpeed = -0.2; 
 
                 this.objects.push({ mesh: group, type: 'train', lane: laneIdx, length: length, height: 3.5, moveSpeed: moveSpeed });
 
-                // Coins on top (Precise placement)
                 for(let z = -length/2 + 5; z < length/2 - 5; z+=3) {
-                    this.spawnCoin([-2.5, 0, 2.5][laneIdx], 4.0, -160 + z);
+                    this.spawnCoin([-2.5, 0, 2.5][laneIdx], 4.0, -200 + z);
                 }
             }
 
@@ -358,7 +436,7 @@
                     const p1 = new THREE.Mesh(pGeo, pMat); p1.position.set(-0.9, 1, 0); group.add(p1);
                     const p2 = new THREE.Mesh(pGeo, pMat); p2.position.set(0.9, 1, 0); group.add(p2);
                 }
-                group.position.set([-2.5, 0, 2.5][laneIdx], 0, -160);
+                group.position.set([-2.5, 0, 2.5][laneIdx], 0, -200);
                 this.scene.add(group);
                 this.objects.push({ mesh: group, type: 'barrier', subType: type, lane: laneIdx });
             }
@@ -376,35 +454,63 @@
                 const type = types[Math.floor(Math.random() * types.length)];
                 const colors = { magnet: 0xe74c3c, shield: 0x3498db, jetpack: 0x9b59b6, multiplier: 0x2ecc71, slowmo: 0x00ffff, superjump: 0xff00ff, hoverboard: 0xffff00 };
                 const p = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshStandardMaterial({ color: colors[type], emissive: colors[type], emissiveIntensity: 0.5 }));
-                p.position.set([-2.5, 0, 2.5][laneIdx], 1.5, -160);
+                p.position.set([-2.5, 0, 2.5][laneIdx], 1.5, -200);
                 this.scene.add(p);
                 this.powerups.push({ mesh: p, type: type });
             }
 
-            resetState() {
-                this.isPlaying = false;
-                this.isPaused = false;
-                this.speed = 0.4;
-                this.score = 0;
-                this.runCoins = 0;
-                this.lane = 1;
-                this.vy = 0;
-                this.isJumping = false;
-                this.isOnTrain = false;
-                this.activeTrain = null;
-                this.stunned = false;
-                this.activePUs = {};
-                
-                this.objects.forEach(o => this.scene.remove(o.mesh));
-                this.coins.forEach(c => this.scene.remove(c));
-                this.powerups.forEach(p => this.scene.remove(p.mesh));
-                this.objects = []; this.coins = []; this.powerups = [];
-                
-                this.player.position.set(0, 0, 0);
-                this.player.scale.set(1,1,1);
-                this.player.rotation.set(0,0,0);
-                document.getElementById('active-powerups').innerHTML = '';
-                this.camera.position.copy(this.baseCamPos);
+            resetState(fullReset = true) {
+                if(fullReset) {
+                    this.isPlaying = false;
+                    this.isPaused = false;
+                    this.speed = 0.4;
+                    this.score = 0;
+                    this.runCoins = 0;
+                    this.lane = 1;
+                    this.vy = 0;
+                    this.isJumping = false;
+                    this.isOnTrain = false;
+                    this.activeTrain = null;
+                    this.stunned = false;
+                    this.activePUs = {};
+                    this.jetpackDescending = false;
+                    
+                    this.objects.forEach(o => this.scene.remove(o.mesh));
+                    this.coins.forEach(c => this.scene.remove(c));
+                    this.powerups.forEach(p => this.scene.remove(p.mesh));
+                    this.environment.forEach(e => this.scene.remove(e));
+                    this.objects = []; this.coins = []; this.powerups = []; this.environment = [];
+                    
+                    this.player.position.set(0, 0, 0);
+                    this.player.scale.set(1,1,1);
+                    this.player.rotation.set(0,0,0);
+                    document.getElementById('active-powerups').innerHTML = '';
+                    this.camera.position.copy(this.baseCamPos);
+                    
+                    // Reset Mission
+                    state.mission.current = 0;
+                    state.mission.completed = false;
+                    state.mission.target = 50 + Math.floor(Math.random() * 100);
+                    ui.updateMission();
+                }
+                this.timers = [];
+                this.gameTime = 0;
+            }
+
+            // FIX #2: Custom Timer System
+            addTimer(duration, callback) {
+                this.timers.push({ end: this.gameTime + duration, callback: callback });
+            }
+
+            updateTimers(delta) {
+                if(this.isPaused) return;
+                this.gameTime += delta;
+                for(let i = this.timers.length - 1; i >= 0; i--) {
+                    if(this.gameTime >= this.timers[i].end) {
+                        this.timers[i].callback();
+                        this.timers.splice(i, 1);
+                    }
+                }
             }
 
             setupInputs() {
@@ -436,7 +542,7 @@
             }
 
             jump() {
-                if(!this.isJumping && !this.activePUs.jetpack) {
+                if(!this.isJumping && !this.activePUs.jetpack && !this.jetpackDescending) {
                     let force = 0.6;
                     if(this.activePUs.superjump) force = 0.9;
                     this.vy = force;
@@ -448,13 +554,13 @@
             }
 
             roll() {
-                if(!this.isJumping && !this.isOnTrain) {
+                if(!this.isJumping && !this.isOnTrain && !this.activePUs.jetpack && !this.jetpackDescending) {
                     this.player.scale.y = 0.5;
                     this.player.position.y = 0;
-                    setTimeout(() => {
+                    this.addTimer(700, () => {
                         this.player.scale.y = 1;
                         if(!this.isOnTrain) this.player.position.y = 0;
-                    }, 700);
+                    });
                 }
             }
 
@@ -462,6 +568,11 @@
                 audio.powerup();
                 const container = document.getElementById('active-powerups');
                 const names = { magnet: '🧲 آهنربا', shield: '🛡️ سپر', jetpack: '🚀 جت‌پک', multiplier: '💰 سکه x2', slowmo: '🐢 آهسته', superjump: '⬆️ پرش قوی', hoverboard: '🛹 هاوربرد' };
+                
+                // Remove existing badge if any
+                const existing = document.getElementById(`pu-${type}`);
+                if(existing) existing.remove();
+
                 const div = document.createElement('div');
                 div.className = 'pu-badge';
                 div.id = `pu-${type}`;
@@ -475,14 +586,20 @@
                 if(type === 'jetpack') duration = 6000;
                 if(type === 'slowmo') duration = 5000;
                 
-                setTimeout(() => {
+                this.addTimer(duration, () => {
                     this.activePUs[type] = false;
                     const el = document.getElementById(`pu-${type}`);
                     if(el) el.remove();
-                }, duration);
+                    
+                    // FIX #3: Jetpack Soft Landing
+                    if(type === 'jetpack') {
+                        this.jetpackDescending = true;
+                        ui.toast("فرود نرم... 🪂");
+                    }
+                });
             }
 
-            stumble() {
+            stumble(fromSide = false) {
                 if(this.activePUs.shield || this.activePUs.hoverboard) {
                     if(this.activePUs.hoverboard) {
                         this.activePUs.hoverboard = false;
@@ -499,12 +616,21 @@
                 this.stunned = true;
                 this.speed *= 0.4; 
                 document.getElementById('blur-overlay').style.backdropFilter = 'blur(8px)';
-                ui.toast("سرگیجه! مراقب باش 😵");
-                setTimeout(() => {
+                
+                // FIX #1: Push back to previous lane if hit from side
+                if(fromSide) {
+                    if(this.lane < 2) this.lane++;
+                    else this.lane--;
+                    ui.toast("هل داده شدی! 😵");
+                } else {
+                    ui.toast("سرگیجه! مراقب باش 😵");
+                }
+
+                this.addTimer(1500, () => {
                     this.stunned = false;
                     this.speed = Math.max(this.speed * 2, 0.4); 
                     document.getElementById('blur-overlay').style.backdropFilter = 'blur(0px)';
-                }, 1500);
+                });
             }
 
             checkCollisions() {
@@ -519,6 +645,8 @@
                             if(Math.abs(this.player.position.x - obj.mesh.position.x) < 1.2) {
                                 const pBottom = this.player.position.y;
                                 const tTop = obj.height;
+                                
+                                // Landing on train
                                 if(this.vy <= 0 && pBottom >= tTop - 0.5 && pBottom <= tTop + 1.5) {
                                     this.isOnTrain = true;
                                     if(this.activeTrain !== obj) {
@@ -528,14 +656,23 @@
                                     this.player.position.y = tTop;
                                     this.vy = 0;
                                     this.isJumping = false;
-                                } else if (pBottom < tTop - 0.5) {
-                                    // Check if hitting FRONT (Game Over) or SIDE (Stumble)
-                                    // Front is roughly at obj.mesh.position.z - obj.length/2
-                                    const trainFront = obj.mesh.position.z - obj.length/2;
-                                    if(this.player.position.z > trainFront - 1 && this.player.position.z < trainFront + 1) {
-                                        this.gameOver(); // Frontal Crash
+                                    this.jetpackDescending = false; // Cancel descent if landed
+                                } 
+                                // FIX #1: Correct Front vs Side Collision
+                                else if (pBottom < tTop - 0.5) {
+                                    const trainFrontZ = obj.mesh.position.z + obj.length/2; // Front is +Z because trains move +Z relative to world or player moves -Z? 
+                                    // Actually in this engine, objects move +Z towards camera. So front is +Z edge.
+                                    // Player is at Z~0. Train comes from -Z.
+                                    // So front of train is obj.mesh.position.z + length/2.
+                                    
+                                    const distToFront = Math.abs(this.player.position.z - trainFrontZ);
+                                    
+                                    if(distToFront < 1.0) {
+                                        // Direct frontal crash
+                                        this.gameOver(); 
                                     } else {
-                                        this.stumble(); // Side rub
+                                        // Side rub / clipping
+                                        this.stumble(true); 
                                     }
                                 }
                             }
@@ -545,7 +682,7 @@
                             if(obj.subType === 'high' && this.player.scale.y < 1) continue; 
                             if(obj.subType === 'low' && this.player.position.y > 1) continue; 
                             if(!this.activePUs.shield && !this.activePUs.hoverboard) this.gameOver();
-                            else this.stumble();
+                            else this.stumble(false);
                         }
                     }
                 }
@@ -554,12 +691,20 @@
                     const c = this.coins[i];
                     if(this.activePUs.magnet) {
                         const d = this.player.position.distanceTo(c.position);
-                        if(d < 12) c.position.lerp(this.player.position, 0.2);
+                        if(d < 15) c.position.lerp(this.player.position, 0.2);
                     }
                     if(pBox.intersectsBox(new THREE.Box3().setFromObject(c))) {
                         this.scene.remove(c);
                         this.coins.splice(i, 1);
-                        this.runCoins += (this.activePUs.multiplier ? 2 : 1);
+                        const amount = (this.activePUs.multiplier || state.ownedPowerups.includes('multiplier')) ? 2 : 1;
+                        this.runCoins += amount;
+                        
+                        // Mission Progress
+                        if(!state.mission.completed && state.mission.type === 'coins') {
+                            state.mission.current += amount;
+                            ui.updateMission();
+                        }
+                        
                         audio.coin();
                     }
                 }
@@ -579,6 +724,7 @@
                 audio.crash();
                 document.getElementById('game-over').classList.remove('hidden');
                 document.getElementById('hud').style.display = 'none';
+                document.getElementById('mission-hud').style.display = 'none';
                 document.getElementById('pause-btn').style.display = 'none';
                 document.getElementById('active-powerups').innerHTML = '';
                 document.getElementById('final-score').innerText = Math.floor(this.score);
@@ -586,7 +732,13 @@
                 document.getElementById('final-coins').innerText = this.runCoins;
                 
                 state.coins += this.runCoins;
-                if(this.score > state.highScore) state.highScore = Math.floor(this.score);
+                if(this.score > state.highScore) {
+                    state.highScore = Math.floor(this.score);
+                    // New Record Banner
+                    const banner = document.getElementById('new-record-banner');
+                    banner.style.transform = "translate(-50%, -50%) scale(1)";
+                    setTimeout(() => banner.style.transform = "translate(-50%, -50%) scale(0)", 3000);
+                }
                 
                 localStorage.setItem('v24_coins', state.coins);
                 localStorage.setItem('v24_high', state.highScore);
@@ -596,12 +748,45 @@
                 ui.updateMenu();
             }
 
+            revive() {
+                if(state.coins >= 100) {
+                    state.coins -= 100;
+                    state.stats.reviveUsed++;
+                    localStorage.setItem('v24_coins', state.coins);
+                    localStorage.setItem('v24_stats', JSON.stringify(state.stats));
+                    
+                    audio.revive();
+                    document.getElementById('game-over').classList.add('hidden');
+                    document.getElementById('hud').style.display = 'flex';
+                    document.getElementById('mission-hud').style.display = 'block';
+                    document.getElementById('pause-btn').style.display = 'block';
+                    
+                    // Clear immediate danger
+                    this.objects.forEach(o => {
+                        if(o.mesh.position.z > -20 && o.mesh.position.z < 20) {
+                            o.mesh.position.z -= 30; // Push back
+                        }
+                    });
+                    
+                    this.player.position.y = 2;
+                    this.vy = 0;
+                    this.stunned = false;
+                    this.isPlaying = true;
+                    
+                    ui.updateMenu();
+                    ui.checkAchievements();
+                } else {
+                    ui.toast("سکه کافی نیست! 💸");
+                }
+            }
+
             start() {
                 audio.init();
                 document.getElementById('main-menu').classList.add('hidden');
                 document.getElementById('hud').style.display = 'flex';
+                document.getElementById('mission-hud').style.display = 'block';
                 document.getElementById('pause-btn').style.display = 'block';
-                this.resetState();
+                this.resetState(true);
                 this.isPlaying = true;
                 this.spawnTrain();
             }
@@ -639,45 +824,67 @@
 
             animate() {
                 requestAnimationFrame(() => this.animate());
+                
+                // Delta time calculation for smooth movement regardless of framerate
+                const now = performance.now();
+                const delta = Math.min((now - (this.lastTime || now)) / 1000, 0.1); // Cap at 100ms
+                this.lastTime = now;
+
+                // FIX #2: Update internal timers
+                this.updateTimers(delta * 1000);
 
                 if(this.isPlaying && !this.isPaused) {
                     let currentSpeed = this.speed;
                     if(this.activePUs.slowmo) currentSpeed *= 0.5;
                     
-                    // Difficulty Scaling: Speed increases with score
-                    if(!this.stunned) this.speed = Math.min(0.4 + (this.score * 0.0002), 1.8);
+                    // Progressive Difficulty
+                    const level = Math.floor(this.score / 1000);
+                    const baseSpeed = 0.4 + (level * 0.05);
+                    if(!this.stunned) this.speed = Math.min(baseSpeed + (this.score * 0.0001), 2.2);
                     
                     this.score += currentSpeed;
                     document.getElementById('score').innerText = Math.floor(this.score);
                     document.getElementById('coins').innerText = state.coins + this.runCoins;
+                    document.getElementById('hud-high').innerText = state.highScore;
 
                     const targetX = [-2.5, 0, 2.5][this.lane];
-                    this.player.position.x += (targetX - this.player.position.x) * 0.2;
+                    this.player.position.x += (targetX - this.player.position.x) * 10 * delta;
                     this.player.rotation.z = (this.player.position.x - targetX) * -0.1;
 
                     // --- CAMERA LOGIC ---
                     let targetCamY = this.baseCamPos.y;
                     let targetCamZ = this.baseCamPos.z;
 
+                    // FIX #3: Jetpack Logic + Soft Descent
                     if(this.activePUs.jetpack) {
-                        this.player.position.y += 0.15; 
-                        if(this.player.position.y > 10) this.player.position.y = 10;
+                        this.player.position.y += 8 * delta; 
+                        if(this.player.position.y > 12) this.player.position.y = 12;
                         this.player.rotation.x = -0.5;
                         this.vy = 0; 
                         this.isJumping = false;
+                        this.jetpackDescending = false;
                         
-                        targetCamY = 12; 
-                        targetCamZ = 14;
+                        targetCamY = 16; 
+                        targetCamZ = 18;
 
-                        // Spawn Sky Coins
                         if(Math.random() < 0.3) {
-                            this.spawnCoin([-2.5, 0, 2.5][Math.floor(Math.random()*3)], 8 + Math.random()*2, -100);
+                            this.spawnCoin([-2.5, 0, 2.5][Math.floor(Math.random()*3)], 10 + Math.random()*3, -150);
                         }
+                    } else if (this.jetpackDescending) {
+                        // Soft landing parachute physics
+                        this.player.position.y -= 3 * delta;
+                        this.player.rotation.x = -0.2;
+                        if(this.player.position.y <= 0) {
+                            this.player.position.y = 0;
+                            this.jetpackDescending = false;
+                            this.player.rotation.x = 0;
+                        }
+                        targetCamY = 8 + this.player.position.y;
                     } else {
                         this.player.rotation.x = 0;
                         if(!this.isOnTrain) {
                             this.player.position.y += this.vy;
-                            this.vy -= 0.025;
+                            this.vy -= 1.5 * delta; // Gravity scaled by delta
                             if(this.player.position.y < 0) {
                                 this.player.position.y = 0;
                                 this.vy = 0;
@@ -688,45 +895,52 @@
                         }
                     }
 
-                    this.camera.position.y += (targetCamY - this.camera.position.y) * 0.05;
-                    this.camera.position.z += (targetCamZ - this.camera.position.z) * 0.05;
-                    this.camera.lookAt(0, this.player.position.y, -10);
+                    this.camera.position.y += (targetCamY - this.camera.position.y) * 3 * delta;
+                    this.camera.position.z += (targetCamZ - this.camera.position.z) * 3 * delta;
+                    this.camera.lookAt(0, this.player.position.y + 2, -10);
 
-                    // Move World
+                    // Move World Objects (Scaled by delta * 60 to maintain original feel)
+                    const moveFactor = delta * 60;
+                    
                     this.objects.forEach(o => {
-                        // Train specific movement
                         let move = currentSpeed;
                         if(o.type === 'train') move += o.moveSpeed;
-                        
-                        o.mesh.position.z += move;
-                        if(o.mesh.position.z > 20) { o.dead = true; this.scene.remove(o.mesh); }
+                        o.mesh.position.z += move * moveFactor;
+                        if(o.mesh.position.z > 30) { o.dead = true; this.scene.remove(o.mesh); }
                     });
                     this.objects = this.objects.filter(o => !o.dead);
 
                     this.coins.forEach(c => {
-                        c.position.z += currentSpeed;
-                        c.rotation.z += 0.1;
+                        c.position.z += currentSpeed * moveFactor;
+                        c.rotation.z += 5 * delta;
                         if(c.position.z > 10) { c.dead = true; this.scene.remove(c); }
                     });
                     this.coins = this.coins.filter(c => !c.dead);
 
                     this.powerups.forEach(p => {
-                        p.mesh.position.z += currentSpeed;
-                        p.mesh.rotation.y += 0.05;
+                        p.mesh.position.z += currentSpeed * moveFactor;
+                        p.mesh.rotation.y += 3 * delta;
                         if(p.mesh.position.z > 10) { p.dead = true; this.scene.remove(p.mesh); }
                     });
                     this.powerups = this.powerups.filter(p => !p.dead);
+                    
+                    this.environment.forEach(e => {
+                        e.position.z += currentSpeed * moveFactor;
+                        if(e.position.z > 30) { e.dead = true; this.scene.remove(e); }
+                    });
+                    this.environment = this.environment.filter(e => !e.dead);
 
                     // Spawning Logic (Harder over time)
-                    const spawnRate = Math.max(0.01, 0.025 - (this.score * 0.000005));
-                    if(this.objects.length < 3 && Math.random() < spawnRate) {
+                    const spawnRate = Math.max(0.01, 0.025 - (level * 0.002));
+                    if(this.objects.length < 3 + level && Math.random() < spawnRate) {
                         if(Math.random() > 0.3) this.spawnTrain();
                         else this.spawnBarrier();
                     }
-                    if(Math.random() < 0.04) this.spawnCoin([-2.5, 0, 2.5][Math.floor(Math.random()*3)], 1, -160);
+                    if(Math.random() < 0.04) this.spawnCoin([-2.5, 0, 2.5][Math.floor(Math.random()*3)], 1, -200);
                     if(Math.random() < 0.003) this.spawnPowerup();
+                    if(Math.random() < 0.1) this.spawnEnvironment(-250);
 
-                    if(!this.isJumping && !this.activePUs.jetpack) {
+                    if(!this.isJumping && !this.activePUs.jetpack && !this.jetpackDescending) {
                         const t = Date.now() * 0.02 * (currentSpeed/0.4);
                         this.player.userData.parts.ll.rotation.x = Math.sin(t);
                         this.player.userData.parts.rl.rotation.x = Math.sin(t + Math.PI);
@@ -737,10 +951,27 @@
                     if(state.settings.shake && !this.stunned) {
                         this.camera.position.x = (Math.random() - 0.5) * 0.05;
                     } else {
-                        this.camera.position.x = 0;
+                        this.camera.position.x += (0 - this.camera.position.x) * 5 * delta;
                     }
 
                     this.checkCollisions();
+                    
+                    // Check Mission Completion
+                    if(!state.mission.completed && state.mission.current >= state.mission.target) {
+                        state.mission.completed = true;
+                        state.coins += 50; // Reward
+                        localStorage.setItem('v24_coins', state.coins);
+                        ui.toast("🎉 مأموریت انجام شد! +50 سکه");
+                        ui.updateMission();
+                        
+                        // Generate new mission immediately
+                        setTimeout(() => {
+                            state.mission.current = 0;
+                            state.mission.completed = false;
+                            state.mission.target = 50 + Math.floor(Math.random() * 100);
+                            ui.updateMission();
+                        }, 3000);
+                    }
                 }
 
                 this.renderer.render(this.scene, this.camera);
@@ -750,6 +981,7 @@
                 this.camera.aspect = window.innerWidth / window.innerHeight;
                 this.camera.updateProjectionMatrix();
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             }
         }
 
@@ -759,6 +991,7 @@
                 document.querySelectorAll('.menu-screen').forEach(el => el.classList.add('hidden'));
                 document.getElementById('main-menu').classList.remove('hidden');
                 document.getElementById('pause-btn').style.display = 'none';
+                document.getElementById('mission-hud').style.display = 'none';
                 ui.updateMenu();
             },
             showShop: () => {
@@ -782,11 +1015,25 @@
                 document.getElementById('menu-coins').innerText = state.coins;
                 document.getElementById('menu-high').innerText = state.highScore;
             },
+            updateMission: () => {
+                const el = document.getElementById('mission-hud');
+                if(state.mission.completed) {
+                    document.getElementById('mission-text').innerText = "✅ تکمیل شد!";
+                    document.getElementById('mission-prog').innerText = "";
+                    el.style.borderRightColor = "#2ecc71";
+                } else {
+                    document.getElementById('mission-text').innerText = `جمع‌آوری ${state.mission.target} سکه`;
+                    document.getElementById('mission-prog').innerText = `${state.mission.current}/${state.mission.target}`;
+                    el.style.borderRightColor = "#e67e22";
+                }
+            },
             toast: (msg) => {
                 const t = document.getElementById('toast');
                 t.innerText = msg;
                 t.style.opacity = 1;
-                setTimeout(() => t.style.opacity = 0, 2000);
+                // Use a simple timeout for toast since it's UI only and not game-critical
+                if(ui.toastTimer) clearTimeout(ui.toastTimer);
+                ui.toastTimer = setTimeout(() => t.style.opacity = 0, 2000);
             },
             renderShop: () => {
                 document.getElementById('shop-coins').innerText = state.coins;
@@ -819,6 +1066,9 @@
                             game.scene.add(game.player);
                             ui.renderShop();
                             ui.updateMenu();
+                            ui.toast(`${skin.name} خریداری شد!`);
+                        } else {
+                            ui.toast("سکه کافی نیست! 💸");
                         }
                     };
                     sGrid.appendChild(div);
@@ -830,7 +1080,7 @@
                     const isOwned = state.ownedPowerups.includes(pu.id);
                     const div = document.createElement('div');
                     div.className = `grid-item ${isOwned ? 'selected' : ''}`;
-                    div.innerHTML = `<div class="item-preview" style="background:#333;">${pu.icon}</div><div style="font-size:12px">${pu.name}</div><div style="color:#f1c40f; font-size:10px">${isOwned ? '✓ موجود' : pu.price}</div>`;
+                    div.innerHTML = `<div class="item-preview" style="background:#333;">${pu.icon}</div><div style="font-size:12px">${pu.name}</div><div style="color:#f1c40f; font-size:10px">${isOwned ? '✓ فعال' : pu.price}</div>`;
                     div.onclick = () => {
                         if(!isOwned && state.coins >= pu.price) {
                             state.coins -= pu.price;
@@ -839,7 +1089,9 @@
                             localStorage.setItem('v24_pu', JSON.stringify(state.ownedPowerups));
                             ui.renderShop();
                             ui.updateMenu();
-                            ui.toast(`${pu.name} خریداری شد!`);
+                            ui.toast(`${pu.name} ارتقا یافت!`);
+                        } else if (!isOwned) {
+                            ui.toast("سکه کافی نیست! 💸");
                         }
                     };
                     uGrid.appendChild(div);
@@ -865,6 +1117,7 @@
                         if(ach.type === 'coins') val = state.coins;
                         if(ach.type === 'trains') val = state.stats.trainsHopped || 0;
                         if(ach.type === 'jetpack_used') val = state.stats.jetpackUsed || 0;
+                        if(ach.type === 'revive_used') val = state.stats.reviveUsed || 0;
                         if(val >= ach.target) {
                             state.achievements.push(ach.id);
                             newUnlock = true;
@@ -873,7 +1126,7 @@
                 });
                 if(newUnlock) {
                     localStorage.setItem('v24_ach', JSON.stringify(state.achievements));
-                    ui.toast("دستاورد جدید باز شد! 🏆");
+                    ui.toast("🏆 دستاورد جدید باز شد!");
                 }
             }
         };
