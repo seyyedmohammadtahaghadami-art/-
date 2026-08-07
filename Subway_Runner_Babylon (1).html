@@ -3,39 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>Subway Runner Pro V16 - Ultimate Engine</title>
+    <title>Subway Runner Pro V16 - The Titan Architecture</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@400;700;900&display=swap');
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Vazirmatn', sans-serif; user-select: none; touch-action: none; }
+        
+        body { 
+            margin: 0; overflow: hidden; background: #000; 
+            font-family: 'Vazirmatn', sans-serif; user-select: none; touch-action: none; 
+        }
         canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
         
         /* UI System */
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; }
-        .hud-top { padding: 15px; display: flex; justify-content: space-between; align-items: flex-start; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); font-weight: 900; font-size: 1.2rem; pointer-events: auto; }
-        .stat-box { background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,0,0,0.3)); padding: 8px 15px; border-radius: 20px; margin-bottom: 8px; border: 2px solid rgba(255,255,255,0.2); display: inline-flex; align-items: center; gap: 8px; backdrop-filter: blur(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        #ui-layer { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            z-index: 10; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; 
+        }
+        
+        .hud-top { 
+            padding: 15px; display: flex; justify-content: space-between; align-items: flex-start; 
+            color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); font-weight: 900; font-size: 1.2rem; pointer-events: auto; 
+        }
+        
+        .stat-box { 
+            background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,0,0,0.3)); 
+            padding: 8px 15px; border-radius: 20px; margin-bottom: 8px; 
+            border: 2px solid rgba(255,255,255,0.2); display: inline-flex; align-items: center; gap: 8px;
+            backdrop-filter: blur(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        
         .powerup-list { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
-        .pu-badge { background: linear-gradient(135deg, #FFD700, #FFA000); color: #333; padding: 6px 12px; border-radius: 15px; font-size: 0.9rem; font-weight: bold; display: none; animation: pulse 1s infinite; box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5); }
+        .pu-badge { 
+            background: linear-gradient(135deg, #FFD700, #FFA000); color: #333; 
+            padding: 6px 12px; border-radius: 15px; font-size: 0.9rem; font-weight: bold;
+            display: none; animation: pulse 1s infinite; box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
+        }
+        
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
         /* Menus */
-        .menu-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, rgba(20,20,30,0.9), rgba(0,0,0,0.95)); backdrop-filter: blur(15px); display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; transition: opacity 0.4s ease; z-index: 20; overflow-y: auto; }
+        .menu-screen { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: radial-gradient(circle at center, rgba(20,20,30,0.9), rgba(0,0,0,0.95)); 
+            backdrop-filter: blur(15px); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            pointer-events: auto; transition: opacity 0.4s ease; z-index: 20; overflow-y: auto;
+        }
         .hidden { opacity: 0; pointer-events: none; visibility: hidden; }
-        h1 { font-family: 'Lalezar', cursive; color: #FFEB3B; font-size: 4rem; margin: 0 0 10px 0; text-shadow: 4px 4px 0 #D32F2F, 8px 8px 10px rgba(0,0,0,0.5); letter-spacing: 2px; text-align: center; }
+        
+        h1 { 
+            font-family: 'Lalezar', cursive; color: #FFEB3B; font-size: 4rem; margin: 0 0 10px 0; 
+            text-shadow: 4px 4px 0 #D32F2F, 8px 8px 10px rgba(0,0,0,0.5); letter-spacing: 2px; text-align: center; 
+        }
         h2 { color: white; margin-bottom: 20px; font-family: 'Lalezar', cursive; font-size: 2rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        button { background: linear-gradient(to bottom, #FF9800, #F57C00); border: none; padding: 15px 40px; color: white; font-family: 'Lalezar', cursive; font-size: 1.5rem; border-radius: 30px; cursor: pointer; box-shadow: 0 6px 0 #E65100, 0 10px 20px rgba(0,0,0,0.4); transition: all 0.1s; margin: 10px; min-width: 250px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        
+        button { 
+            background: linear-gradient(to bottom, #FF9800, #F57C00); 
+            border: none; padding: 15px 40px; color: white; 
+            font-family: 'Lalezar', cursive; font-size: 1.5rem; 
+            border-radius: 30px; cursor: pointer; box-shadow: 0 6px 0 #E65100, 0 10px 20px rgba(0,0,0,0.4); 
+            transition: all 0.1s; margin: 10px; min-width: 250px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
         button:active { transform: translateY(6px); box-shadow: 0 0 0 #E65100, 0 2px 5px rgba(0,0,0,0.4); }
         button.sec { background: linear-gradient(to bottom, #607D8B, #455A64); box-shadow: 0 6px 0 #263238, 0 10px 20px rgba(0,0,0,0.4); }
         button.sec:active { box-shadow: 0 0 0 #263238, 0 2px 5px rgba(0,0,0,0.4); }
         
         /* Grids */
         .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 600px; width: 90%; margin-bottom: 20px; }
-        .item-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; text-align: center; border: 2px solid rgba(255,255,255,0.1); cursor: pointer; color: white; transition: 0.2s; box-shadow: inset 0 0 20px rgba(0,0,0,0.2); }
+        .item-card { 
+            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; text-align: center; 
+            border: 2px solid rgba(255,255,255,0.1); cursor: pointer; color: white; transition: 0.2s;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+        }
         .item-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
         .item-card.selected { border-color: #FFEB3B; background: rgba(255, 235, 59, 0.15); box-shadow: 0 0 15px rgba(255,235,59,0.3); }
         .item-card.locked { opacity: 0.5; filter: grayscale(1); }
         
-        #stumble-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle, transparent 30%, rgba(255,0,0,0.7) 100%); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 5; mix-blend-mode: multiply; }
-        #pause-btn { pointer-events: auto; background: rgba(0,0,0,0.5); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.5rem; border: 2px solid rgba(255,255,255,0.3); backdrop-filter: blur(5px); }
+        #stumble-overlay { 
+            position: absolute; top:0; left:0; width:100%; height:100%; 
+            background: radial-gradient(circle, transparent 30%, rgba(255,0,0,0.7) 100%); 
+            opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 5; mix-blend-mode: multiply;
+        }
+        
+        #pause-btn { 
+            pointer-events: auto; background: rgba(0,0,0,0.5); width: 50px; height: 50px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; font-size: 1.5rem; border: 2px solid rgba(255,255,255,0.3); backdrop-filter: blur(5px);
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -57,6 +110,7 @@
                 <div class="pu-badge" id="pu-shield">🛡️ سپر</div>
                 <div class="pu-badge" id="pu-multi">💰 سکه×۲</div>
                 <div class="pu-badge" id="pu-slow">🐢 آهسته</div>
+                <div class="pu-badge" id="pu-jump">⬆️ پرش قوی</div>
                 <div class="pu-badge" id="pu-hover">🛹 هاوربرد</div>
                 <div class="pu-badge" id="pu-jetpack">🚀 جت‌پک</div>
             </div>
@@ -69,7 +123,7 @@
     <!-- Main Menu -->
     <div id="main-menu" class="menu-screen">
         <h1>SUBWAY PRO V16</h1>
-        <h2 style="font-size:1.2rem; color:#ccc; font-family:'Vazirmatn'">موتور نهایی - رفع تمام باگ‌ها</h2>
+        <h2 style="font-size:1.2rem; color:#ccc; font-family:'Vazirmatn'">ابر معماری - رفع تمام باگ‌ها</h2>
         <button onclick="Game.start()">شروع دویدن 🏃‍♂️</button>
         <button class="sec" onclick="UI.show('char-menu')">انتخاب شخصیت 👤</button>
         <button class="sec" onclick="UI.show('shop-menu')">فروشگاه 🛒</button>
@@ -88,7 +142,10 @@
     <div id="shop-menu" class="menu-screen hidden">
         <h2>فروشگاه</h2>
         <div style="color:#FFD700; margin-bottom:10px; font-size:1.5rem;">سکه‌ها: <span id="shop-coins">0</span></div>
-        <div class="grid-container" id="shop-grid"></div>
+        <h3 style="color:white; margin:10px 0;">⚡ پاورآپ‌ها</h3>
+        <div class="grid-container" id="shop-grid-pu"></div>
+        <h3 style="color:white; margin:10px 0;">👕 اسکین‌ها</h3>
+        <div class="grid-container" id="shop-grid-skin"></div>
         <button class="sec" onclick="UI.show('main-menu')">بستن</button>
     </div>
 
@@ -112,6 +169,10 @@
         <div style="display:flex; gap:10px; margin-bottom:20px;">
             <button class="sec" onclick="Settings.toggleShadow()" id="btn-shadow" style="min-width:100px; padding:10px;">روشن</button>
         </div>
+        <div style="color:white; margin:10px; font-size:1.2rem;">افکت ذرات</div>
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <button class="sec" onclick="Settings.toggleParticles()" id="btn-particles" style="min-width:100px; padding:10px;">روشن</button>
+        </div>
         <button class="sec" onclick="UI.show('main-menu')">بستن</button>
     </div>
 
@@ -125,8 +186,8 @@
 
 <script>
 /**
- * SUBWAY RUNNER PRO V16 - ULTIMATE ENGINE
- * Full Logic, Real Physics, Procedural Graphics, No Clipping
+ * SUBWAY RUNNER PRO V16 - THE TITAN ARCHITECTURE
+ * Full Logic from V7 + Physics Fix + Real Models + Particles
  */
 
 // --- CONFIG & STATE ---
@@ -135,6 +196,7 @@ const CONFIG = {
     baseSpeed: 20,
     gravity: -65,
     jumpForce: 24,
+    superJumpForce: 35, // For Super Jump Powerup
     colors: {
         skyTop: 0x4FC3F7, skyBot: 0xE1F5FE, ground: 0x5D4037, rail: 0x3E2723,
         building: [0xFFCDD2, 0xC8E6C9, 0xBBDEFB, 0xFFF9C4, 0xE1BEE7]
@@ -152,6 +214,7 @@ const CONFIG = {
         'shield': { price: 100, duration: 15, name: 'سپر', icon: '🛡️', desc: 'یک نجات' },
         'multi': { price: 120, duration: 15, name: 'سکه×۲', icon: '💰', desc: '۱۵ ثانیه' },
         'slow': { price: 90, duration: 10, name: 'آهسته', icon: '🐢', desc: '۱۰ ثانیه' },
+        'jump': { price: 80, count: 3, name: 'پرش قوی', icon: '⬆️', desc: '۳ پرش' },
         'hover': { price: 180, duration: 8, name: 'هاوربرد', icon: '🛹', desc: '۸ ثانیه' },
         'jetpack': { price: 220, duration: 6, name: 'جت‌پک', icon: '🚀', desc: '۶ ثانیه' }
     }
@@ -164,7 +227,8 @@ let state = {
     skin: localStorage.getItem('srp_skin_v16') || 'classic',
     ownedSkins: JSON.parse(localStorage.getItem('srp_owned_v16') || '["classic", "black"]'),
     activePowerups: {}, stumbleTimer: 0, missionTarget: 50, missionProgress: 0,
-    settings: JSON.parse(localStorage.getItem('srp_settings_v16') || '{"quality":"med","shadows":true}')
+    superJumpsLeft: 0,
+    settings: JSON.parse(localStorage.getItem('srp_settings_v16') || '{"quality":"med","shadows":true,"particles":true}')
 };
 
 // --- THREE.JS SETUP ---
@@ -196,7 +260,8 @@ sunLight.shadow.camera.top = 20; sunLight.shadow.camera.bottom = -20;
 scene.add(sunLight);
 
 // --- ASSETS & MODELS ---
-let player, ground, obstacles = [], coins = [], buildings = [], clock = new THREE.Clock();
+let player, ground, obstacles = [], coins = [], buildings = [], particles = [];
+let clock = new THREE.Clock();
 
 function createCapsule(radius, length, mat) {
     const group = new THREE.Group();
@@ -288,6 +353,21 @@ function createBuilding(zPos) {
     return mesh;
 }
 
+function initParticles() {
+    const geo = new THREE.BufferGeometry();
+    const count = 300;
+    const pos = new Float32Array(count * 3);
+    for(let i=0; i<count*3; i++) {
+        pos[i] = (Math.random() - 0.5) * 60;
+        if(i % 3 === 1) pos[i] = Math.random() * 20;
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const mat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.15, transparent: true, opacity: 0.4 });
+    const points = new THREE.Points(geo, mat);
+    scene.add(points);
+    return points;
+}
+
 // --- GAME LOGIC ---
 function initWorld() {
     if(player) scene.remove(player);
@@ -304,11 +384,13 @@ function initWorld() {
         ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
     }
 
+    if(particles.length === 0) particles.push(initParticles());
+
     player = createPlayer(); scene.add(player);
     for(let i=0; i<15; i++) { const b = createBuilding(-i * 20); scene.add(b); buildings.push(b); }
 
     state.lane = 0; state.score = 0; state.speed = CONFIG.baseSpeed; state.isJumping = false; state.yVel = 0;
-    state.stumbleTimer = 0; state.activePowerups = {}; state.missionProgress = 0;
+    state.stumbleTimer = 0; state.activePowerups = {}; state.missionProgress = 0; state.superJumpsLeft = 0;
     player.position.set(0, 0, 0); updateHUD();
 }
 
@@ -344,7 +426,7 @@ function update(delta) {
 
     const now = Date.now();
     Object.keys(state.activePowerups).forEach(key => {
-        if(now > state.activePowerups[key]) {
+        if(key !== 'jump' && now > state.activePowerups[key]) {
             delete state.activePowerups[key]; document.getElementById(`pu-${key}`).style.display = 'none';
             if(key === 'jetpack') state.yVel = -10;
         }
@@ -434,6 +516,12 @@ function update(delta) {
     });
 
     ground.position.z += moveDist; if(ground.position.z > 100) ground.position.z = -100;
+    
+    if(state.settings.particles && particles[0]) {
+        particles[0].position.z = player.position.z;
+        particles[0].rotation.y += delta * 0.05;
+    }
+
     camera.position.z = player.position.z + 10; camera.position.x += (player.position.x * 0.4 - camera.position.x) * 5 * delta;
 
     if(state.missionProgress >= state.missionTarget) {
@@ -451,7 +539,11 @@ window.addEventListener('keydown', e => {
     if(!state.isPlaying || state.isPaused) return;
     if(e.key === 'ArrowLeft' && state.lane > -1) state.lane--;
     if(e.key === 'ArrowRight' && state.lane < 1) state.lane++;
-    if((e.key === 'ArrowUp' || e.key === ' ') && !state.isJumping && !state.activePowerups.jetpack && !state.activePowerups.hover) { state.isJumping = true; state.yVel = CONFIG.jumpForce; }
+    if((e.key === 'ArrowUp' || e.key === ' ') && !state.isJumping && !state.activePowerups.jetpack && !state.activePowerups.hover) { 
+        state.isJumping = true; 
+        state.yVel = state.superJumpsLeft > 0 ? CONFIG.superJumpForce : CONFIG.jumpForce;
+        if(state.superJumpsLeft > 0) state.superJumpsLeft--;
+    }
 });
 
 let tx = 0, ty = 0;
@@ -462,8 +554,20 @@ window.addEventListener('touchend', e => {
     if(Math.abs(dx) > Math.abs(dy)) {
         if(Math.abs(dx) > 30) { if(dx > 0 && state.lane < 1) state.lane++; if(dx < 0 && state.lane > -1) state.lane--; }
     } else {
-        if(Math.abs(dy) > 30) { if(dy < 0 && !state.isJumping) { state.isJumping = true; state.yVel = CONFIG.jumpForce; } }
-        else if (Math.abs(dx) < 10 && Math.abs(dy) < 10) { if(!state.isJumping) { state.isJumping = true; state.yVel = CONFIG.jumpForce; } }
+        if(Math.abs(dy) > 30) { 
+            if(dy < 0 && !state.isJumping) { 
+                state.isJumping = true; 
+                state.yVel = state.superJumpsLeft > 0 ? CONFIG.superJumpForce : CONFIG.jumpForce;
+                if(state.superJumpsLeft > 0) state.superJumpsLeft--;
+            } 
+        }
+        else if (Math.abs(dx) < 10 && Math.abs(dy) < 10) { 
+            if(!state.isJumping) { 
+                state.isJumping = true; 
+                state.yVel = state.superJumpsLeft > 0 ? CONFIG.superJumpForce : CONFIG.jumpForce;
+                if(state.superJumpsLeft > 0) state.superJumpsLeft--;
+            } 
+        }
     }
 });
 
@@ -478,7 +582,14 @@ const UI = {
 };
 
 const Game = {
-    start: () => { initWorld(); state.isPlaying = true; state.isPaused = false; document.querySelectorAll('.menu-screen').forEach(el => el.classList.add('hidden')); clock.start(); },
+    start: () => { 
+        try {
+            initWorld(); 
+            state.isPlaying = true; state.isPaused = false; 
+            document.querySelectorAll('.menu-screen').forEach(el => el.classList.add('hidden')); 
+            clock.start(); 
+        } catch(e) { console.error(e); alert("خطا: " + e.message); }
+    },
     pause: () => { state.isPaused = !state.isPaused; }
 };
 
@@ -488,16 +599,37 @@ function updateHUD() { document.getElementById('score-display').innerText = stat
 const Settings = {
     setQuality: (level) => { state.settings.quality = level; const dpr = level === 'low' ? 0.7 : level === 'med' ? 1 : Math.min(window.devicePixelRatio, 2); renderer.setPixelRatio(dpr); saveSettings(); },
     toggleShadow: () => { state.settings.shadows = !state.settings.shadows; renderer.shadowMap.enabled = state.settings.shadows; scene.traverse(obj => { if(obj.material) obj.material.needsUpdate = true; }); Settings.updateUI(); saveSettings(); },
-    updateUI: () => { document.getElementById('btn-shadow').innerText = state.settings.shadows ? 'روشن' : 'خاموش'; }
+    toggleParticles: () => { state.settings.particles = !state.settings.particles; if(particles[0]) particles[0].visible = state.settings.particles; Settings.updateUI(); saveSettings(); },
+    updateUI: () => { 
+        document.getElementById('btn-shadow').innerText = state.settings.shadows ? 'روشن' : 'خاموش'; 
+        document.getElementById('btn-particles').innerText = state.settings.particles ? 'روشن' : 'خاموش';
+    }
 };
 function saveSettings() { localStorage.setItem('srp_settings_v16', JSON.stringify(state.settings)); }
 
 function renderShop() {
-    const grid = document.getElementById('shop-grid'); grid.innerHTML = ''; document.getElementById('shop-coins').innerText = state.coins;
+    const gridPU = document.getElementById('shop-grid-pu'); gridPU.innerHTML = '';
+    const gridSkin = document.getElementById('shop-grid-skin'); gridSkin.innerHTML = '';
+    document.getElementById('shop-coins').innerText = state.coins;
+    
     Object.entries(CONFIG.powerups).forEach(([key, data]) => {
         const div = document.createElement('div'); div.className = 'item-card';
         div.innerHTML = `<div style="font-size:2rem">${data.icon}</div><div style="font-weight:bold">${data.name}</div><div style="font-size:0.8rem; color:#aaa">${data.desc}</div><div style="color:#FFD700; margin-top:5px">${data.price} 🪙</div>`;
-        div.onclick = () => buyPowerup(key, data.price); grid.appendChild(div);
+        div.onclick = () => buyPowerup(key, data.price); gridPU.appendChild(div);
+    });
+
+    Object.entries(CONFIG.skins).forEach(([key, data]) => {
+        const owned = state.ownedSkins.includes(key); const selected = state.skin === key;
+        const div = document.createElement('div'); div.className = `item-card ${selected ? 'selected' : ''} ${!owned ? 'locked' : ''}`;
+        div.innerHTML = `<div style="width:40px;height:40px;background:#${data.color.toString(16)};border-radius:50%;margin:0 auto 10px; border:2px solid white"></div><div style="font-weight:bold">${data.name}</div><div style="font-size:0.8rem; color:#aaa">${owned ? (selected ? '✓ انتخاب شده' : 'انتخاب') : data.price + ' 🪙'}</div>`;
+        div.onclick = () => {
+            if(owned) { state.skin = key; localStorage.setItem('srp_skin_v16', key); renderShop(); }
+            else if(state.coins >= data.price) {
+                state.coins -= data.price; state.ownedSkins.push(key); state.skin = key;
+                localStorage.setItem('srp_coins_v16', state.coins); localStorage.setItem('srp_owned_v16', JSON.stringify(state.ownedSkins)); localStorage.setItem('srp_skin_v16', key); renderShop();
+            }
+        };
+        gridSkin.appendChild(div);
     });
 }
 
@@ -525,8 +657,15 @@ function renderAchievements() {
 
 function buyPowerup(key, price) {
     if(state.coins >= price) {
-        state.coins -= price; const duration = CONFIG.powerups[key].duration * 1000;
-        state.activePowerups[key] = Date.now() + duration; document.getElementById(`pu-${key}`).style.display = 'block';
+        state.coins -= price;
+        if(key === 'jump') {
+            state.superJumpsLeft += CONFIG.powerups[key].count;
+            document.getElementById('pu-jump').style.display = 'block';
+        } else {
+            const duration = CONFIG.powerups[key].duration * 1000;
+            state.activePowerups[key] = Date.now() + duration;
+            document.getElementById(`pu-${key}`).style.display = 'block';
+        }
         localStorage.setItem('srp_coins_v16', state.coins); renderShop();
     } else { alert("سکه کافی نیست!"); }
 }
