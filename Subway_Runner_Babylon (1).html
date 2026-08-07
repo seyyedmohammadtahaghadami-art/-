@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Subway Runner - Babylon.js</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Lalezar&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{margin:0;overflow:hidden;background:#0a0a12;font-family:'Lalezar',cursive;touch-action:none;user-select:none}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+#ui{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10}
+.hud{display:flex;justify-content:space-between;padding:12px 16px;font-size:22px;color:#fff;text-shadow:2px 2px 4px #000}
+.box{background:rgba(0,0,0,.55);padding:6px 14px;border-radius:18px;border:1.5px solid rgba(255,255,255,.15)}
+#mission{position:absolute;top:60px;left:12px;background:rgba(0,0,0,.5);padding:6px 12px;border-radius:10px;color:#ffe;font-size:13px;border:1px solid rgba(255,215,0,.3)}
+#pus{position:absolute;top:60px;right:12px;display:flex;flex-direction:column;gap:4px}
+.pu{background:rgba(0,200,255,.3);border:1.5px solid #0cf;padding:4px 10px;border-radius:8px;color:#fff;font-size:13px;display:none}
+.menu{position:absolute;inset:0;background:radial-gradient(circle,rgba(20,18,30,.95),rgba(0,0,0,.98));display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;pointer-events:auto;transition:opacity .3s}
+.hidden{opacity:0;pointer-events:none}
+h1{font-size:48px;color:#FFD700;text-shadow:0 0 25px #FFD700,3px 3px 0 #a32;margin-bottom:8px}
+p{color:#ccc;font-size:16px;margin-bottom:20px}
+button{background:linear-gradient(#ff9f43,#ee5253);border:3px solid #fff;color:#fff;font-family:'Lalezar';font-size:22px;padding:12px 40px;border-radius:40px;cursor:pointer;margin:6px;box-shadow:0 8px 20px rgba(0,0,0,.4)}
+button:active{transform:scale(.96)}
+.btn2{background:linear-gradient(#576574,#222f3e);font-size:16px;padding:9px 24px}
+#fps{position:absolute;bottom:8px;left:8px;color:#0f0;font-size:12px;opacity:.6}
+</style>
+<script src="https://cdn.babylonjs.com/babylon.js"></script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui">
+  <div class="hud">
+    <div class="box">امتیاز: <span id="score">0</span></div>
+    <div class="box">🪙 <span id="coins">0</span></div>
+  </div>
+  <div id="mission">مأموریت: <span id="mtext">-</span></div>
+  <div id="pus">
+    <div class="pu" id="pu-magnet">آهنربا</div>
+    <div class="pu" id="pu-shield">سپر</div>
+    <div class="pu" id="pu-double">×۲</div>
+    <div class="pu" id="pu-hover">هاور</div>
+    <div class="pu" id="pu-jet">جت</div>
+  </div>
+  <div id="fps"></div>
+</div>
+
+<div id="start" class="menu">
+  <h1>SUBWAY PRO</h1>
+  <p>نسخه Babylon.js</p>
+  <button id="btnStart">شروع دویدن</button>
+  <button id="btnShop" class="btn2">فروشگاه</button>
+</div>
+
+<div id="over" class="menu hidden">
+  <h1 style="color:#ff4757">GAME OVER</h1>
+  <p>امتیاز: <span id="fscore">0</span></p>
+  <button id="btnRetry">دوباره</button>
+  <button id="btnMenu" class="btn2">منو</button>
+</div>
+
+<div id="shop" class="menu hidden">
+  <h1 style="font-size:32px;color:#f1c40f">فروشگاه</h1>
+  <p>سکه: <span id="scoins">0</span></p>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:340px">
+    <button class="btn2" data-item="magnet" data-cost="50">آهنربا ۵۰</button>
+    <button class="btn2" data-item="shield" data-cost="100">سپر ۱۰۰</button>
+    <button class="btn2" data-item="double" data-cost="120">×۲ ۱۲۰</button>
+    <button class="btn2" data-item="hover" data-cost="180">هاور ۱۸۰</button>
+    <button class="btn2" data-item="jet" data-cost="220">جت ۲۲۰</button>
+  </div>
+  <button id="btnCloseShop" class="btn2" style="margin-top:20px">بستن</button>
+</div>
+
+<script>
+const canvas = document.getElementById("c");
+const engine = new BABYLON.Engine(canvas, true, {preserveDrawingBuffer:true, stencil:true});
+const scene = new BABYLON.Scene(engine);
+scene.clearColor = new BABYLON.Color4(0.4, 0.7, 0.9, 1);
+scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
+scene.fogDensity = 0.012;
+scene.fogColor = new BABYLON.Color3(0.4, 0.7, 0.9);
+
+// Light
+const hemi = new BABYLON.HemisphericLight("h", new BABYLON.Vector3(0,1,0), scene);
+hemi.intensity = 0.85;
+const sun = new BABYLON.DirectionalLight("s", new BABYLON.Vector3(-0.4,-1,-0.3), scene);
+sun.position = new BABYLON.Vector3(20,40,10);
+sun.intensity = 1.2;
+sun.shadowMinZ = 1;
+sun.shadowMaxZ = 80;
+
+const shadowGen = new BABYLON.ShadowGenerator(1024, sun);
+shadowGen.useBlurExponentialShadowMap = true;
+shadowGen.blurKernel = 16;
+
+// Camera
+const camera = new BABYLON.UniversalCamera("cam", new BABYLON.Vector3(0, 6.5, 12), scene);
+camera.setTarget(new BABYLON.Vector3(0, 1.5, -10));
+camera.fov = 0.9;
+
+// Materials
+const matGround = new BABYLON.StandardMaterial("mg", scene);
+matGround.diffuseColor = new BABYLON.Color3(0.18,0.18,0.18);
+matGround.specularColor = new BABYLON.Color3(0.1,0.1,0.1);
+
+const matRail = new BABYLON.StandardMaterial("mr", scene);
+matRail.diffuseColor = new BABYLON.Color3(0.4,0.4,0.4);
+matRail.specularColor = new BABYLON.Color3(0.6,0.6,0.6);
+matRail.specularPower = 32;
+
+const matSleeper = new BABYLON.StandardMaterial("ms", scene);
+matSleeper.diffuseColor = new BABYLON.Color3(0.3,0.2,0.15);
+
+const matSkin = new BABYLON.StandardMaterial("msk", scene);
+matSkin.diffuseColor = new BABYLON.Color3(0.95,0.78,0.65);
+
+const matHoodie = new BABYLON.StandardMaterial("mh", scene);
+matHoodie.diffuseColor = new BABYLON.Color3(0.1,0.1,0.1);
+
+const matPants = new BABYLON.StandardMaterial("mp", scene);
+matPants.diffuseColor = new BABYLON.Color3(0.08,0.08,0.08);
+
+const matShoe = new BABYLON.StandardMaterial("msh", scene);
+matShoe.diffuseColor = new BABYLON.Color3(0.95,0.95,0.95);
+
+const matGold = new BABYLON.StandardMaterial("mgold", scene);
+matGold.diffuseColor = new BABYLON.Color3(1,0.84,0);
+matGold.emissiveColor = new BABYLON.Color3(0.3,0.2,0);
+matGold.specularColor = new BABYLON.Color3(1,0.9,0.4);
+matGold.specularPower = 64;
+
+// Ground
+const ground = BABYLON.MeshBuilder.CreateGround("g", {width:50, height:400}, scene);
+ground.position.z = -80;
+ground.material = matGround;
+ground.receiveShadows = true;
+
+// Tracks
+const tracks = new BABYLON.TransformNode("tracks", scene);
+const laneW = 3.6;
+for(let i=-1;i<=1;i++){
+  const o = i * laneW;
+  const r1 = BABYLON.MeshBuilder.CreateBox("r", {width:0.12, height:0.06, depth:400}, scene);
+  r1.position.set(o-0.8, 0.03, -80); r1.material = matRail; r1.parent = tracks;
+  const r2 = BABYLON.MeshBuilder.CreateBox("r", {width:0.12, height:0.06, depth:400}, scene);
+  r2.position.set(o+0.8, 0.03, -80); r2.material = matRail; r2.parent = tracks;
+}
+for(let j=0;j<120;j++){
+  const s = BABYLON.MeshBuilder.CreateBox("sl", {width:10, height:0.1, depth:0.4}, scene);
+  s.position.set(0, 0.02, -j*3.3); s.material = matSleeper; s.parent = tracks;
+}
+
+// Buildings
+const buildings = [];
+for(let side=-1; side<=1; side+=2){
+  for(let i=0;i<12;i++){
+    const h = 8 + Math.random()*14;
+    const b = BABYLON.MeshBuilder.CreateBox("b", {width:5+Math.random()*3, height:h, depth:6+Math.random()*3}, scene);
+    b.position.set(side*(11+Math.random()*2), h/2, -i*26 - Math.random()*6);
+    const m = new BABYLON.StandardMaterial("bm"+i+side, scene);
+    m.diffuseColor = new BABYLON.Color3(0.25+Math.random()*0.15, 0.2+Math.random()*0.1, 0.18+Math.random()*0.08);
+    b.material = m;
+    b.receiveShadows = true;
+    shadowGen.addShadowCaster(b);
+    buildings.push(b);
+  }
+}
+
+// Player
+const player = new BABYLON.TransformNode("player", scene);
+const torso = BABYLON.MeshBuilder.CreateSphere("torso", {diameter:0.9, segments:16}, scene);
+torso.scaling = new BABYLON.Vector3(1.05, 1.4, 0.85);
+torso.position.y = 1.35;
+torso.material = matHoodie;
+torso.parent = player;
+shadowGen.addShadowCaster(torso);
+
+const head = BABYLON.MeshBuilder.CreateSphere("head", {diameter:0.6, segments:14}, scene);
+head.position.y = 2.1;
+head.material = matSkin;
+head.parent = player;
+
+const armL = new BABYLON.TransformNode("armL", scene);
+armL.position.set(-0.5, 1.65, 0);
+armL.parent = player;
+const armLM = BABYLON.MeshBuilder.CreateSphere("alm", {diameter:0.24, segments:10}, scene);
+armLM.scaling.y = 2.3;
+armLM.position.y = -0.28;
+armLM.material = matHoodie;
+armLM.parent = armL;
+
+const armR = new BABYLON.TransformNode("armR", scene);
+armR.position.set(0.5, 1.65, 0);
+armR.parent = player;
+const armRM = BABYLON.MeshBuilder.CreateSphere("arm", {diameter:0.24, segments:10}, scene);
+armRM.scaling.y = 2.3;
+armRM.position.y = -0.28;
+armRM.material = matHoodie;
+armRM.parent = armR;
+
+const legL = new BABYLON.TransformNode("legL", scene);
+legL.position.set(-0.18, 0.75, 0);
+legL.parent = player;
+const legLM = BABYLON.MeshBuilder.CreateSphere("llm", {diameter:0.26, segments:10}, scene);
+legLM.scaling.y = 2.4;
+legLM.position.y = -0.35;
+legLM.material = matPants;
+legLM.parent = legL;
+const shoeL = BABYLON.MeshBuilder.CreateSphere("sl", {diameter:0.3, segments:8}, scene);
+shoeL.scaling = new BABYLON.Vector3(1.1, 0.6, 1.4);
+shoeL.position.set(0, -0.8, 0.04);
+shoeL.material = matShoe;
+shoeL.parent = legL;
+
+const legR = new BABYLON.TransformNode("legR", scene);
+legR.position.set(0.18, 0.75, 0);
+legR.parent = player;
+const legRM = BABYLON.MeshBuilder.CreateSphere("lrm", {diameter:0.26, segments:10}, scene);
+legRM.scaling.y = 2.4;
+legRM.position.y = -0.35;
+legRM.material = matPants;
+legRM.parent = legR;
+const shoeR = BABYLON.MeshBuilder.CreateSphere("sr", {diameter:0.3, segments:8}, scene);
+shoeR.scaling = new BABYLON.Vector3(1.1, 0.6, 1.4);
+shoeR.position.set(0, -0.8, 0.04);
+shoeR.material = matShoe;
+shoeR.parent = legR;
+
+// Hover & Jet visuals
+const hoverBoard = BABYLON.MeshBuilder.CreateBox("hb", {width:0.9, height:0.08, depth:1.5}, scene);
+hoverBoard.position.y = 0.1;
+const matHover = new BABYLON.StandardMaterial("mhb", scene);
+matHover.diffuseColor = new BABYLON.Color3(0,0.9,1);
+matHover.emissiveColor = new BABYLON.Color3(0,0.3,0.4);
+hoverBoard.material = matHover;
+hoverBoard.parent = player;
+hoverBoard.setEnabled(false);
+
+const jetPack = BABYLON.MeshBuilder.CreateBox("jp", {width:0.45, height:0.65, depth:0.25}, scene);
+jetPack.position.set(0, 1.45, 0.4);
+const matJet = new BABYLON.StandardMaterial("mjp", scene);
+matJet.diffuseColor = new BABYLON.Color3(1,0.3,0);
+matJet.emissiveColor = new BABYLON.Color3(0.4,0.1,0);
+jetPack.material = matJet;
+jetPack.parent = player;
+jetPack.setEnabled(false);
+
+const shieldMesh = BABYLON.MeshBuilder.CreateSphere("shield", {diameter:2.6, segments:16}, scene);
+const matShield = new BABYLON.StandardMaterial("mshd", scene);
+matShield.diffuseColor = new BABYLON.Color3(0,0.9,1);
+matShield.alpha = 0.2;
+matShield.wireframe = true;
+shieldMesh.material = matShield;
+shieldMesh.parent = player;
+shieldMesh.setEnabled(false);
+
+// State
+const state = {
+  playing: false,
+  score: 0,
+  coins: parseInt(localStorage.getItem("bab_coins")) || 0,
+  speed: 0.48,
+  maxSpeed: 2.1,
+  lane: 1,
+  targetX: 0,
+  velY: 0,
+  jumping: false,
+  rolling: false,
+  rollTimer: 0,
+  inv: JSON.parse(localStorage.getItem("bab_inv") || '{"magnet":0,"shield":0,"double":0,"hover":0,"jet":0}'),
+  pu: {magnet:0, shield:false, double:0, hover:0, jet:0},
+  trainH: 3.15,
+  entities: {trains:[], bars:[], coins:[], pus:[]},
+  runCoins: 0
+};
+
+function makeTrain(lane) {
+  const len = 13 + Math.random() * 8;
+  const colors = [
+    new BABYLON.Color3(0.75,0.15,0.15),
+    new BABYLON.Color3(0.95,0.75,0.1),
+    new BABYLON.Color3(0.15,0.45,0.8),
+    new BABYLON.Color3(0.15,0.65,0.3)
+  ];
+  const col = colors[Math.floor(Math.random()*colors.length)];
+  const g = new BABYLON.TransformNode("train", scene);
+  const body = BABYLON.MeshBuilder.CreateBox("tb", {width:2.5, height:state.trainH*0.9, depth:len}, scene);
+  body.position.y = state.trainH * 0.48;
+  const mat = new BABYLON.StandardMaterial("tm"+Math.random(), scene);
+  mat.diffuseColor = col;
+  mat.specularColor = new BABYLON.Color3(0.5,0.5,0.5);
+  mat.specularPower = 32;
+  body.material = mat;
+  body.parent = g;
+  shadowGen.addShadowCaster(body);
+
+  const roof = BABYLON.MeshBuilder.CreateBox("tr", {width:2.6, height:0.14, depth:len+0.2}, scene);
+  roof.position.y = state.trainH + 0.02;
+  const matR = new BABYLON.StandardMaterial("trmat", scene);
+  matR.diffuseColor = new BABYLON.Color3(0.8,0.8,0.8);
+  matR.specularColor = new BABYLON.Color3(0.7,0.7,0.7);
+  roof.material = matR;
+  roof.parent = g;
+
+  g.position.set((lane-1)*laneW, 0, -90);
+  g.metadata = {len, type:"train"};
+  state.entities.trains.push(g);
+}
+
+function makeBar(lane, high) {
+  const g = new BABYLON.TransformNode("bar", scene);
+  if(high){
+    const bar = BABYLON.MeshBuilder.CreateBox("b", {width:2.1, height:0.3, depth:0.35}, scene);
+    bar.position.y = 1.4;
+    const m = new BABYLON.StandardMaterial("bm", scene);
+    m.diffuseColor = new BABYLON.Color3(1,0.7,0);
+    bar.material = m; bar.parent = g;
+    g.metadata = {type:"high"};
+  } else {
+    const bar = BABYLON.MeshBuilder.CreateBox("b", {width:2.1, height:0.75, depth:0.4}, scene);
+    bar.position.y = 0.4;
+    const m = new BABYLON.StandardMaterial("bm", scene);
+    m.diffuseColor = new BABYLON.Color3(0.9,0.45,0.1);
+    bar.material = m; bar.parent = g;
+    g.metadata = {type:"low"};
+  }
+  g.position.set((lane-1)*laneW, 0, -90);
+  state.entities.bars.push(g);
+}
+
+function makeCoin(x,y,z) {
+  const c = BABYLON.MeshBuilder.CreateCylinder("c", {height:0.06, diameter:0.55, tessellation:12}, scene);
+  c.rotation.x = Math.PI/2;
+  c.position.set(x,y,z);
+  c.material = matGold;
+  state.entities.coins.push(c);
+}
+
+function makePU(lane) {
+  const types = ["magnet","shield","double","hover","jet"];
+  const type = types[Math.floor(Math.random()*types.length)];
+  const cols = {magnet:[1,0.15,0.2], shield:[0,0.9,1], double:[1,0.85,0], hover:[0,1,0.8], jet:[1,0.4,0]};
+  const g = new BABYLON.TransformNode("pu", scene);
+  const s = BABYLON.MeshBuilder.CreateSphere("ps", {diameter:0.7, segments:10}, scene);
+  const m = new BABYLON.StandardMaterial("pm", scene);
+  m.diffuseColor = new BABYLON.Color3(...cols[type]);
+  m.emissiveColor = new BABYLON.Color3(...cols[type].map(v=>v*0.4));
+  s.material = m; s.parent = g;
+  g.position.set((lane-1)*laneW, 1.3, -90);
+  g.metadata = {type};
+  state.entities.pus.push(g);
+}
+
+function spawn() {
+  if(Math.random() < 0.025 + state.speed*0.003){
+    const lane = Math.floor(Math.random()*3);
+    const r = Math.random();
+    if(r < 0.35){
+      makeTrain(lane);
+      if(Math.random()>0.4) for(let i=0;i<4;i++) makeCoin((lane-1)*laneW, state.trainH+0.4, -95-i*2);
+    } else if(r < 0.52){
+      makeBar(lane, true);
+    } else if(r < 0.68){
+      makeBar(lane, false);
+    } else if(r < 0.85){
+      makePU(lane);
+    } else {
+      for(let i=0;i<5;i++) makeCoin((lane-1)*laneW, 0.9, -90-i*1.8);
+    }
+  }
+}
+
+function activate(type) {
+  if(type==="magnet"){ state.pu.magnet=700; document.getElementById("pu-magnet").style.display="block"; }
+  if(type==="shield"){ state.pu.shield=true; shieldMesh.setEnabled(true); document.getElementById("pu-shield").style.display="block"; }
+  if(type==="double"){ state.pu.double=850; document.getElementById("pu-double").style.display="block"; }
+  if(type==="hover"){ state.pu.hover=450; document.getElementById("pu-hover").style.display="block"; }
+  if(type==="jet"){ state.pu.jet=360; document.getElementById("pu-jet").style.display="block"; }
+}
+
+function crash() {
+  if(state.pu.shield){
+    state.pu.shield=false; shieldMesh.setEnabled(false);
+    document.getElementById("pu-shield").style.display="none";
+    state.entities.trains.forEach(t=>t.position.z+=8);
+    state.entities.bars.forEach(b=>b.position.z+=8);
+    return;
+  }
+  gameOver();
+}
+
+function gameOver() {
+  state.playing = false;
+  localStorage.setItem("bab_coins", state.coins);
+  document.getElementById("fscore").textContent = Math.floor(state.score);
+  document.getElementById("over").classList.remove("hidden");
+}
+
+function start() {
+  document.getElementById("start").classList.add("hidden");
+  document.getElementById("over").classList.add("hidden");
+  state.playing = true;
+  state.score = 0;
+  state.speed = 0.48;
+  state.lane = 1;
+  state.targetX = 0;
+  state.velY = 0;
+  state.jumping = false;
+  state.rolling = false;
+  state.runCoins = 0;
+  player.position.set(0,0,0);
+  player.scaling.y = 1;
+
+  // apply inventory
+  ["magnet","shield","double","hover","jet"].forEach(k=>{
+    if(state.inv[k]>0){ activate(k); state.inv[k]--; }
+  });
+  localStorage.setItem("bab_inv", JSON.stringify(state.inv));
+
+  // clear entities
+  [...state.entities.trains, ...state.entities.bars, ...state.entities.coins, ...state.entities.pus].forEach(m=>{
+    if(m.dispose) m.dispose();
+    else if(m.getChildren) m.getChildren().forEach(c=>c.dispose());
+  });
+  state.entities = {trains:[], bars:[], coins:[], pus:[]};
+  updateUI();
+}
+
+function updateUI() {
+  document.getElementById("score").textContent = Math.floor(state.score);
+  document.getElementById("coins").textContent = state.coins;
+  document.getElementById("scoins").textContent = state.coins;
+}
+
+// Input
+window.addEventListener("keydown", e=>{
+  if(!state.playing) return;
+  if(e.key==="ArrowLeft") move(-1);
+  if(e.key==="ArrowRight") move(1);
+  if(e.key==="ArrowUp") jump();
+  if(e.key==="ArrowDown") roll();
+});
+
+let tx=0, ty=0;
+canvas.addEventListener("touchstart", e=>{
+  tx = e.changedTouches[0].screenX;
+  ty = e.changedTouches[0].screenY;
+},{passive:false});
+canvas.addEventListener("touchend", e=>{
+  if(!state.playing) return;
+  const dx = e.changedTouches[0].screenX - tx;
+  const dy = e.changedTouches[0].screenY - ty;
+  if(Math.abs(dx) > Math.abs(dy)){
+    if(dx > 30) move(1); else if(dx < -30) move(-1);
+  } else {
+    if(dy < -30) jump(); else if(dy > 30) roll();
+  }
+},{passive:false});
+
+function move(dir){
+  const n = Math.max(0, Math.min(2, state.lane+dir));
+  if(n === state.lane) return;
+  state.lane = n;
+  state.targetX = (state.lane-1)*laneW;
+}
+function jump(){
+  if(!state.jumping && state.pu.jet<=0){
+    state.velY = 0.7;
+    state.jumping = true;
+    state.rolling = false;
+    player.scaling.y = 1;
+  }
+}
+function roll(){
+  if(!state.rolling && state.pu.jet<=0){
+    state.rolling = true;
+    state.rollTimer = 35;
+    if(state.jumping) state.velY = -0.6;
+  }
+}
+
+// Main loop
+scene.registerBeforeRender(()=>{
+  if(!state.playing) return;
+
+  // Hover / Jet
+  const hovering = state.pu.hover > 0;
+  const jetting = state.pu.jet > 0;
+  hoverBoard.setEnabled(hovering);
+  jetPack.setEnabled(jetting);
+
+  if(jetting){
+    player.position.y = Math.max(player.position.y, 4.2);
+    state.velY = 0.01;
+    state.jumping = false;
+  } else if(hovering){
+    player.position.y = Math.max(player.position.y, 0.85);
+    if(state.velY < 0) state.velY *= 0.5;
+  }
+
+  // Move player X
+  const lerp = state.jumping ? 0.12 : 0.18;
+  player.position.x += (state.targetX - player.position.x) * lerp;
+  player.rotation.z = (state.targetX - player.position.x) * -0.06;
+
+  // Gravity
+  if(!jetting){
+    player.position.y += state.velY;
+    state.velY -= 0.033;
+  }
+
+  // Train collision & climb
+  let onTrain = false, trainH = 0, hit = false;
+  if(!hovering && !jetting){
+    for(const t of state.entities.trains){
+      const dx = Math.abs(t.position.x - player.position.x);
+      const dz = t.position.z - player.position.z;
+      const half = t.metadata.len / 2;
+      if(dx < 1.3 && dz < half && dz > -half){
+        if(player.position.y >= state.trainH - 0.5){
+          onTrain = true; trainH = state.trainH;
+        } else if(dz > 0 && dz < half + 0.8){
+          if(state.jumping && player.position.y > state.trainH - 1.4){
+            player.position.y = state.trainH;
+            state.velY = 0;
+            state.jumping = false;
+            onTrain = true; trainH = state.trainH;
+          } else hit = true;
+        }
+      }
+    }
+  }
+  if(hit){ crash(); return; }
+
+  if(onTrain){
+    if(player.position.y <= trainH){
+      player.position.y = trainH;
+      state.velY = 0;
+      state.jumping = false;
+    }
+  } else if(!hovering && !jetting && player.position.y <= 0){
+    player.position.y = 0;
+    state.velY = 0;
+    state.jumping = false;
+  }
+
+  // Roll
+  if(state.rolling){
+    player.scaling.y = 0.48;
+    state.rollTimer--;
+    if(state.rollTimer <= 0){
+      state.rolling = false;
+      player.scaling.y = 1;
+    }
+  }
+
+  // Animation
+  if(!state.jumping && !state.rolling && !jetting){
+    const t = performance.now() * 0.01 * (state.speed/0.48);
+    const sw = Math.sin(t) * 0.5;
+    legL.rotation.x = sw;
+    legR.rotation.x = -sw;
+    armL.rotation.x = -sw * 0.8;
+    armR.rotation.x = sw * 0.8;
+    if(!onTrain && !hovering) player.position.y = Math.abs(Math.sin(t*2)) * 0.04;
+  } else if(state.jumping){
+    legL.rotation.x = -0.4;
+    legR.rotation.x = 0.15;
+    armL.rotation.x = -1.9;
+    armR.rotation.x = -1.9;
+  }
+
+  // Move world
+  const sp = state.speed;
+  for(let i=state.entities.trains.length-1;i>=0;i--){
+    const t = state.entities.trains[i];
+    t.position.z += sp;
+    if(t.position.z > 18){ t.dispose(); state.entities.trains.splice(i,1); }
+  }
+  for(let i=state.entities.bars.length-1;i>=0;i--){
+    const b = state.entities.bars[i];
+    b.position.z += sp;
+    if(!hovering && !jetting){
+      const dz = Math.abs(b.position.z - player.position.z);
+      const dx = Math.abs(b.position.x - player.position.x);
+      if(dz < 0.85 && dx < 1.05){
+        if(b.metadata.type==="high" && !state.rolling) crash();
+        if(b.metadata.type==="low" && player.position.y < 0.85) crash();
+      }
+    }
+    if(b.position.z > 15){ b.dispose(); state.entities.bars.splice(i,1); }
+  }
+  for(let i=state.entities.coins.length-1;i>=0;i--){
+    const c = state.entities.coins[i];
+    c.position.z += sp;
+    c.rotation.z += 0.12;
+    if(state.pu.magnet > 0){
+      const d = BABYLON.Vector3.Distance(c.position, player.position);
+      if(d < 11){
+        const dir = player.position.subtract(c.position).normalize();
+        c.position.addInPlace(dir.scale(0.85));
+      }
+    }
+    const pp = player.position.clone(); pp.y += 0.9;
+    if(BABYLON.Vector3.Distance(c.position, pp) < 1.35){
+      const gain = state.pu.double > 0 ? 2 : 1;
+      state.coins += gain;
+      state.runCoins += gain;
+      state.score += 5 * gain;
+      updateUI();
+      c.dispose();
+      state.entities.coins.splice(i,1);
+    } else if(c.position.z > 10){
+      c.dispose(); state.entities.coins.splice(i,1);
+    }
+  }
+  for(let i=state.entities.pus.length-1;i>=0;i--){
+    const p = state.entities.pus[i];
+    p.position.z += sp;
+    p.rotation.y += 0.06;
+    if(BABYLON.Vector3.Distance(p.position, player.position) < 1.35){
+      activate(p.metadata.type);
+      p.dispose();
+      state.entities.pus.splice(i,1);
+    } else if(p.position.z > 10){
+      p.dispose(); state.entities.pus.splice(i,1);
+    }
+  }
+
+  // Powerup timers
+  ["magnet","double","hover","jet"].forEach(k=>{
+    if(state.pu[k] > 0){
+      state.pu[k]--;
+      if(state.pu[k] <= 0){
+        const el = document.getElementById("pu-"+k);
+        if(el) el.style.display = "none";
+      }
+    }
+  });
+
+  // Tracks loop
+  tracks.position.z += sp;
+  if(tracks.position.z > 3.3) tracks.position.z = 0;
+
+  // Buildings parallax
+  for(const b of buildings){
+    b.position.z += sp * 0.08;
+    if(b.position.z > 25) b.position.z -= 320;
+  }
+
+  // Difficulty
+  state.speed = Math.min(state.maxSpeed, 0.48 + state.score * 0.00014);
+  state.score += sp * 0.1;
+  updateUI();
+
+  // Camera
+  const targetCamY = jetting ? 8 : 6.5;
+  camera.position.y += (targetCamY - camera.position.y) * 0.05;
+  camera.position.x += (player.position.x * 0.25 - camera.position.x) * 0.06;
+  camera.setTarget(new BABYLON.Vector3(player.position.x*0.2, 2, player.position.z - 10));
+
+  spawn();
+});
+
+// Buttons
+document.getElementById("btnStart").onclick = start;
+document.getElementById("btnRetry").onclick = start;
+document.getElementById("btnMenu").onclick = ()=>{
+  document.getElementById("over").classList.add("hidden");
+  document.getElementById("start").classList.remove("hidden");
+};
+document.getElementById("btnShop").onclick = ()=>{
+  document.getElementById("start").classList.add("hidden");
+  document.getElementById("shop").classList.remove("hidden");
+  updateUI();
+};
+document.getElementById("btnCloseShop").onclick = ()=>{
+  document.getElementById("shop").classList.add("hidden");
+  document.getElementById("start").classList.remove("hidden");
+};
+document.querySelectorAll("#shop button[data-item]").forEach(btn=>{
+  btn.onclick = ()=>{
+    const item = btn.dataset.item;
+    const cost = parseInt(btn.dataset.cost);
+    if(state.coins >= cost){
+      state.coins -= cost;
+      state.inv[item] = (state.inv[item]||0) + 1;
+      localStorage.setItem("bab_coins", state.coins);
+      localStorage.setItem("bab_inv", JSON.stringify(state.inv));
+      updateUI();
+    }
+  };
+});
+
+// Resize
+window.addEventListener("resize", ()=>engine.resize());
+
+// Render
+engine.runRenderLoop(()=>{
+  scene.render();
+  document.getElementById("fps").textContent = engine.getFps().toFixed(0) + " FPS";
+});
+</script>
+</body>
+</html>
