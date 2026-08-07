@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Subway Runner Pro V10.1 - Stable & Enhanced</title>
+    <title>Subway Runner Pro V10.2 - Ultimate Graphics</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap');
         body { margin: 0; overflow: hidden; background: #050510; font-family: 'Vazirmatn', sans-serif; user-select: none; touch-action: none; }
@@ -61,7 +61,7 @@
         
         #stumble-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle, transparent 40%, rgba(255,0,0,0.4) 100%); opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 5; mix-blend-mode: overlay; }
     </style>
-    <!-- Only Core Three.js - No External Post Processing to prevent button failure -->
+    <!-- Three.js r128 (Stable) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
@@ -127,8 +127,8 @@
 
 <script>
 /**
- * SUBWAY RUNNER PRO V10.1 - STABLE ENGINE
- * Fixed: Button functionality, Internal Shaders, Optimized PBR
+ * SUBWAY RUNNER PRO V10.2 - ULTIMATE FIX
+ * Fixed: CapsuleGeometry Error, Added EnvMap, Particles, Neon Lights
  */
 
 const CONFIG = {
@@ -183,6 +183,17 @@ renderer.toneMappingExposure = 1.2;
 renderer.outputEncoding = THREE.sRGBEncoding;
 document.getElementById('game-container').appendChild(renderer.domElement);
 
+// --- ENVIRONMENT MAP (For Realistic Reflections) ---
+const pmremGenerator = new THREE.PMREMGenerator(renderer);
+const envScene = new THREE.Scene();
+envScene.background = new THREE.Color(0x222233);
+// Add some lights to env scene for reflections
+const envLight = new THREE.PointLight(0xffffff, 1);
+envLight.position.set(10, 10, 10);
+envScene.add(envLight);
+const envTexture = pmremGenerator.fromScene(envScene).texture;
+scene.environment = envTexture;
+
 // Professional Three-Point Lighting
 const ambientLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
 scene.add(ambientLight);
@@ -202,7 +213,6 @@ mainLight.shadow.bias = -0.0001;
 mainLight.shadow.normalBias = 0.02;
 scene.add(mainLight);
 
-// Rim Light for cinematic separation
 const rimLight = new THREE.DirectionalLight(0x667eea, 0.8);
 rimLight.position.set(-10, 10, -20);
 scene.add(rimLight);
@@ -231,7 +241,7 @@ const matGround = new THREE.MeshStandardMaterial({
 });
 
 const matTrainBody = new THREE.MeshStandardMaterial({ 
-    color: 0xffffff, roughness: 0.2, metalness: 0.6
+    color: 0xffffff, roughness: 0.2, metalness: 0.6, envMapIntensity: 1.0
 });
 
 const matGlass = new THREE.MeshPhysicalMaterial({
@@ -241,7 +251,24 @@ const matGlass = new THREE.MeshPhysicalMaterial({
 // --- OBJECT FACTORIES ---
 let player, ground;
 let obstacles = [];
+let particles = [];
 let clock = new THREE.Clock();
+
+// Helper to create Capsule manually for r128 compatibility
+function createCapsule(radius, length, capSeg, radSeg) {
+    const group = new THREE.Group();
+    const cylGeo = new THREE.CylinderGeometry(radius, radius, length, radSeg);
+    const sphGeo = new THREE.SphereGeometry(radius, radSeg, capSeg);
+    
+    const cyl = new THREE.Mesh(cylGeo);
+    const top = new THREE.Mesh(sphGeo);
+    top.position.y = length / 2;
+    const bot = new THREE.Mesh(sphGeo);
+    bot.position.y = -length / 2;
+    
+    group.add(cyl, top, bot);
+    return group;
+}
 
 function createPlayerMesh(skinKey) {
     const group = new THREE.Group();
@@ -251,10 +278,11 @@ function createPlayerMesh(skinKey) {
     const matCloth = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8, roughnessMap: roughnessMap });
     const matShoe = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, metalness: 0.2 });
 
-    // Smooth Capsule Body
-    const torsoGeo = new THREE.CapsuleGeometry(0.38, 0.9, 8, 16);
-    const torso = new THREE.Mesh(torsoGeo, matSkin);
-    torso.position.y = 1.1; torso.castShadow = true; group.add(torso);
+    // Torso (Manual Capsule)
+    const torsoGroup = createCapsule(0.38, 0.9, 8, 16);
+    torsoGroup.children.forEach(c => { c.material = matSkin; c.castShadow = true; });
+    torsoGroup.position.y = 1.1;
+    group.add(torsoGroup);
 
     // Head
     const headGeo = new THREE.SphereGeometry(0.3, 32, 32);
@@ -271,10 +299,16 @@ function createPlayerMesh(skinKey) {
     const brim = new THREE.Mesh(brimGeo, capMat);
     brim.position.set(0, 2.05, 0.3); group.add(brim);
 
-    // Legs
-    const legGeo = new THREE.CapsuleGeometry(0.13, 0.7, 4, 8);
-    const ll = new THREE.Mesh(legGeo, matCloth); ll.position.set(-0.18, 0.45, 0); ll.castShadow=true; group.add(ll);
-    const rl = new THREE.Mesh(legGeo, matCloth); rl.position.set(0.18, 0.45, 0); rl.castShadow=true; group.add(rl);
+    // Legs (Manual Capsule)
+    const legGroupL = createCapsule(0.13, 0.7, 4, 8);
+    legGroupL.children.forEach(c => { c.material = matCloth; c.castShadow = true; });
+    legGroupL.position.set(-0.18, 0.45, 0);
+    group.add(legGroupL);
+
+    const legGroupR = createCapsule(0.13, 0.7, 4, 8);
+    legGroupR.children.forEach(c => { c.material = matCloth; c.castShadow = true; });
+    legGroupR.position.set(0.18, 0.45, 0);
+    group.add(legGroupR);
 
     // Shoes
     const shoeGeo = new THREE.BoxGeometry(0.2, 0.18, 0.35, 2, 2, 2);
@@ -336,6 +370,23 @@ function createBarrierMesh() {
     group.userData = { type: 'barrier', topY: 1.15, width: 2.8 };
     return group;
 }
+
+// --- PARTICLES SYSTEM (Dust/Atmosphere) ---
+function initParticles() {
+    const geo = new THREE.BufferGeometry();
+    const count = 500;
+    const pos = new Float32Array(count * 3);
+    for(let i=0; i<count*3; i++) {
+        pos[i] = (Math.random() - 0.5) * 40; // Spread X/Z
+        if(i % 3 === 1) pos[i] = Math.random() * 10; // Y height
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const mat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1, transparent: true, opacity: 0.3 });
+    const points = new THREE.Points(geo, mat);
+    scene.add(points);
+    return points;
+}
+let particleSystem = initParticles();
 
 // --- GAME LOGIC ---
 function initWorld() {
@@ -483,6 +534,12 @@ function update(delta) {
     ground.position.z += move;
     if(ground.position.z > 100) ground.position.z = -100;
 
+    // Animate Particles
+    if(state.settings.particles) {
+        particleSystem.position.z = player.position.z;
+        particleSystem.rotation.y += delta * 0.05;
+    }
+
     camera.position.z = player.position.z + 10;
     camera.position.x += (player.position.x * 0.4 - camera.position.x) * 4 * delta;
     
@@ -571,6 +628,7 @@ const Settings = {
     },
     toggleParticles: () => {
         state.settings.particles = !state.settings.particles;
+        particleSystem.visible = state.settings.particles;
         Settings.updateUI();
         saveSettings();
     },
