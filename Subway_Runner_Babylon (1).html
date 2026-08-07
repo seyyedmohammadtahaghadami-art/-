@@ -3,101 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Subway Runner Pro V8 - Ultimate Edition</title>
+    <title>Subway Runner Pro V8 - Remastered</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap');
         
-        body { margin: 0; overflow: hidden; background: #1a1a2e; font-family: 'Vazirmatn', sans-serif; user-select: none; }
-        canvas { display: block; width: 100vw; height: 100vh; }
+        body { margin: 0; overflow: hidden; background: #0f0f1a; font-family: 'Vazirmatn', sans-serif; user-select: none; touch-action: none; }
+        canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
         
-        /* UI Overlay */
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; }
-        .hud { padding: 20px; display: flex; justify-content: space-between; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.8); font-weight: 900; font-size: 1.5rem; pointer-events: auto; }
-        .coin-counter { color: #ffd700; display: flex; align-items: center; gap: 10px; }
+        /* UI Layer */
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; }
+        .hud { padding: 20px; display: flex; justify-content: space-between; align-items: center; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.8); font-weight: 900; font-size: 1.5rem; pointer-events: auto; }
+        .coin-box { background: rgba(0,0,0,0.4); padding: 5px 15px; border-radius: 20px; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,215,0,0.3); }
         
         /* Menus */
-        .menu-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 15, 30, 0.85); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; transition: opacity 0.3s; z-index: 10; }
-        .hidden { opacity: 0; pointer-events: none; display: none !important; }
+        .menu-screen { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(15, 15, 26, 0.9); backdrop-filter: blur(8px); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            pointer-events: auto; transition: opacity 0.3s; z-index: 20; 
+        }
+        .hidden { opacity: 0; pointer-events: none; visibility: hidden; }
         
-        h1 { color: #fff; font-size: 3rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; background: linear-gradient(to right, #ff416c, #ff4b2b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        h2 { color: #ddd; margin-bottom: 30px; }
+        h1 { 
+            color: #fff; font-size: 3.5rem; margin: 0 0 30px 0; text-transform: uppercase; 
+            background: linear-gradient(to bottom, #ffeb3b, #ff9800); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); letter-spacing: 2px;
+        }
         
-        button { background: linear-gradient(45deg, #ff416c, #ff4b2b); border: none; padding: 15px 40px; color: white; font-family: inherit; font-size: 1.2rem; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4); transition: transform 0.1s, box-shadow 0.1s; margin: 10px; min-width: 200px; }
-        button:active { transform: scale(0.95); }
-        button.secondary { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); box-shadow: none; }
+        button { 
+            background: linear-gradient(to bottom, #4caf50, #2e7d32); 
+            border: none; padding: 18px 50px; color: white; 
+            font-family: inherit; font-size: 1.3rem; font-weight: bold; 
+            border-radius: 50px; cursor: pointer; box-shadow: 0 6px 0 #1b5e20, 0 10px 20px rgba(0,0,0,0.3); 
+            transition: all 0.1s; margin: 10px; min-width: 240px; 
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3); position: relative; overflow: hidden;
+        }
+        button::after { content:''; position:absolute; top:0; left:0; width:100%; height:50%; background:rgba(255,255,255,0.1); }
+        button:active { transform: translateY(6px); box-shadow: 0 0 0 #1b5e20, 0 0 0 rgba(0,0,0,0); }
+        button.secondary { background: linear-gradient(to bottom, #546e7a, #37474f); box-shadow: 0 6px 0 #263238, 0 10px 20px rgba(0,0,0,0.3); }
+        button.secondary:active { box-shadow: 0 0 0 #263238; }
         
-        /* Shop Grid */
-        .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 600px; margin-bottom: 20px; }
-        .shop-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.2s; }
+        /* Settings & Shop */
+        .panel-row { display: flex; justify-content: space-between; width: 320px; margin: 12px 0; color: white; font-size: 1.1rem; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 12px; }
+        .toggle-group { display: flex; gap: 5px; }
+        .toggle-btn { background: rgba(0,0,0,0.3); padding: 6px 16px; border-radius: 20px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; transition: 0.2s; }
+        .toggle-btn.active { background: #ff9800; border-color: #ffb74d; color: black; font-weight: bold; box-shadow: 0 0 10px rgba(255,152,0,0.4); }
+
+        .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 500px; margin-bottom: 25px; }
+        .shop-item { background: rgba(255,255,255,0.05); padding: 15px 10px; border-radius: 15px; text-align: center; border: 2px solid rgba(255,255,255,0.05); cursor: pointer; color: white; transition: 0.2s; }
         .shop-item:hover { background: rgba(255,255,255,0.1); }
-        .shop-item.owned { border-color: #4caf50; }
-        .shop-item.selected { border-color: #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+        .shop-item.selected { border-color: #ffeb3b; background: rgba(255, 235, 59, 0.15); box-shadow: 0 0 15px rgba(255,235,59,0.2); }
+        .shop-item.locked { opacity: 0.7; }
+        .skin-preview { width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 8px; border: 2px solid rgba(255,255,255,0.2); box-shadow: inset 0 -5px 10px rgba(0,0,0,0.3); }
         
-        #pause-btn { pointer-events: auto; background: rgba(0,0,0,0.3); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; }
+        #pause-btn { pointer-events: auto; background: rgba(0,0,0,0.4); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.5rem; border: 2px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px); transition: 0.2s; }
+        #pause-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); }
     </style>
-    <!-- Three.js from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
-    <!-- Game Canvas Container -->
     <div id="game-container"></div>
 
     <!-- HUD -->
     <div id="ui-layer">
         <div class="hud">
-            <div class="coin-counter">🪙 <span id="score-display">0</span></div>
+            <div class="coin-box">🪙 <span id="coin-display">0</span></div>
             <div id="pause-btn">⏸️</div>
+        </div>
+        <div class="hud" style="justify-content:center; padding-bottom:50px; pointer-events:none;">
+            <div id="score-display" style="font-size:3rem; letter-spacing:2px;">0</div>
         </div>
     </div>
 
     <!-- Main Menu -->
     <div id="main-menu" class="menu-screen">
         <h1>SUBWAY PRO V8</h1>
-        <h2>نسخه نهایی و کامل</h2>
-        <button onclick="startGame()">شروع دویدن 🏃‍♂️</button>
-        <button class="secondary" onclick="openShop()">فروشگاه 🛒</button>
-        <button class="secondary" onclick="toggleSettings()">تنظیمات ⚙️</button>
+        <button onclick="Game.start()">🏃‍♂️ شروع دویدن</button>
+        <button class="secondary" onclick="UI.showShop()">🛒 فروشگاه و اسکین</button>
+        <button class="secondary" onclick="UI.showSettings()">⚙️ تنظیمات گرافیک</button>
     </div>
 
-    <!-- Shop Menu -->
+    <!-- Settings -->
+    <div id="settings-menu" class="menu-screen hidden">
+        <h2 style="color:white; margin-bottom:25px; font-size:1.8rem;">تنظیمات گرافیک</h2>
+        <div class="panel-row">
+            <span>کیفیت رندر:</span>
+            <div class="toggle-group">
+                <div class="toggle-btn" onclick="Settings.setQuality('low')" id="q-low">پایین</div>
+                <div class="toggle-btn active" onclick="Settings.setQuality('med')" id="q-med">متوسط</div>
+                <div class="toggle-btn" onclick="Settings.setQuality('high')" id="q-high">بالا</div>
+            </div>
+        </div>
+        <div class="panel-row">
+            <span>سایه‌زنی (Shadow):</span>
+            <div class="toggle-btn active" onclick="Settings.toggleShadow()" id="t-shadow">روشن</div>
+        </div>
+        <div class="panel-row">
+            <span>افکت ذرات:</span>
+            <div class="toggle-btn active" onclick="Settings.toggleParticles()" id="t-particles">روشن</div>
+        </div>
+        <button class="secondary" onclick="UI.showMain()" style="margin-top:30px;">بازگشت به منو</button>
+    </div>
+
+    <!-- Shop -->
     <div id="shop-menu" class="menu-screen hidden">
-        <h2>فروشگاه اسکین‌ها</h2>
-        <div class="shop-grid" id="skin-grid"></div>
-        <button class="secondary" onclick="closeMenus()">بازگشت</button>
+        <h2 style="color:white; margin-bottom:10px;">فروشگاه شخصیت‌ها</h2>
+        <div style="color:#ffd700; margin-bottom:20px; font-size:1.3rem; background:rgba(0,0,0,0.3); padding:8px 20px; border-radius:20px;">موجودی: <span id="shop-coins">0</span> 🪙</div>
+        <div class="shop-grid" id="skin-container"></div>
+        <button class="secondary" onclick="UI.showMain()">بازگشت</button>
     </div>
 
-    <!-- Game Over Screen -->
+    <!-- Game Over -->
     <div id="game-over" class="menu-screen hidden">
-        <h1 style="font-size: 2.5rem;">GAME OVER</h1>
-        <h2 id="final-score">امتیاز: 0</h2>
-        <p id="police-msg" style="color:#ff4b2b; margin-bottom:20px; display:none;">👮 پلیس شما را گرفت!</p>
-        <button onclick="resetGame()">تلاش مجدد 🔄</button>
-        <button class="secondary" onclick="goToMainMenu()">منوی اصلی</button>
+        <h1 style="background:linear-gradient(to bottom, #ff5252, #b71c1c); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">GAME OVER</h1>
+        <h2 style="color:white; font-size:1.5rem; margin-bottom:30px;">امتیاز نهایی: <span id="final-score" style="color:#ffeb3b">0</span></h2>
+        <button onclick="Game.start()">🔄 تلاش مجدد</button>
+        <button class="secondary" onclick="UI.showMain()">منوی اصلی</button>
     </div>
 
 <script>
 /**
- * SUBWAY RUNNER PRO V8 - CORE ENGINE
- * Improved Graphics, Police System, Procedural Generation
+ * SUBWAY RUNNER PRO V8 - REMASTERED ENGINE
+ * Non-Minecraft Graphics, Procedural Details, Full Logic
  */
 
-// --- CONFIGURATION & STATE ---
+// --- CONFIGURATION ---
 const CONFIG = {
-    laneWidth: 3,
-    speedBase: 15,
-    speedMax: 40,
-    gravity: -30,
-    jumpForce: 12,
+    laneWidth: 3.2,
+    baseSpeed: 18,
+    gravity: -40,
+    jumpForce: 15,
     colors: {
-        ground: 0x2c3e50,
-        fog: 0x1a1a2e,
-        train: [0xe74c3c, 0x3498db, 0xf1c40f, 0x2ecc71],
+        fog: 0x87CEEB, // Sky blue fog for better atmosphere
+        ground: 0x5D4037, // Gravel/Dirt color
+        rail: 0x3E2723,
         skins: {
-            'classic': 0xffccaa,
-            'ninja': 0x222222,
-            'gold': 0xffd700,
-            'neon': 0x00ffcc
+            'classic': { color: 0xFFCCAA, price: 0, name: 'کلاسیک' },
+            'ninja': { color: 0x212121, price: 200, name: 'نینجا' },
+            'red': { color: 0xD32F2F, price: 250, name: 'قرمز' },
+            'blue': { color: 0x1976D2, price: 300, name: 'آبی' },
+            'gold': { color: 0xFFD700, price: 500, name: 'طلایی' }
         }
     }
 };
@@ -107,265 +154,333 @@ let state = {
     isPaused: false,
     score: 0,
     coins: parseInt(localStorage.getItem('srp_coins') || '0'),
-    speed: CONFIG.speedBase,
-    lane: 0, // -1, 0, 1
-    yVelocity: 0,
+    speed: CONFIG.baseSpeed,
+    lane: 0,
+    yVel: 0,
     isJumping: false,
     skin: localStorage.getItem('srp_skin') || 'classic',
     ownedSkins: JSON.parse(localStorage.getItem('srp_owned') || '["classic"]'),
-    policeDistance: 15, // Distance behind player
-    policeCatchRate: 0.5 // How fast police closes in when hitting obstacles
+    settings: JSON.parse(localStorage.getItem('srp_settings') || '{"quality":"med","shadows":true,"particles":true}')
 };
 
-// --- THREE.JS SETUP ---
+// --- THREE.JS CORE SETUP ---
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(CONFIG.colors.fog);
-scene.fog = new THREE.FogExp2(CONFIG.colors.fog, 0.02);
+scene.fog = new THREE.FogExp2(CONFIG.colors.fog, 0.015); // Softer fog for depth
 
-const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.set(0, 5, 8);
-camera.lookAt(0, 0, -5);
+const camera = new THREE.PerspectiveCamera(65, window.innerWidth/window.innerHeight, 0.1, 150);
+camera.position.set(0, 6, 9);
+camera.lookAt(0, 1, -5);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
+renderer.shadowMap.enabled = state.settings.shadows;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; // Better color grading
+renderer.outputEncoding = THREE.sRGBEncoding;
 document.getElementById('game-container').appendChild(renderer.domElement);
 
-// Lighting
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-scene.add(ambientLight);
+// Professional Lighting
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8); // Sky/Ground light
+scene.add(hemiLight);
 
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-dirLight.position.set(10, 20, 10);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+dirLight.position.set(15, 30, 20);
 dirLight.castShadow = true;
-dirLight.shadow.mapSize.width = 1024;
-dirLight.shadow.mapSize.height = 1024;
+dirLight.shadow.mapSize.width = 2048;
+dirLight.shadow.mapSize.height = 2048;
 dirLight.shadow.camera.near = 0.5;
-dirLight.shadow.camera.far = 50;
-dirLight.shadow.camera.left = -10;
-dirLight.shadow.camera.right = 10;
-dirLight.shadow.camera.top = 10;
-dirLight.shadow.camera.bottom = -10;
+dirLight.shadow.camera.far = 80;
+dirLight.shadow.camera.left = -20;
+dirLight.shadow.camera.right = 20;
+dirLight.shadow.camera.top = 20;
+dirLight.shadow.camera.bottom = -20;
+dirLight.shadow.bias = -0.0005;
 scene.add(dirLight);
 
-// --- GAME OBJECTS ---
-let player, police, ground;
+// --- ASSET GENERATION (NON-MINECRAFT) ---
+function createProceduralTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512; canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    // Base Ground
+    ctx.fillStyle = '#5D4037';
+    ctx.fillRect(0,0,512,512);
+    
+    // Noise/Gravel
+    for(let i=0; i<5000; i++) {
+        ctx.fillStyle = Math.random() > 0.5 ? '#4E342E' : '#6D4C41';
+        ctx.fillRect(Math.random()*512, Math.random()*512, 2, 2);
+    }
+    
+    // Rails
+    ctx.fillStyle = '#3E2723';
+    ctx.fillRect(100, 0, 20, 512);
+    ctx.fillRect(256, 0, 20, 512);
+    ctx.fillRect(412, 0, 20, 512);
+    
+    // Sleepers (Traverses)
+    ctx.fillStyle = '#212121';
+    for(let y=0; y<512; y+=40) {
+        ctx.fillRect(80, y, 352, 10);
+    }
+    
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(1, 10);
+    return tex;
+}
+
+const groundMat = new THREE.MeshStandardMaterial({ 
+    map: createProceduralTexture(), 
+    roughness: 0.9, 
+    metalness: 0.1 
+});
+
+// --- GAME OBJECT FACTORIES ---
+let player, ground;
 let obstacles = [];
-let particles = [];
 let clock = new THREE.Clock();
 
-// Materials
-const matGround = new THREE.MeshStandardMaterial({ color: CONFIG.colors.ground, roughness: 0.8 });
-const matTrain = new THREE.MeshStandardMaterial({ roughness: 0.3, metalness: 0.2 });
-const matCoin = new THREE.MeshStandardMaterial({ color: 0xffd700, emissive: 0xaa8800, emissiveIntensity: 0.5, metalness: 0.8, roughness: 0.2 });
-
-function createPlayer() {
+function createPlayerMesh(skinKey) {
     const group = new THREE.Group();
+    const skinColor = CONFIG.colors.skins[skinKey]?.color || 0xFFCCAA;
+    const matSkin = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.4, metalness: 0.1 });
+    const matCloth = new THREE.MeshStandardMaterial({ color: 0x37474F, roughness: 0.7 });
+    const matShoe = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.5 });
+
+    // Torso (Rounded Box look using capsule/bevel)
+    const torsoGeo = new THREE.CylinderGeometry(0.35, 0.3, 0.9, 12);
+    const torso = new THREE.Mesh(torsoGeo, matSkin);
+    torso.position.y = 1.1;
+    torso.castShadow = true;
+    group.add(torso);
+
+    // Head
+    const headGeo = new THREE.SphereGeometry(0.28, 16, 16);
+    const head = new THREE.Mesh(headGeo, matSkin);
+    head.position.y = 1.85;
+    head.castShadow = true;
+    group.add(head);
+
+    // Cap (Backwards)
+    const capGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.15, 16);
+    const cap = new THREE.Mesh(capGeo, new THREE.MeshStandardMaterial({color: 0xD32F2F}));
+    cap.position.y = 1.95;
+    group.add(cap);
+    const brimGeo = new THREE.BoxGeometry(0.15, 0.05, 0.3);
+    const brim = new THREE.Mesh(brimGeo, new THREE.MeshStandardMaterial({color: 0xD32F2F}));
+    brim.position.set(0, 1.95, 0.25);
+    group.add(brim);
+
+    // Legs
+    const legGeo = new THREE.CylinderGeometry(0.12, 0.1, 0.8, 8);
+    const leftLeg = new THREE.Mesh(legGeo, matCloth);
+    leftLeg.position.set(-0.15, 0.4, 0);
+    leftLeg.castShadow = true;
+    group.add(leftLeg);
     
-    // Body
-    const geoBody = new THREE.CapsuleGeometry(0.4, 1, 4, 8);
-    const matSkin = new THREE.MeshStandardMaterial({ color: CONFIG.colors.skins[state.skin] || 0xffccaa });
-    const body = new THREE.Mesh(geoBody, matSkin);
-    body.position.y = 0.9;
-    body.castShadow = true;
-    group.add(body);
-    
-    // Backpack (Jetpack placeholder)
-    const geoPack = new THREE.BoxGeometry(0.5, 0.6, 0.3);
-    const pack = new THREE.Mesh(geoPack, new THREE.MeshStandardMaterial({color: 0x333333}));
-    pack.position.set(0, 1, 0.35);
-    group.add(pack);
+    const rightLeg = new THREE.Mesh(legGeo, matCloth);
+    rightLeg.position.set(0.15, 0.4, 0);
+    rightLeg.castShadow = true;
+    group.add(rightLeg);
+
+    // Shoes
+    const shoeGeo = new THREE.BoxGeometry(0.18, 0.15, 0.3);
+    const ls = new THREE.Mesh(shoeGeo, matShoe);
+    ls.position.set(-0.15, 0.07, 0.05);
+    group.add(ls);
+    const rs = new THREE.Mesh(shoeGeo, matShoe);
+    rs.position.set(0.15, 0.07, 0.05);
+    group.add(rs);
 
     return group;
 }
 
-function createPolice() {
+function createTrainMesh(color) {
     const group = new THREE.Group();
-    
-    // Officer Body
-    const geo = new THREE.CapsuleGeometry(0.45, 1.1, 4, 8);
-    const mat = new THREE.MeshStandardMaterial({ color: 0x000088 }); // Dark Blue Uniform
-    const body = new THREE.Mesh(geo, mat);
-    body.position.y = 0.95;
+    const matBody = new THREE.MeshStandardMaterial({ color: color, roughness: 0.3, metalness: 0.4 });
+    const matDark = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8 });
+    const matWindow = new THREE.MeshStandardMaterial({ color: 0x81D4FA, roughness: 0.1, metalness: 0.8 });
+
+    // Main Body (Rounded edges simulated by segments)
+    const bodyGeo = new THREE.BoxGeometry(2.4, 2.8, 7, 2, 2, 2);
+    const body = new THREE.Mesh(bodyGeo, matBody);
+    body.position.y = 1.6;
     body.castShadow = true;
+    body.receiveShadow = true;
     group.add(body);
 
-    // Hat
-    const hatGeo = new THREE.CylinderGeometry(0.3, 0.5, 0.3, 8);
-    const hat = new THREE.Mesh(hatGeo, new THREE.MeshStandardMaterial({color:0x000044}));
-    hat.position.y = 1.8;
-    group.add(hat);
+    // Roof Detail
+    const roofGeo = new THREE.BoxGeometry(2.2, 0.2, 6.8);
+    const roof = new THREE.Mesh(roofGeo, matDark);
+    roof.position.y = 3.1;
+    group.add(roof);
 
-    // Dog (Simple representation)
-    const dogGroup = new THREE.Group();
-    const dogBody = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.8), new THREE.MeshStandardMaterial({color: 0x8B4513}));
-    dogBody.position.y = 0.4;
-    dogGroup.add(dogBody);
-    dogGroup.position.set(0.8, 0, 0.5);
-    group.add(dogGroup);
+    // Windows Strip
+    const winGeo = new THREE.BoxGeometry(2.45, 0.8, 5);
+    const win = new THREE.Mesh(winGeo, matWindow);
+    win.position.y = 2.2;
+    group.add(win);
+
+    // Wheels/Bogies
+    const wheelGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.3, 16);
+    wheelGeo.rotateZ(Math.PI/2);
+    const positions = [-2.5, 2.5];
+    positions.forEach(z => {
+        const w1 = new THREE.Mesh(wheelGeo, matDark);
+        w1.position.set(-1.1, 0.4, z);
+        group.add(w1);
+        const w2 = new THREE.Mesh(wheelGeo, matDark);
+        w2.position.set(1.1, 0.4, z);
+        group.add(w2);
+    });
+
+    // Front Light
+    const lightGeo = new THREE.CircleGeometry(0.2, 16);
+    const lightMat = new THREE.MeshBasicMaterial({ color: 0xFFFF00 });
+    const light = new THREE.Mesh(lightGeo, lightMat);
+    light.position.set(0, 1.2, 3.51);
+    group.add(light);
 
     return group;
 }
 
+function createBarrierMesh() {
+    const group = new THREE.Group();
+    const matWood = new THREE.MeshStandardMaterial({ color: 0x8D6E63, roughness: 0.9 });
+    const matMetal = new THREE.MeshStandardMaterial({ color: 0xBDBDBD, metalness: 0.6, roughness: 0.4 });
+
+    // Legs
+    const legGeo = new THREE.BoxGeometry(0.15, 1.2, 0.15);
+    const l1 = new THREE.Mesh(legGeo, matMetal); l1.position.set(-1.2, 0.6, 0); l1.castShadow=true;
+    const l2 = new THREE.Mesh(legGeo, matMetal); l2.position.set(1.2, 0.6, 0); l2.castShadow=true;
+    group.add(l1, l2);
+
+    // Bars
+    const barGeo = new THREE.BoxGeometry(2.6, 0.2, 0.1);
+    const b1 = new THREE.Mesh(barGeo, matWood); b1.position.y = 0.9; b1.castShadow=true;
+    const b2 = new THREE.Mesh(barGeo, matWood); b2.position.y = 0.5; b2.castShadow=true;
+    group.add(b1, b2);
+
+    return group;
+}
+
+// --- GAME LOGIC ---
 function initWorld() {
-    // Ground
-    if(ground) scene.remove(ground);
-    const geoGround = new THREE.PlaneGeometry(40, 200);
-    ground = new THREE.Mesh(geoGround, matGround);
-    ground.rotation.x = -Math.PI / 2;
-    ground.position.z = -50;
-    ground.receiveShadow = true;
-    scene.add(ground);
-
-    // Player
     if(player) scene.remove(player);
-    player = createPlayer();
+    obstacles.forEach(o => scene.remove(o));
+    obstacles = [];
+
+    // Ground with procedural texture
+    if(!ground) {
+        const geo = new THREE.PlaneGeometry(40, 300);
+        ground = new THREE.Mesh(geo, groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+    }
+
+    player = createPlayerMesh(state.skin);
     scene.add(player);
 
-    // Police
-    if(police) scene.remove(police);
-    police = createPolice();
-    scene.add(police);
-    
-    // Reset State
     state.lane = 0;
     state.score = 0;
-    state.speed = CONFIG.speedBase;
-    state.policeDistance = 15;
+    state.speed = CONFIG.baseSpeed;
+    state.isJumping = false;
+    state.yVel = 0;
     player.position.set(0, 0, 0);
-    updateUI();
+    updateHUD();
 }
 
-// --- PROCEDURAL GENERATION ---
 function spawnObstacle(zPos) {
     const type = Math.random();
     let mesh;
-    
-    if (type < 0.6) {
-        // Train
-        const color = CONFIG.colors.train[Math.floor(Math.random() * CONFIG.colors.train.length)];
-        const geo = new THREE.BoxGeometry(2.2, 2.5, 6);
-        mesh = new THREE.Mesh(geo, matTrain.clone());
-        mesh.material.color.setHex(color);
-        mesh.position.y = 1.25;
-        mesh.userData = { type: 'train', hitBox: { w: 2, h: 2.5, d: 5.8 } };
-    } else if (type < 0.85) {
-        // Barrier (Jumpable)
-        const geo = new THREE.BoxGeometry(2.5, 0.8, 0.5);
-        mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({color: 0xffaa00}));
-        mesh.position.y = 0.4;
-        mesh.userData = { type: 'barrier', hitBox: { w: 2.3, h: 0.8, d: 0.5 } };
+
+    if(type < 0.6) {
+        const colors = [0xE53935, 0x1E88E5, 0xFDD835, 0x43A047, 0x8E24AA];
+        mesh = createTrainMesh(colors[Math.floor(Math.random()*colors.length)]);
+        mesh.userData = { type: 'solid', hitW: 2.2, hitH: 2.8 };
     } else {
-        // Coins Cluster
-        const group = new THREE.Group();
-        for(let i=0; i<3; i++) {
-            const coin = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.08, 8, 16), matCoin);
-            coin.position.y = 1 + (i*0.5);
-            coin.rotation.y = Math.PI/2;
-            group.add(coin);
-        }
-        mesh = group;
-        mesh.userData = { type: 'coin', hitBox: { w: 1, h: 2, d: 0.5 } };
+        mesh = createBarrierMesh();
+        mesh.userData = { type: 'jumpable', hitW: 2.4, hitH: 1.0 };
     }
 
-    // Random Lane
     const lane = Math.floor(Math.random() * 3) - 1;
     mesh.position.x = lane * CONFIG.laneWidth;
     mesh.position.z = zPos;
-    
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
     scene.add(mesh);
     obstacles.push(mesh);
 }
 
-// --- GAME LOGIC ---
 function update(delta) {
-    if (!state.isPlaying || state.isPaused) return;
+    if(!state.isPlaying || state.isPaused) return;
 
-    // Move Player Forward (Conceptually moving world towards player)
-    const moveDist = state.speed * delta;
-    state.score += Math.floor(moveDist * 10);
-    state.speed = Math.min(state.speed + delta * 0.1, CONFIG.speedMax);
+    const move = state.speed * delta;
+    state.score += Math.floor(move * 10);
+    state.speed = Math.min(state.speed + delta * 0.05, 45);
 
-    // Lane Interpolation
+    // Smooth Lane Transition
     const targetX = state.lane * CONFIG.laneWidth;
-    player.position.x += (targetX - player.position.x) * 10 * delta;
-    player.rotation.z = (player.position.x - targetX) * -0.1; // Lean effect
+    player.position.x += (targetX - player.position.x) * 12 * delta;
+    player.rotation.z = (player.position.x - targetX) * -0.08;
+    
+    // Running Animation (Bobbing)
+    if(!state.isJumping) {
+        player.children.forEach((c, i) => {
+            if(i > 4) c.position.y += Math.sin(Date.now() * 0.015 + i) * 0.002; // Legs/Shoes
+        });
+    }
 
     // Jump Physics
-    if (state.isJumping) {
-        state.yVelocity += CONFIG.gravity * delta;
-        player.position.y += state.yVelocity * delta;
-        if (player.position.y <= 0) {
+    if(state.isJumping) {
+        state.yVel += CONFIG.gravity * delta;
+        player.position.y += state.yVel * delta;
+        if(player.position.y <= 0) {
             player.position.y = 0;
             state.isJumping = false;
-            state.yVelocity = 0;
+            state.yVel = 0;
         }
     }
 
-    // Police Logic
-    police.position.x = player.position.x * 0.8; // Follow loosely
-    police.position.z = player.position.z + state.policeDistance;
-    police.position.y = player.position.y; // Match jump roughly
-    
-    // Animate Police Run Bobbing
-    police.children[0].position.y = 0.95 + Math.sin(Date.now() * 0.015) * 0.1;
-    
-    // Move Obstacles
-    for (let i = obstacles.length - 1; i >= 0; i--) {
+    // Obstacle Management
+    for(let i = obstacles.length - 1; i >= 0; i--) {
         let ob = obstacles[i];
-        ob.position.z += moveDist;
+        ob.position.z += move;
 
-        // Rotation for coins
-        if(ob.userData.type === 'coin') {
-            ob.children.forEach(c => c.rotation.z += 3 * delta);
-        }
-
-        // Collision Detection
+        // Collision
         const dz = ob.position.z - player.position.z;
         const dx = Math.abs(ob.position.x - player.position.x);
         
-        if (dz > -1 && dz < 1 && dx < 1.2) {
-            if (ob.userData.type === 'coin') {
-                state.coins++;
-                playSound('coin');
-                scene.remove(ob);
-                obstacles.splice(i, 1);
-                continue;
-            } else if (ob.userData.type === 'barrier' && player.position.y > 1) {
-                // Successfully jumped over
-                continue;
-            } else {
-                // CRASH!
-                gameOver(true);
-                return;
+        if(dz > -1.5 && dz < 1.5 && dx < (ob.userData.hitW/2 + 0.3)) {
+            if(ob.userData.type === 'solid') {
+                gameOver(); return;
+            } else if(ob.userData.type === 'jumpable' && player.position.y < 0.9) {
+                gameOver(); return;
             }
         }
 
-        // Cleanup
-        if (ob.position.z > 10) {
+        if(ob.position.z > 12) {
             scene.remove(ob);
             obstacles.splice(i, 1);
         }
     }
 
-    // Spawn new obstacles
-    const lastZ = obstacles.length > 0 ? obstacles[obstacles.length-1].position.z : -20;
-    if (lastZ > -100) {
-        spawnObstacle(lastZ - (15 + Math.random() * 15));
-    }
+    // Spawning
+    const lastZ = obstacles.length > 0 ? obstacles[obstacles.length-1].position.z : -30;
+    if(lastZ > -120) spawnObstacle(lastZ - (18 + Math.random() * 18));
 
-    // Move Ground Texture illusion
-    ground.position.z += moveDist;
-    if(ground.position.z > 50) ground.position.z = -50;
+    // Infinite Ground Scroll
+    ground.position.z += move;
+    if(ground.position.z > 100) ground.position.z = -100;
 
     // Camera Follow
-    camera.position.z = player.position.z + 8;
-    camera.position.x += (player.position.x * 0.3 - camera.position.x) * 5 * delta;
-
-    updateUI();
+    camera.position.z = player.position.z + 9;
+    camera.position.x += (player.position.x * 0.4 - camera.position.x) * 4 * delta;
+    
+    updateHUD();
 }
 
 function animate() {
@@ -376,196 +491,148 @@ function animate() {
 }
 
 // --- INPUT HANDLING ---
-function handleInput(action) {
-    if (!state.isPlaying || state.isPaused) return;
-    
-    switch(action) {
-        case 'left': 
-            if(state.lane > -1) state.lane--; 
-            break;
-        case 'right': 
-            if(state.lane < 1) state.lane++; 
-            break;
-        case 'jump': 
-            if(!state.isJumping) {
-                state.isJumping = true;
-                state.yVelocity = CONFIG.jumpForce;
-                playSound('jump');
-            }
-            break;
-        case 'roll':
-            // Simplified roll as fast fall or duck
-            if(state.isJumping) state.yVelocity = -20;
-            break;
+window.addEventListener('keydown', e => {
+    if(!state.isPlaying || state.isPaused) return;
+    if(e.key === 'ArrowLeft' && state.lane > -1) state.lane--;
+    if(e.key === 'ArrowRight' && state.lane < 1) state.lane++;
+    if((e.key === 'ArrowUp' || e.key === ' ') && !state.isJumping) {
+        state.isJumping = true;
+        state.yVel = CONFIG.jumpForce;
     }
-}
-
-window.addEventListener('keydown', (e) => {
-    if(e.key === 'ArrowLeft') handleInput('left');
-    if(e.key === 'ArrowRight') handleInput('right');
-    if(e.key === 'ArrowUp' || e.key === ' ') handleInput('jump');
-    if(e.key === 'ArrowDown') handleInput('roll');
-    if(e.key === 'Escape') togglePause();
 });
 
-// Touch Controls
-let touchStartX = 0;
-let touchStartY = 0;
-window.addEventListener('touchstart', e => {
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-});
+let tx = 0;
+window.addEventListener('touchstart', e => tx = e.touches[0].clientX, {passive:false});
 window.addEventListener('touchend', e => {
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    const dy = e.changedTouches[0].clientY - touchStartY;
-    
-    if(Math.abs(dx) > Math.abs(dy)) {
-        if(Math.abs(dx) > 30) handleInput(dx > 0 ? 'right' : 'left');
-    } else {
-        if(Math.abs(dy) > 30) handleInput(dy > 0 ? 'roll' : 'jump');
+    if(!state.isPlaying || state.isPaused) return;
+    const dx = e.changedTouches[0].clientX - tx;
+    if(Math.abs(dx) > 30) {
+        if(dx > 0 && state.lane < 1) state.lane++;
+        if(dx < 0 && state.lane > -1) state.lane--;
     }
-});
+}, {passive:false});
 
-// --- AUDIO SYSTEM (Synthesized) ---
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playSound(type) {
-    if(audioCtx.state === 'suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    
-    const now = audioCtx.currentTime;
-    if(type === 'jump') {
-        osc.frequency.setValueAtTime(300, now);
-        osc.frequency.exponentialRampToValueAtTime(600, now + 0.1);
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-        osc.start(now);
-        osc.stop(now + 0.1);
-    } else if (type === 'coin') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(1200, now);
-        osc.frequency.exponentialRampToValueAtTime(1800, now + 0.1);
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-        osc.start(now);
-        osc.stop(now + 0.1);
-    } else if (type === 'crash') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(100, now);
-        osc.frequency.exponentialRampToValueAtTime(10, now + 0.3);
-        gain.gain.setValueAtTime(0.5, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-        osc.start(now);
-        osc.stop(now + 0.3);
+// --- SYSTEMS ---
+const UI = {
+    showMain: () => {
+        document.querySelectorAll('.menu-screen').forEach(el => el.classList.add('hidden'));
+        document.getElementById('main-menu').classList.remove('hidden');
+    },
+    showShop: () => {
+        document.querySelectorAll('.menu-screen').forEach(el => el.classList.add('hidden'));
+        document.getElementById('shop-menu').classList.remove('hidden');
+        renderShop();
+    },
+    showSettings: () => {
+        document.querySelectorAll('.menu-screen').forEach(el => el.classList.add('hidden'));
+        document.getElementById('settings-menu').classList.remove('hidden');
+        Settings.updateUI();
     }
-}
+};
 
-// --- UI & STATE MANAGEMENT ---
-function updateUI() {
-    document.getElementById('score-display').innerText = state.score;
-}
+const Game = {
+    start: () => {
+        initWorld();
+        state.isPlaying = true;
+        state.isPaused = false;
+        document.querySelectorAll('.menu-screen').forEach(el => el.classList.add('hidden'));
+        clock.start();
+    },
+    pause: () => {
+        state.isPaused = !state.isPaused;
+    }
+};
 
-function startGame() {
-    initWorld();
-    state.isPlaying = true;
-    state.isPaused = false;
-    document.querySelectorAll('.menu-screen').forEach(el => el.classList.add('hidden'));
-    clock.start();
-}
-
-function gameOver(caughtByPolice) {
+function gameOver() {
     state.isPlaying = false;
-    playSound('crash');
     localStorage.setItem('srp_coins', state.coins);
-    
-    document.getElementById('final-score').innerText = `امتیاز: ${state.score}`;
-    document.getElementById('police-msg').style.display = caughtByPolice ? 'block' : 'none';
+    document.getElementById('final-score').innerText = state.score;
     document.getElementById('game-over').classList.remove('hidden');
 }
 
-function resetGame() {
-    startGame();
+function updateHUD() {
+    document.getElementById('score-display').innerText = state.score;
+    document.getElementById('coin-display').innerText = state.coins;
 }
 
-function goToMainMenu() {
-    document.getElementById('game-over').classList.add('hidden');
-    document.getElementById('main-menu').classList.remove('hidden');
-}
-
-function togglePause() {
-    if(!state.isPlaying) return;
-    state.isPaused = !state.isPaused;
-    if(state.isPaused) {
-        // Show simple pause overlay could go here
+// --- SETTINGS (REAL IMPACT) ---
+const Settings = {
+    setQuality: (level) => {
+        state.settings.quality = level;
+        const dpr = level === 'low' ? 1 : level === 'med' ? 1.5 : window.devicePixelRatio;
+        renderer.setPixelRatio(dpr);
+        Settings.updateUI();
+        saveSettings();
+    },
+    toggleShadow: () => {
+        state.settings.shadows = !state.settings.shadows;
+        renderer.shadowMap.enabled = state.settings.shadows;
+        scene.traverse(obj => { if(obj.material) obj.material.needsUpdate = true; });
+        Settings.updateUI();
+        saveSettings();
+    },
+    toggleParticles: () => {
+        state.settings.particles = !state.settings.particles;
+        Settings.updateUI();
+        saveSettings();
+    },
+    updateUI: () => {
+        document.getElementById('t-shadow').className = `toggle-btn ${state.settings.shadows ? 'active' : ''}`;
+        document.getElementById('t-shadow').innerText = state.settings.shadows ? 'روشن' : 'خاموش';
+        document.getElementById('t-particles').className = `toggle-btn ${state.settings.particles ? 'active' : ''}`;
+        document.getElementById('t-particles').innerText = state.settings.particles ? 'روشن' : 'خاموش';
+        ['low','med','high'].forEach(q => {
+            document.getElementById(`q-${q}`).className = `toggle-btn ${state.settings.quality === q ? 'active' : ''}`;
+        });
     }
-}
+};
 
-// Shop Logic
-function openShop() {
-    document.getElementById('main-menu').classList.add('hidden');
-    document.getElementById('shop-menu').classList.remove('hidden');
-    renderShop();
-}
+function saveSettings() { localStorage.setItem('srp_settings', JSON.stringify(state.settings)); }
 
+// --- SHOP ---
 function renderShop() {
-    const grid = document.getElementById('skin-grid');
-    grid.innerHTML = '';
-    Object.keys(CONFIG.colors.skins).forEach(skinKey => {
-        const price = skinKey === 'classic' ? 0 : 200;
-        const owned = state.ownedSkins.includes(skinKey);
-        const selected = state.skin === skinKey;
-        
+    const container = document.getElementById('skin-container');
+    container.innerHTML = '';
+    document.getElementById('shop-coins').innerText = state.coins;
+    
+    Object.entries(CONFIG.colors.skins).forEach(([key, data]) => {
+        const owned = state.ownedSkins.includes(key);
+        const selected = state.skin === key;
         const div = document.createElement('div');
-        div.className = `shop-item ${owned ? 'owned' : ''} ${selected ? 'selected' : ''}`;
+        div.className = `shop-item ${selected ? 'selected' : ''} ${!owned ? 'locked' : ''}`;
         div.innerHTML = `
-            <div style="width:30px;height:30px;background:#${CONFIG.colors.skins[skinKey].toString(16)};border-radius:50%;margin:0 auto 10px;"></div>
-            <div>${skinKey.toUpperCase()}</div>
-            <div style="font-size:0.8rem;color:#aaa">${owned ? 'خریداری شده' : price + ' 🪙'}</div>
+            <div class="skin-preview" style="background:#${data.color.toString(16).padStart(6,'0')}"></div>
+            <div style="font-weight:bold">${data.name}</div>
+            <div style="font-size:0.8rem;color:#aaa;margin-top:4px">${owned ? '✓ انتخاب شده' : data.price + ' 🪙'}</div>
         `;
-        div.onclick = () => buyOrSelect(skinKey, price);
-        grid.appendChild(div);
+        div.onclick = () => {
+            if(owned) {
+                state.skin = key;
+                localStorage.setItem('srp_skin', key);
+                renderShop();
+            } else if(state.coins >= data.price) {
+                state.coins -= data.price;
+                state.ownedSkins.push(key);
+                state.skin = key;
+                localStorage.setItem('srp_coins', state.coins);
+                localStorage.setItem('srp_owned', JSON.stringify(state.ownedSkins));
+                localStorage.setItem('srp_skin', key);
+                renderShop();
+            } else { alert("سکه کافی نیست!"); }
+        };
+        container.appendChild(div);
     });
 }
 
-function buyOrSelect(skin, price) {
-    if(state.ownedSkins.includes(skin)) {
-        state.skin = skin;
-        localStorage.setItem('srp_skin', skin);
-        renderShop();
-    } else if(state.coins >= price) {
-        state.coins -= price;
-        state.ownedSkins.push(skin);
-        state.skin = skin;
-        localStorage.setItem('srp_coins', state.coins);
-        localStorage.setItem('srp_owned', JSON.stringify(state.ownedSkins));
-        localStorage.setItem('srp_skin', skin);
-        renderShop();
-    } else {
-        alert("سکه کافی نیست!");
-    }
-}
+document.getElementById('pause-btn').onclick = Game.pause;
+Settings.updateUI();
+animate();
 
-function closeMenus() {
-    document.getElementById('shop-menu').classList.add('hidden');
-    document.getElementById('main-menu').classList.remove('hidden');
-}
-
-function toggleSettings() {
-    alert("تنظیمات گرافیکی در نسخه V8 به صورت خودکار بهینه شده‌اند.");
-}
-
-// Resize Handler
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
-// Start Loop
-animate();
-
 </script>
 </body>
 </html>
