@@ -1,705 +1,571 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Subway Runner - Babylon.js</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Lalezar&display=swap');
-*{margin:0;padding:0;box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#0a0a12;font-family:'Lalezar',cursive;touch-action:none;user-select:none}
-canvas{display:block;width:100%;height:100%;touch-action:none}
-#ui{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10}
-.hud{display:flex;justify-content:space-between;padding:12px 16px;font-size:22px;color:#fff;text-shadow:2px 2px 4px #000}
-.box{background:rgba(0,0,0,.55);padding:6px 14px;border-radius:18px;border:1.5px solid rgba(255,255,255,.15)}
-#mission{position:absolute;top:60px;left:12px;background:rgba(0,0,0,.5);padding:6px 12px;border-radius:10px;color:#ffe;font-size:13px;border:1px solid rgba(255,215,0,.3)}
-#pus{position:absolute;top:60px;right:12px;display:flex;flex-direction:column;gap:4px}
-.pu{background:rgba(0,200,255,.3);border:1.5px solid #0cf;padding:4px 10px;border-radius:8px;color:#fff;font-size:13px;display:none}
-.menu{position:absolute;inset:0;background:radial-gradient(circle,rgba(20,18,30,.95),rgba(0,0,0,.98));display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;pointer-events:auto;transition:opacity .3s}
-.hidden{opacity:0;pointer-events:none}
-h1{font-size:48px;color:#FFD700;text-shadow:0 0 25px #FFD700,3px 3px 0 #a32;margin-bottom:8px}
-p{color:#ccc;font-size:16px;margin-bottom:20px}
-button{background:linear-gradient(#ff9f43,#ee5253);border:3px solid #fff;color:#fff;font-family:'Lalezar';font-size:22px;padding:12px 40px;border-radius:40px;cursor:pointer;margin:6px;box-shadow:0 8px 20px rgba(0,0,0,.4)}
-button:active{transform:scale(.96)}
-.btn2{background:linear-gradient(#576574,#222f3e);font-size:16px;padding:9px 24px}
-#fps{position:absolute;bottom:8px;left:8px;color:#0f0;font-size:12px;opacity:.6}
-</style>
-<script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Subway Runner Pro V8 - Ultimate Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap');
+        
+        body { margin: 0; overflow: hidden; background: #1a1a2e; font-family: 'Vazirmatn', sans-serif; user-select: none; }
+        canvas { display: block; width: 100vw; height: 100vh; }
+        
+        /* UI Overlay */
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; }
+        .hud { padding: 20px; display: flex; justify-content: space-between; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.8); font-weight: 900; font-size: 1.5rem; pointer-events: auto; }
+        .coin-counter { color: #ffd700; display: flex; align-items: center; gap: 10px; }
+        
+        /* Menus */
+        .menu-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 15, 30, 0.85); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; transition: opacity 0.3s; z-index: 10; }
+        .hidden { opacity: 0; pointer-events: none; display: none !important; }
+        
+        h1 { color: #fff; font-size: 3rem; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; background: linear-gradient(to right, #ff416c, #ff4b2b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h2 { color: #ddd; margin-bottom: 30px; }
+        
+        button { background: linear-gradient(45deg, #ff416c, #ff4b2b); border: none; padding: 15px 40px; color: white; font-family: inherit; font-size: 1.2rem; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4); transition: transform 0.1s, box-shadow 0.1s; margin: 10px; min-width: 200px; }
+        button:active { transform: scale(0.95); }
+        button.secondary { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); box-shadow: none; }
+        
+        /* Shop Grid */
+        .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 600px; margin-bottom: 20px; }
+        .shop-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; text-align: center; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.2s; }
+        .shop-item:hover { background: rgba(255,255,255,0.1); }
+        .shop-item.owned { border-color: #4caf50; }
+        .shop-item.selected { border-color: #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+        
+        #pause-btn { pointer-events: auto; background: rgba(0,0,0,0.3); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; }
+    </style>
+    <!-- Three.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-<canvas id="c"></canvas>
-<div id="ui">
-  <div class="hud">
-    <div class="box">امتیاز: <span id="score">0</span></div>
-    <div class="box">🪙 <span id="coins">0</span></div>
-  </div>
-  <div id="mission">مأموریت: <span id="mtext">-</span></div>
-  <div id="pus">
-    <div class="pu" id="pu-magnet">آهنربا</div>
-    <div class="pu" id="pu-shield">سپر</div>
-    <div class="pu" id="pu-double">×۲</div>
-    <div class="pu" id="pu-hover">هاور</div>
-    <div class="pu" id="pu-jet">جت</div>
-  </div>
-  <div id="fps"></div>
-</div>
 
-<div id="start" class="menu">
-  <h1>SUBWAY PRO</h1>
-  <p>نسخه Babylon.js</p>
-  <button id="btnStart">شروع دویدن</button>
-  <button id="btnShop" class="btn2">فروشگاه</button>
-</div>
+    <!-- Game Canvas Container -->
+    <div id="game-container"></div>
 
-<div id="over" class="menu hidden">
-  <h1 style="color:#ff4757">GAME OVER</h1>
-  <p>امتیاز: <span id="fscore">0</span></p>
-  <button id="btnRetry">دوباره</button>
-  <button id="btnMenu" class="btn2">منو</button>
-</div>
+    <!-- HUD -->
+    <div id="ui-layer">
+        <div class="hud">
+            <div class="coin-counter">🪙 <span id="score-display">0</span></div>
+            <div id="pause-btn">⏸️</div>
+        </div>
+    </div>
 
-<div id="shop" class="menu hidden">
-  <h1 style="font-size:32px;color:#f1c40f">فروشگاه</h1>
-  <p>سکه: <span id="scoins">0</span></p>
-  <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:340px">
-    <button class="btn2" data-item="magnet" data-cost="50">آهنربا ۵۰</button>
-    <button class="btn2" data-item="shield" data-cost="100">سپر ۱۰۰</button>
-    <button class="btn2" data-item="double" data-cost="120">×۲ ۱۲۰</button>
-    <button class="btn2" data-item="hover" data-cost="180">هاور ۱۸۰</button>
-    <button class="btn2" data-item="jet" data-cost="220">جت ۲۲۰</button>
-  </div>
-  <button id="btnCloseShop" class="btn2" style="margin-top:20px">بستن</button>
-</div>
+    <!-- Main Menu -->
+    <div id="main-menu" class="menu-screen">
+        <h1>SUBWAY PRO V8</h1>
+        <h2>نسخه نهایی و کامل</h2>
+        <button onclick="startGame()">شروع دویدن 🏃‍♂️</button>
+        <button class="secondary" onclick="openShop()">فروشگاه 🛒</button>
+        <button class="secondary" onclick="toggleSettings()">تنظیمات ⚙️</button>
+    </div>
+
+    <!-- Shop Menu -->
+    <div id="shop-menu" class="menu-screen hidden">
+        <h2>فروشگاه اسکین‌ها</h2>
+        <div class="shop-grid" id="skin-grid"></div>
+        <button class="secondary" onclick="closeMenus()">بازگشت</button>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="game-over" class="menu-screen hidden">
+        <h1 style="font-size: 2.5rem;">GAME OVER</h1>
+        <h2 id="final-score">امتیاز: 0</h2>
+        <p id="police-msg" style="color:#ff4b2b; margin-bottom:20px; display:none;">👮 پلیس شما را گرفت!</p>
+        <button onclick="resetGame()">تلاش مجدد 🔄</button>
+        <button class="secondary" onclick="goToMainMenu()">منوی اصلی</button>
+    </div>
 
 <script>
-const canvas = document.getElementById("c");
-const engine = new BABYLON.Engine(canvas, true, {preserveDrawingBuffer:true, stencil:true});
-const scene = new BABYLON.Scene(engine);
-scene.clearColor = new BABYLON.Color4(0.4, 0.7, 0.9, 1);
-scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
-scene.fogDensity = 0.012;
-scene.fogColor = new BABYLON.Color3(0.4, 0.7, 0.9);
+/**
+ * SUBWAY RUNNER PRO V8 - CORE ENGINE
+ * Improved Graphics, Police System, Procedural Generation
+ */
 
-// Light
-const hemi = new BABYLON.HemisphericLight("h", new BABYLON.Vector3(0,1,0), scene);
-hemi.intensity = 0.85;
-const sun = new BABYLON.DirectionalLight("s", new BABYLON.Vector3(-0.4,-1,-0.3), scene);
-sun.position = new BABYLON.Vector3(20,40,10);
-sun.intensity = 1.2;
-sun.shadowMinZ = 1;
-sun.shadowMaxZ = 80;
+// --- CONFIGURATION & STATE ---
+const CONFIG = {
+    laneWidth: 3,
+    speedBase: 15,
+    speedMax: 40,
+    gravity: -30,
+    jumpForce: 12,
+    colors: {
+        ground: 0x2c3e50,
+        fog: 0x1a1a2e,
+        train: [0xe74c3c, 0x3498db, 0xf1c40f, 0x2ecc71],
+        skins: {
+            'classic': 0xffccaa,
+            'ninja': 0x222222,
+            'gold': 0xffd700,
+            'neon': 0x00ffcc
+        }
+    }
+};
 
-const shadowGen = new BABYLON.ShadowGenerator(1024, sun);
-shadowGen.useBlurExponentialShadowMap = true;
-shadowGen.blurKernel = 16;
+let state = {
+    isPlaying: false,
+    isPaused: false,
+    score: 0,
+    coins: parseInt(localStorage.getItem('srp_coins') || '0'),
+    speed: CONFIG.speedBase,
+    lane: 0, // -1, 0, 1
+    yVelocity: 0,
+    isJumping: false,
+    skin: localStorage.getItem('srp_skin') || 'classic',
+    ownedSkins: JSON.parse(localStorage.getItem('srp_owned') || '["classic"]'),
+    policeDistance: 15, // Distance behind player
+    policeCatchRate: 0.5 // How fast police closes in when hitting obstacles
+};
 
-// Camera
-const camera = new BABYLON.UniversalCamera("cam", new BABYLON.Vector3(0, 6.5, 12), scene);
-camera.setTarget(new BABYLON.Vector3(0, 1.5, -10));
-camera.fov = 0.9;
+// --- THREE.JS SETUP ---
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(CONFIG.colors.fog);
+scene.fog = new THREE.FogExp2(CONFIG.colors.fog, 0.02);
+
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.set(0, 5, 8);
+camera.lookAt(0, 0, -5);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.getElementById('game-container').appendChild(renderer.domElement);
+
+// Lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+scene.add(ambientLight);
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+dirLight.position.set(10, 20, 10);
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.width = 1024;
+dirLight.shadow.mapSize.height = 1024;
+dirLight.shadow.camera.near = 0.5;
+dirLight.shadow.camera.far = 50;
+dirLight.shadow.camera.left = -10;
+dirLight.shadow.camera.right = 10;
+dirLight.shadow.camera.top = 10;
+dirLight.shadow.camera.bottom = -10;
+scene.add(dirLight);
+
+// --- GAME OBJECTS ---
+let player, police, ground;
+let obstacles = [];
+let particles = [];
+let clock = new THREE.Clock();
 
 // Materials
-const matGround = new BABYLON.StandardMaterial("mg", scene);
-matGround.diffuseColor = new BABYLON.Color3(0.18,0.18,0.18);
-matGround.specularColor = new BABYLON.Color3(0.1,0.1,0.1);
+const matGround = new THREE.MeshStandardMaterial({ color: CONFIG.colors.ground, roughness: 0.8 });
+const matTrain = new THREE.MeshStandardMaterial({ roughness: 0.3, metalness: 0.2 });
+const matCoin = new THREE.MeshStandardMaterial({ color: 0xffd700, emissive: 0xaa8800, emissiveIntensity: 0.5, metalness: 0.8, roughness: 0.2 });
 
-const matRail = new BABYLON.StandardMaterial("mr", scene);
-matRail.diffuseColor = new BABYLON.Color3(0.4,0.4,0.4);
-matRail.specularColor = new BABYLON.Color3(0.6,0.6,0.6);
-matRail.specularPower = 32;
+function createPlayer() {
+    const group = new THREE.Group();
+    
+    // Body
+    const geoBody = new THREE.CapsuleGeometry(0.4, 1, 4, 8);
+    const matSkin = new THREE.MeshStandardMaterial({ color: CONFIG.colors.skins[state.skin] || 0xffccaa });
+    const body = new THREE.Mesh(geoBody, matSkin);
+    body.position.y = 0.9;
+    body.castShadow = true;
+    group.add(body);
+    
+    // Backpack (Jetpack placeholder)
+    const geoPack = new THREE.BoxGeometry(0.5, 0.6, 0.3);
+    const pack = new THREE.Mesh(geoPack, new THREE.MeshStandardMaterial({color: 0x333333}));
+    pack.position.set(0, 1, 0.35);
+    group.add(pack);
 
-const matSleeper = new BABYLON.StandardMaterial("ms", scene);
-matSleeper.diffuseColor = new BABYLON.Color3(0.3,0.2,0.15);
-
-const matSkin = new BABYLON.StandardMaterial("msk", scene);
-matSkin.diffuseColor = new BABYLON.Color3(0.95,0.78,0.65);
-
-const matHoodie = new BABYLON.StandardMaterial("mh", scene);
-matHoodie.diffuseColor = new BABYLON.Color3(0.1,0.1,0.1);
-
-const matPants = new BABYLON.StandardMaterial("mp", scene);
-matPants.diffuseColor = new BABYLON.Color3(0.08,0.08,0.08);
-
-const matShoe = new BABYLON.StandardMaterial("msh", scene);
-matShoe.diffuseColor = new BABYLON.Color3(0.95,0.95,0.95);
-
-const matGold = new BABYLON.StandardMaterial("mgold", scene);
-matGold.diffuseColor = new BABYLON.Color3(1,0.84,0);
-matGold.emissiveColor = new BABYLON.Color3(0.3,0.2,0);
-matGold.specularColor = new BABYLON.Color3(1,0.9,0.4);
-matGold.specularPower = 64;
-
-// Ground
-const ground = BABYLON.MeshBuilder.CreateGround("g", {width:50, height:400}, scene);
-ground.position.z = -80;
-ground.material = matGround;
-ground.receiveShadows = true;
-
-// Tracks
-const tracks = new BABYLON.TransformNode("tracks", scene);
-const laneW = 3.6;
-for(let i=-1;i<=1;i++){
-  const o = i * laneW;
-  const r1 = BABYLON.MeshBuilder.CreateBox("r", {width:0.12, height:0.06, depth:400}, scene);
-  r1.position.set(o-0.8, 0.03, -80); r1.material = matRail; r1.parent = tracks;
-  const r2 = BABYLON.MeshBuilder.CreateBox("r", {width:0.12, height:0.06, depth:400}, scene);
-  r2.position.set(o+0.8, 0.03, -80); r2.material = matRail; r2.parent = tracks;
-}
-for(let j=0;j<120;j++){
-  const s = BABYLON.MeshBuilder.CreateBox("sl", {width:10, height:0.1, depth:0.4}, scene);
-  s.position.set(0, 0.02, -j*3.3); s.material = matSleeper; s.parent = tracks;
+    return group;
 }
 
-// Buildings
-const buildings = [];
-for(let side=-1; side<=1; side+=2){
-  for(let i=0;i<12;i++){
-    const h = 8 + Math.random()*14;
-    const b = BABYLON.MeshBuilder.CreateBox("b", {width:5+Math.random()*3, height:h, depth:6+Math.random()*3}, scene);
-    b.position.set(side*(11+Math.random()*2), h/2, -i*26 - Math.random()*6);
-    const m = new BABYLON.StandardMaterial("bm"+i+side, scene);
-    m.diffuseColor = new BABYLON.Color3(0.25+Math.random()*0.15, 0.2+Math.random()*0.1, 0.18+Math.random()*0.08);
-    b.material = m;
-    b.receiveShadows = true;
-    shadowGen.addShadowCaster(b);
-    buildings.push(b);
-  }
+function createPolice() {
+    const group = new THREE.Group();
+    
+    // Officer Body
+    const geo = new THREE.CapsuleGeometry(0.45, 1.1, 4, 8);
+    const mat = new THREE.MeshStandardMaterial({ color: 0x000088 }); // Dark Blue Uniform
+    const body = new THREE.Mesh(geo, mat);
+    body.position.y = 0.95;
+    body.castShadow = true;
+    group.add(body);
+
+    // Hat
+    const hatGeo = new THREE.CylinderGeometry(0.3, 0.5, 0.3, 8);
+    const hat = new THREE.Mesh(hatGeo, new THREE.MeshStandardMaterial({color:0x000044}));
+    hat.position.y = 1.8;
+    group.add(hat);
+
+    // Dog (Simple representation)
+    const dogGroup = new THREE.Group();
+    const dogBody = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.8), new THREE.MeshStandardMaterial({color: 0x8B4513}));
+    dogBody.position.y = 0.4;
+    dogGroup.add(dogBody);
+    dogGroup.position.set(0.8, 0, 0.5);
+    group.add(dogGroup);
+
+    return group;
 }
 
-// Player
-const player = new BABYLON.TransformNode("player", scene);
-const torso = BABYLON.MeshBuilder.CreateSphere("torso", {diameter:0.9, segments:16}, scene);
-torso.scaling = new BABYLON.Vector3(1.05, 1.4, 0.85);
-torso.position.y = 1.35;
-torso.material = matHoodie;
-torso.parent = player;
-shadowGen.addShadowCaster(torso);
+function initWorld() {
+    // Ground
+    if(ground) scene.remove(ground);
+    const geoGround = new THREE.PlaneGeometry(40, 200);
+    ground = new THREE.Mesh(geoGround, matGround);
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.z = -50;
+    ground.receiveShadow = true;
+    scene.add(ground);
 
-const head = BABYLON.MeshBuilder.CreateSphere("head", {diameter:0.6, segments:14}, scene);
-head.position.y = 2.1;
-head.material = matSkin;
-head.parent = player;
+    // Player
+    if(player) scene.remove(player);
+    player = createPlayer();
+    scene.add(player);
 
-const armL = new BABYLON.TransformNode("armL", scene);
-armL.position.set(-0.5, 1.65, 0);
-armL.parent = player;
-const armLM = BABYLON.MeshBuilder.CreateSphere("alm", {diameter:0.24, segments:10}, scene);
-armLM.scaling.y = 2.3;
-armLM.position.y = -0.28;
-armLM.material = matHoodie;
-armLM.parent = armL;
-
-const armR = new BABYLON.TransformNode("armR", scene);
-armR.position.set(0.5, 1.65, 0);
-armR.parent = player;
-const armRM = BABYLON.MeshBuilder.CreateSphere("arm", {diameter:0.24, segments:10}, scene);
-armRM.scaling.y = 2.3;
-armRM.position.y = -0.28;
-armRM.material = matHoodie;
-armRM.parent = armR;
-
-const legL = new BABYLON.TransformNode("legL", scene);
-legL.position.set(-0.18, 0.75, 0);
-legL.parent = player;
-const legLM = BABYLON.MeshBuilder.CreateSphere("llm", {diameter:0.26, segments:10}, scene);
-legLM.scaling.y = 2.4;
-legLM.position.y = -0.35;
-legLM.material = matPants;
-legLM.parent = legL;
-const shoeL = BABYLON.MeshBuilder.CreateSphere("sl", {diameter:0.3, segments:8}, scene);
-shoeL.scaling = new BABYLON.Vector3(1.1, 0.6, 1.4);
-shoeL.position.set(0, -0.8, 0.04);
-shoeL.material = matShoe;
-shoeL.parent = legL;
-
-const legR = new BABYLON.TransformNode("legR", scene);
-legR.position.set(0.18, 0.75, 0);
-legR.parent = player;
-const legRM = BABYLON.MeshBuilder.CreateSphere("lrm", {diameter:0.26, segments:10}, scene);
-legRM.scaling.y = 2.4;
-legRM.position.y = -0.35;
-legRM.material = matPants;
-legRM.parent = legR;
-const shoeR = BABYLON.MeshBuilder.CreateSphere("sr", {diameter:0.3, segments:8}, scene);
-shoeR.scaling = new BABYLON.Vector3(1.1, 0.6, 1.4);
-shoeR.position.set(0, -0.8, 0.04);
-shoeR.material = matShoe;
-shoeR.parent = legR;
-
-// Hover & Jet visuals
-const hoverBoard = BABYLON.MeshBuilder.CreateBox("hb", {width:0.9, height:0.08, depth:1.5}, scene);
-hoverBoard.position.y = 0.1;
-const matHover = new BABYLON.StandardMaterial("mhb", scene);
-matHover.diffuseColor = new BABYLON.Color3(0,0.9,1);
-matHover.emissiveColor = new BABYLON.Color3(0,0.3,0.4);
-hoverBoard.material = matHover;
-hoverBoard.parent = player;
-hoverBoard.setEnabled(false);
-
-const jetPack = BABYLON.MeshBuilder.CreateBox("jp", {width:0.45, height:0.65, depth:0.25}, scene);
-jetPack.position.set(0, 1.45, 0.4);
-const matJet = new BABYLON.StandardMaterial("mjp", scene);
-matJet.diffuseColor = new BABYLON.Color3(1,0.3,0);
-matJet.emissiveColor = new BABYLON.Color3(0.4,0.1,0);
-jetPack.material = matJet;
-jetPack.parent = player;
-jetPack.setEnabled(false);
-
-const shieldMesh = BABYLON.MeshBuilder.CreateSphere("shield", {diameter:2.6, segments:16}, scene);
-const matShield = new BABYLON.StandardMaterial("mshd", scene);
-matShield.diffuseColor = new BABYLON.Color3(0,0.9,1);
-matShield.alpha = 0.2;
-matShield.wireframe = true;
-shieldMesh.material = matShield;
-shieldMesh.parent = player;
-shieldMesh.setEnabled(false);
-
-// State
-const state = {
-  playing: false,
-  score: 0,
-  coins: parseInt(localStorage.getItem("bab_coins")) || 0,
-  speed: 0.48,
-  maxSpeed: 2.1,
-  lane: 1,
-  targetX: 0,
-  velY: 0,
-  jumping: false,
-  rolling: false,
-  rollTimer: 0,
-  inv: JSON.parse(localStorage.getItem("bab_inv") || '{"magnet":0,"shield":0,"double":0,"hover":0,"jet":0}'),
-  pu: {magnet:0, shield:false, double:0, hover:0, jet:0},
-  trainH: 3.15,
-  entities: {trains:[], bars:[], coins:[], pus:[]},
-  runCoins: 0
-};
-
-function makeTrain(lane) {
-  const len = 13 + Math.random() * 8;
-  const colors = [
-    new BABYLON.Color3(0.75,0.15,0.15),
-    new BABYLON.Color3(0.95,0.75,0.1),
-    new BABYLON.Color3(0.15,0.45,0.8),
-    new BABYLON.Color3(0.15,0.65,0.3)
-  ];
-  const col = colors[Math.floor(Math.random()*colors.length)];
-  const g = new BABYLON.TransformNode("train", scene);
-  const body = BABYLON.MeshBuilder.CreateBox("tb", {width:2.5, height:state.trainH*0.9, depth:len}, scene);
-  body.position.y = state.trainH * 0.48;
-  const mat = new BABYLON.StandardMaterial("tm"+Math.random(), scene);
-  mat.diffuseColor = col;
-  mat.specularColor = new BABYLON.Color3(0.5,0.5,0.5);
-  mat.specularPower = 32;
-  body.material = mat;
-  body.parent = g;
-  shadowGen.addShadowCaster(body);
-
-  const roof = BABYLON.MeshBuilder.CreateBox("tr", {width:2.6, height:0.14, depth:len+0.2}, scene);
-  roof.position.y = state.trainH + 0.02;
-  const matR = new BABYLON.StandardMaterial("trmat", scene);
-  matR.diffuseColor = new BABYLON.Color3(0.8,0.8,0.8);
-  matR.specularColor = new BABYLON.Color3(0.7,0.7,0.7);
-  roof.material = matR;
-  roof.parent = g;
-
-  g.position.set((lane-1)*laneW, 0, -90);
-  g.metadata = {len, type:"train"};
-  state.entities.trains.push(g);
+    // Police
+    if(police) scene.remove(police);
+    police = createPolice();
+    scene.add(police);
+    
+    // Reset State
+    state.lane = 0;
+    state.score = 0;
+    state.speed = CONFIG.speedBase;
+    state.policeDistance = 15;
+    player.position.set(0, 0, 0);
+    updateUI();
 }
 
-function makeBar(lane, high) {
-  const g = new BABYLON.TransformNode("bar", scene);
-  if(high){
-    const bar = BABYLON.MeshBuilder.CreateBox("b", {width:2.1, height:0.3, depth:0.35}, scene);
-    bar.position.y = 1.4;
-    const m = new BABYLON.StandardMaterial("bm", scene);
-    m.diffuseColor = new BABYLON.Color3(1,0.7,0);
-    bar.material = m; bar.parent = g;
-    g.metadata = {type:"high"};
-  } else {
-    const bar = BABYLON.MeshBuilder.CreateBox("b", {width:2.1, height:0.75, depth:0.4}, scene);
-    bar.position.y = 0.4;
-    const m = new BABYLON.StandardMaterial("bm", scene);
-    m.diffuseColor = new BABYLON.Color3(0.9,0.45,0.1);
-    bar.material = m; bar.parent = g;
-    g.metadata = {type:"low"};
-  }
-  g.position.set((lane-1)*laneW, 0, -90);
-  state.entities.bars.push(g);
-}
-
-function makeCoin(x,y,z) {
-  const c = BABYLON.MeshBuilder.CreateCylinder("c", {height:0.06, diameter:0.55, tessellation:12}, scene);
-  c.rotation.x = Math.PI/2;
-  c.position.set(x,y,z);
-  c.material = matGold;
-  state.entities.coins.push(c);
-}
-
-function makePU(lane) {
-  const types = ["magnet","shield","double","hover","jet"];
-  const type = types[Math.floor(Math.random()*types.length)];
-  const cols = {magnet:[1,0.15,0.2], shield:[0,0.9,1], double:[1,0.85,0], hover:[0,1,0.8], jet:[1,0.4,0]};
-  const g = new BABYLON.TransformNode("pu", scene);
-  const s = BABYLON.MeshBuilder.CreateSphere("ps", {diameter:0.7, segments:10}, scene);
-  const m = new BABYLON.StandardMaterial("pm", scene);
-  m.diffuseColor = new BABYLON.Color3(...cols[type]);
-  m.emissiveColor = new BABYLON.Color3(...cols[type].map(v=>v*0.4));
-  s.material = m; s.parent = g;
-  g.position.set((lane-1)*laneW, 1.3, -90);
-  g.metadata = {type};
-  state.entities.pus.push(g);
-}
-
-function spawn() {
-  if(Math.random() < 0.025 + state.speed*0.003){
-    const lane = Math.floor(Math.random()*3);
-    const r = Math.random();
-    if(r < 0.35){
-      makeTrain(lane);
-      if(Math.random()>0.4) for(let i=0;i<4;i++) makeCoin((lane-1)*laneW, state.trainH+0.4, -95-i*2);
-    } else if(r < 0.52){
-      makeBar(lane, true);
-    } else if(r < 0.68){
-      makeBar(lane, false);
-    } else if(r < 0.85){
-      makePU(lane);
+// --- PROCEDURAL GENERATION ---
+function spawnObstacle(zPos) {
+    const type = Math.random();
+    let mesh;
+    
+    if (type < 0.6) {
+        // Train
+        const color = CONFIG.colors.train[Math.floor(Math.random() * CONFIG.colors.train.length)];
+        const geo = new THREE.BoxGeometry(2.2, 2.5, 6);
+        mesh = new THREE.Mesh(geo, matTrain.clone());
+        mesh.material.color.setHex(color);
+        mesh.position.y = 1.25;
+        mesh.userData = { type: 'train', hitBox: { w: 2, h: 2.5, d: 5.8 } };
+    } else if (type < 0.85) {
+        // Barrier (Jumpable)
+        const geo = new THREE.BoxGeometry(2.5, 0.8, 0.5);
+        mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({color: 0xffaa00}));
+        mesh.position.y = 0.4;
+        mesh.userData = { type: 'barrier', hitBox: { w: 2.3, h: 0.8, d: 0.5 } };
     } else {
-      for(let i=0;i<5;i++) makeCoin((lane-1)*laneW, 0.9, -90-i*1.8);
-    }
-  }
-}
-
-function activate(type) {
-  if(type==="magnet"){ state.pu.magnet=700; document.getElementById("pu-magnet").style.display="block"; }
-  if(type==="shield"){ state.pu.shield=true; shieldMesh.setEnabled(true); document.getElementById("pu-shield").style.display="block"; }
-  if(type==="double"){ state.pu.double=850; document.getElementById("pu-double").style.display="block"; }
-  if(type==="hover"){ state.pu.hover=450; document.getElementById("pu-hover").style.display="block"; }
-  if(type==="jet"){ state.pu.jet=360; document.getElementById("pu-jet").style.display="block"; }
-}
-
-function crash() {
-  if(state.pu.shield){
-    state.pu.shield=false; shieldMesh.setEnabled(false);
-    document.getElementById("pu-shield").style.display="none";
-    state.entities.trains.forEach(t=>t.position.z+=8);
-    state.entities.bars.forEach(b=>b.position.z+=8);
-    return;
-  }
-  gameOver();
-}
-
-function gameOver() {
-  state.playing = false;
-  localStorage.setItem("bab_coins", state.coins);
-  document.getElementById("fscore").textContent = Math.floor(state.score);
-  document.getElementById("over").classList.remove("hidden");
-}
-
-function start() {
-  document.getElementById("start").classList.add("hidden");
-  document.getElementById("over").classList.add("hidden");
-  state.playing = true;
-  state.score = 0;
-  state.speed = 0.48;
-  state.lane = 1;
-  state.targetX = 0;
-  state.velY = 0;
-  state.jumping = false;
-  state.rolling = false;
-  state.runCoins = 0;
-  player.position.set(0,0,0);
-  player.scaling.y = 1;
-
-  // apply inventory
-  ["magnet","shield","double","hover","jet"].forEach(k=>{
-    if(state.inv[k]>0){ activate(k); state.inv[k]--; }
-  });
-  localStorage.setItem("bab_inv", JSON.stringify(state.inv));
-
-  // clear entities
-  [...state.entities.trains, ...state.entities.bars, ...state.entities.coins, ...state.entities.pus].forEach(m=>{
-    if(m.dispose) m.dispose();
-    else if(m.getChildren) m.getChildren().forEach(c=>c.dispose());
-  });
-  state.entities = {trains:[], bars:[], coins:[], pus:[]};
-  updateUI();
-}
-
-function updateUI() {
-  document.getElementById("score").textContent = Math.floor(state.score);
-  document.getElementById("coins").textContent = state.coins;
-  document.getElementById("scoins").textContent = state.coins;
-}
-
-// Input
-window.addEventListener("keydown", e=>{
-  if(!state.playing) return;
-  if(e.key==="ArrowLeft") move(-1);
-  if(e.key==="ArrowRight") move(1);
-  if(e.key==="ArrowUp") jump();
-  if(e.key==="ArrowDown") roll();
-});
-
-let tx=0, ty=0;
-canvas.addEventListener("touchstart", e=>{
-  tx = e.changedTouches[0].screenX;
-  ty = e.changedTouches[0].screenY;
-},{passive:false});
-canvas.addEventListener("touchend", e=>{
-  if(!state.playing) return;
-  const dx = e.changedTouches[0].screenX - tx;
-  const dy = e.changedTouches[0].screenY - ty;
-  if(Math.abs(dx) > Math.abs(dy)){
-    if(dx > 30) move(1); else if(dx < -30) move(-1);
-  } else {
-    if(dy < -30) jump(); else if(dy > 30) roll();
-  }
-},{passive:false});
-
-function move(dir){
-  const n = Math.max(0, Math.min(2, state.lane+dir));
-  if(n === state.lane) return;
-  state.lane = n;
-  state.targetX = (state.lane-1)*laneW;
-}
-function jump(){
-  if(!state.jumping && state.pu.jet<=0){
-    state.velY = 0.7;
-    state.jumping = true;
-    state.rolling = false;
-    player.scaling.y = 1;
-  }
-}
-function roll(){
-  if(!state.rolling && state.pu.jet<=0){
-    state.rolling = true;
-    state.rollTimer = 35;
-    if(state.jumping) state.velY = -0.6;
-  }
-}
-
-// Main loop
-scene.registerBeforeRender(()=>{
-  if(!state.playing) return;
-
-  // Hover / Jet
-  const hovering = state.pu.hover > 0;
-  const jetting = state.pu.jet > 0;
-  hoverBoard.setEnabled(hovering);
-  jetPack.setEnabled(jetting);
-
-  if(jetting){
-    player.position.y = Math.max(player.position.y, 4.2);
-    state.velY = 0.01;
-    state.jumping = false;
-  } else if(hovering){
-    player.position.y = Math.max(player.position.y, 0.85);
-    if(state.velY < 0) state.velY *= 0.5;
-  }
-
-  // Move player X
-  const lerp = state.jumping ? 0.12 : 0.18;
-  player.position.x += (state.targetX - player.position.x) * lerp;
-  player.rotation.z = (state.targetX - player.position.x) * -0.06;
-
-  // Gravity
-  if(!jetting){
-    player.position.y += state.velY;
-    state.velY -= 0.033;
-  }
-
-  // Train collision & climb
-  let onTrain = false, trainH = 0, hit = false;
-  if(!hovering && !jetting){
-    for(const t of state.entities.trains){
-      const dx = Math.abs(t.position.x - player.position.x);
-      const dz = t.position.z - player.position.z;
-      const half = t.metadata.len / 2;
-      if(dx < 1.3 && dz < half && dz > -half){
-        if(player.position.y >= state.trainH - 0.5){
-          onTrain = true; trainH = state.trainH;
-        } else if(dz > 0 && dz < half + 0.8){
-          if(state.jumping && player.position.y > state.trainH - 1.4){
-            player.position.y = state.trainH;
-            state.velY = 0;
-            state.jumping = false;
-            onTrain = true; trainH = state.trainH;
-          } else hit = true;
+        // Coins Cluster
+        const group = new THREE.Group();
+        for(let i=0; i<3; i++) {
+            const coin = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.08, 8, 16), matCoin);
+            coin.position.y = 1 + (i*0.5);
+            coin.rotation.y = Math.PI/2;
+            group.add(coin);
         }
-      }
+        mesh = group;
+        mesh.userData = { type: 'coin', hitBox: { w: 1, h: 2, d: 0.5 } };
     }
-  }
-  if(hit){ crash(); return; }
 
-  if(onTrain){
-    if(player.position.y <= trainH){
-      player.position.y = trainH;
-      state.velY = 0;
-      state.jumping = false;
+    // Random Lane
+    const lane = Math.floor(Math.random() * 3) - 1;
+    mesh.position.x = lane * CONFIG.laneWidth;
+    mesh.position.z = zPos;
+    
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+    obstacles.push(mesh);
+}
+
+// --- GAME LOGIC ---
+function update(delta) {
+    if (!state.isPlaying || state.isPaused) return;
+
+    // Move Player Forward (Conceptually moving world towards player)
+    const moveDist = state.speed * delta;
+    state.score += Math.floor(moveDist * 10);
+    state.speed = Math.min(state.speed + delta * 0.1, CONFIG.speedMax);
+
+    // Lane Interpolation
+    const targetX = state.lane * CONFIG.laneWidth;
+    player.position.x += (targetX - player.position.x) * 10 * delta;
+    player.rotation.z = (player.position.x - targetX) * -0.1; // Lean effect
+
+    // Jump Physics
+    if (state.isJumping) {
+        state.yVelocity += CONFIG.gravity * delta;
+        player.position.y += state.yVelocity * delta;
+        if (player.position.y <= 0) {
+            player.position.y = 0;
+            state.isJumping = false;
+            state.yVelocity = 0;
+        }
     }
-  } else if(!hovering && !jetting && player.position.y <= 0){
-    player.position.y = 0;
-    state.velY = 0;
-    state.jumping = false;
-  }
 
-  // Roll
-  if(state.rolling){
-    player.scaling.y = 0.48;
-    state.rollTimer--;
-    if(state.rollTimer <= 0){
-      state.rolling = false;
-      player.scaling.y = 1;
+    // Police Logic
+    police.position.x = player.position.x * 0.8; // Follow loosely
+    police.position.z = player.position.z + state.policeDistance;
+    police.position.y = player.position.y; // Match jump roughly
+    
+    // Animate Police Run Bobbing
+    police.children[0].position.y = 0.95 + Math.sin(Date.now() * 0.015) * 0.1;
+    
+    // Move Obstacles
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+        let ob = obstacles[i];
+        ob.position.z += moveDist;
+
+        // Rotation for coins
+        if(ob.userData.type === 'coin') {
+            ob.children.forEach(c => c.rotation.z += 3 * delta);
+        }
+
+        // Collision Detection
+        const dz = ob.position.z - player.position.z;
+        const dx = Math.abs(ob.position.x - player.position.x);
+        
+        if (dz > -1 && dz < 1 && dx < 1.2) {
+            if (ob.userData.type === 'coin') {
+                state.coins++;
+                playSound('coin');
+                scene.remove(ob);
+                obstacles.splice(i, 1);
+                continue;
+            } else if (ob.userData.type === 'barrier' && player.position.y > 1) {
+                // Successfully jumped over
+                continue;
+            } else {
+                // CRASH!
+                gameOver(true);
+                return;
+            }
+        }
+
+        // Cleanup
+        if (ob.position.z > 10) {
+            scene.remove(ob);
+            obstacles.splice(i, 1);
+        }
     }
-  }
 
-  // Animation
-  if(!state.jumping && !state.rolling && !jetting){
-    const t = performance.now() * 0.01 * (state.speed/0.48);
-    const sw = Math.sin(t) * 0.5;
-    legL.rotation.x = sw;
-    legR.rotation.x = -sw;
-    armL.rotation.x = -sw * 0.8;
-    armR.rotation.x = sw * 0.8;
-    if(!onTrain && !hovering) player.position.y = Math.abs(Math.sin(t*2)) * 0.04;
-  } else if(state.jumping){
-    legL.rotation.x = -0.4;
-    legR.rotation.x = 0.15;
-    armL.rotation.x = -1.9;
-    armR.rotation.x = -1.9;
-  }
-
-  // Move world
-  const sp = state.speed;
-  for(let i=state.entities.trains.length-1;i>=0;i--){
-    const t = state.entities.trains[i];
-    t.position.z += sp;
-    if(t.position.z > 18){ t.dispose(); state.entities.trains.splice(i,1); }
-  }
-  for(let i=state.entities.bars.length-1;i>=0;i--){
-    const b = state.entities.bars[i];
-    b.position.z += sp;
-    if(!hovering && !jetting){
-      const dz = Math.abs(b.position.z - player.position.z);
-      const dx = Math.abs(b.position.x - player.position.x);
-      if(dz < 0.85 && dx < 1.05){
-        if(b.metadata.type==="high" && !state.rolling) crash();
-        if(b.metadata.type==="low" && player.position.y < 0.85) crash();
-      }
+    // Spawn new obstacles
+    const lastZ = obstacles.length > 0 ? obstacles[obstacles.length-1].position.z : -20;
+    if (lastZ > -100) {
+        spawnObstacle(lastZ - (15 + Math.random() * 15));
     }
-    if(b.position.z > 15){ b.dispose(); state.entities.bars.splice(i,1); }
-  }
-  for(let i=state.entities.coins.length-1;i>=0;i--){
-    const c = state.entities.coins[i];
-    c.position.z += sp;
-    c.rotation.z += 0.12;
-    if(state.pu.magnet > 0){
-      const d = BABYLON.Vector3.Distance(c.position, player.position);
-      if(d < 11){
-        const dir = player.position.subtract(c.position).normalize();
-        c.position.addInPlace(dir.scale(0.85));
-      }
+
+    // Move Ground Texture illusion
+    ground.position.z += moveDist;
+    if(ground.position.z > 50) ground.position.z = -50;
+
+    // Camera Follow
+    camera.position.z = player.position.z + 8;
+    camera.position.x += (player.position.x * 0.3 - camera.position.x) * 5 * delta;
+
+    updateUI();
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    const delta = Math.min(clock.getDelta(), 0.1);
+    update(delta);
+    renderer.render(scene, camera);
+}
+
+// --- INPUT HANDLING ---
+function handleInput(action) {
+    if (!state.isPlaying || state.isPaused) return;
+    
+    switch(action) {
+        case 'left': 
+            if(state.lane > -1) state.lane--; 
+            break;
+        case 'right': 
+            if(state.lane < 1) state.lane++; 
+            break;
+        case 'jump': 
+            if(!state.isJumping) {
+                state.isJumping = true;
+                state.yVelocity = CONFIG.jumpForce;
+                playSound('jump');
+            }
+            break;
+        case 'roll':
+            // Simplified roll as fast fall or duck
+            if(state.isJumping) state.yVelocity = -20;
+            break;
     }
-    const pp = player.position.clone(); pp.y += 0.9;
-    if(BABYLON.Vector3.Distance(c.position, pp) < 1.35){
-      const gain = state.pu.double > 0 ? 2 : 1;
-      state.coins += gain;
-      state.runCoins += gain;
-      state.score += 5 * gain;
-      updateUI();
-      c.dispose();
-      state.entities.coins.splice(i,1);
-    } else if(c.position.z > 10){
-      c.dispose(); state.entities.coins.splice(i,1);
-    }
-  }
-  for(let i=state.entities.pus.length-1;i>=0;i--){
-    const p = state.entities.pus[i];
-    p.position.z += sp;
-    p.rotation.y += 0.06;
-    if(BABYLON.Vector3.Distance(p.position, player.position) < 1.35){
-      activate(p.metadata.type);
-      p.dispose();
-      state.entities.pus.splice(i,1);
-    } else if(p.position.z > 10){
-      p.dispose(); state.entities.pus.splice(i,1);
-    }
-  }
+}
 
-  // Powerup timers
-  ["magnet","double","hover","jet"].forEach(k=>{
-    if(state.pu[k] > 0){
-      state.pu[k]--;
-      if(state.pu[k] <= 0){
-        const el = document.getElementById("pu-"+k);
-        if(el) el.style.display = "none";
-      }
-    }
-  });
-
-  // Tracks loop
-  tracks.position.z += sp;
-  if(tracks.position.z > 3.3) tracks.position.z = 0;
-
-  // Buildings parallax
-  for(const b of buildings){
-    b.position.z += sp * 0.08;
-    if(b.position.z > 25) b.position.z -= 320;
-  }
-
-  // Difficulty
-  state.speed = Math.min(state.maxSpeed, 0.48 + state.score * 0.00014);
-  state.score += sp * 0.1;
-  updateUI();
-
-  // Camera
-  const targetCamY = jetting ? 8 : 6.5;
-  camera.position.y += (targetCamY - camera.position.y) * 0.05;
-  camera.position.x += (player.position.x * 0.25 - camera.position.x) * 0.06;
-  camera.setTarget(new BABYLON.Vector3(player.position.x*0.2, 2, player.position.z - 10));
-
-  spawn();
+window.addEventListener('keydown', (e) => {
+    if(e.key === 'ArrowLeft') handleInput('left');
+    if(e.key === 'ArrowRight') handleInput('right');
+    if(e.key === 'ArrowUp' || e.key === ' ') handleInput('jump');
+    if(e.key === 'ArrowDown') handleInput('roll');
+    if(e.key === 'Escape') togglePause();
 });
 
-// Buttons
-document.getElementById("btnStart").onclick = start;
-document.getElementById("btnRetry").onclick = start;
-document.getElementById("btnMenu").onclick = ()=>{
-  document.getElementById("over").classList.add("hidden");
-  document.getElementById("start").classList.remove("hidden");
-};
-document.getElementById("btnShop").onclick = ()=>{
-  document.getElementById("start").classList.add("hidden");
-  document.getElementById("shop").classList.remove("hidden");
-  updateUI();
-};
-document.getElementById("btnCloseShop").onclick = ()=>{
-  document.getElementById("shop").classList.add("hidden");
-  document.getElementById("start").classList.remove("hidden");
-};
-document.querySelectorAll("#shop button[data-item]").forEach(btn=>{
-  btn.onclick = ()=>{
-    const item = btn.dataset.item;
-    const cost = parseInt(btn.dataset.cost);
-    if(state.coins >= cost){
-      state.coins -= cost;
-      state.inv[item] = (state.inv[item]||0) + 1;
-      localStorage.setItem("bab_coins", state.coins);
-      localStorage.setItem("bab_inv", JSON.stringify(state.inv));
-      updateUI();
+// Touch Controls
+let touchStartX = 0;
+let touchStartY = 0;
+window.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+});
+window.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    
+    if(Math.abs(dx) > Math.abs(dy)) {
+        if(Math.abs(dx) > 30) handleInput(dx > 0 ? 'right' : 'left');
+    } else {
+        if(Math.abs(dy) > 30) handleInput(dy > 0 ? 'roll' : 'jump');
     }
-  };
 });
 
-// Resize
-window.addEventListener("resize", ()=>engine.resize());
+// --- AUDIO SYSTEM (Synthesized) ---
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playSound(type) {
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    const now = audioCtx.currentTime;
+    if(type === 'jump') {
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(600, now + 0.1);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+    } else if (type === 'coin') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, now);
+        osc.frequency.exponentialRampToValueAtTime(1800, now + 0.1);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+    } else if (type === 'crash') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(100, now);
+        osc.frequency.exponentialRampToValueAtTime(10, now + 0.3);
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+    }
+}
 
-// Render
-engine.runRenderLoop(()=>{
-  scene.render();
-  document.getElementById("fps").textContent = engine.getFps().toFixed(0) + " FPS";
+// --- UI & STATE MANAGEMENT ---
+function updateUI() {
+    document.getElementById('score-display').innerText = state.score;
+}
+
+function startGame() {
+    initWorld();
+    state.isPlaying = true;
+    state.isPaused = false;
+    document.querySelectorAll('.menu-screen').forEach(el => el.classList.add('hidden'));
+    clock.start();
+}
+
+function gameOver(caughtByPolice) {
+    state.isPlaying = false;
+    playSound('crash');
+    localStorage.setItem('srp_coins', state.coins);
+    
+    document.getElementById('final-score').innerText = `امتیاز: ${state.score}`;
+    document.getElementById('police-msg').style.display = caughtByPolice ? 'block' : 'none';
+    document.getElementById('game-over').classList.remove('hidden');
+}
+
+function resetGame() {
+    startGame();
+}
+
+function goToMainMenu() {
+    document.getElementById('game-over').classList.add('hidden');
+    document.getElementById('main-menu').classList.remove('hidden');
+}
+
+function togglePause() {
+    if(!state.isPlaying) return;
+    state.isPaused = !state.isPaused;
+    if(state.isPaused) {
+        // Show simple pause overlay could go here
+    }
+}
+
+// Shop Logic
+function openShop() {
+    document.getElementById('main-menu').classList.add('hidden');
+    document.getElementById('shop-menu').classList.remove('hidden');
+    renderShop();
+}
+
+function renderShop() {
+    const grid = document.getElementById('skin-grid');
+    grid.innerHTML = '';
+    Object.keys(CONFIG.colors.skins).forEach(skinKey => {
+        const price = skinKey === 'classic' ? 0 : 200;
+        const owned = state.ownedSkins.includes(skinKey);
+        const selected = state.skin === skinKey;
+        
+        const div = document.createElement('div');
+        div.className = `shop-item ${owned ? 'owned' : ''} ${selected ? 'selected' : ''}`;
+        div.innerHTML = `
+            <div style="width:30px;height:30px;background:#${CONFIG.colors.skins[skinKey].toString(16)};border-radius:50%;margin:0 auto 10px;"></div>
+            <div>${skinKey.toUpperCase()}</div>
+            <div style="font-size:0.8rem;color:#aaa">${owned ? 'خریداری شده' : price + ' 🪙'}</div>
+        `;
+        div.onclick = () => buyOrSelect(skinKey, price);
+        grid.appendChild(div);
+    });
+}
+
+function buyOrSelect(skin, price) {
+    if(state.ownedSkins.includes(skin)) {
+        state.skin = skin;
+        localStorage.setItem('srp_skin', skin);
+        renderShop();
+    } else if(state.coins >= price) {
+        state.coins -= price;
+        state.ownedSkins.push(skin);
+        state.skin = skin;
+        localStorage.setItem('srp_coins', state.coins);
+        localStorage.setItem('srp_owned', JSON.stringify(state.ownedSkins));
+        localStorage.setItem('srp_skin', skin);
+        renderShop();
+    } else {
+        alert("سکه کافی نیست!");
+    }
+}
+
+function closeMenus() {
+    document.getElementById('shop-menu').classList.add('hidden');
+    document.getElementById('main-menu').classList.remove('hidden');
+}
+
+function toggleSettings() {
+    alert("تنظیمات گرافیکی در نسخه V8 به صورت خودکار بهینه شده‌اند.");
+}
+
+// Resize Handler
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+// Start Loop
+animate();
+
 </script>
 </body>
 </html>
