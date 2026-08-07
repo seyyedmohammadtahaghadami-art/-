@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Subway Runner V21 - Master Final</title>
+    <title>Subway Runner V22 - Full Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lalezar&display=swap');
 
@@ -15,34 +15,40 @@
         
         /* HUD */
         #hud { position: absolute; top: 10px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box; text-shadow: 2px 2px 0 #000; font-size: 22px; display: none; }
-        .hud-box { background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; border: 2px solid #f1c40f; }
+        .hud-box { background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; border: 2px solid #f1c40f; backdrop-filter: blur(4px); }
         
         /* Active Powerups */
         #active-powerups { position: absolute; top: 70px; left: 10px; display: flex; flex-direction: column; gap: 5px; }
-        .pu-badge { background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 10px; border-left: 4px solid #fff; font-size: 14px; display: flex; align-items: center; gap: 5px; animation: slideIn 0.3s; }
+        .pu-badge { background: rgba(0,0,0,0.8); padding: 5px 10px; border-radius: 10px; border-left: 4px solid #fff; font-size: 14px; display: flex; align-items: center; gap: 5px; animation: slideIn 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
 
         /* Menus */
-        .menu-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; overflow-y: auto; padding: 20px 0; }
+        .menu-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; overflow-y: auto; padding: 20px 0; backdrop-filter: blur(5px); }
         .hidden { display: none !important; }
         
         h1 { color: #f1c40f; font-size: 45px; margin: 0 0 10px 0; text-shadow: 3px 3px 0 #c0392b; transform: skew(-5deg); }
-        h2 { color: #ecf0f1; margin-bottom: 15px; font-size: 24px; }
+        h2 { color: #ecf0f1; margin-bottom: 15px; font-size: 24px; border-bottom: 2px solid #f1c40f; padding-bottom: 5px; display: inline-block; }
         
-        .btn { background: linear-gradient(#e67e22, #d35400); border: none; padding: 12px 25px; margin: 6px; color: white; font-family: 'Lalezar'; font-size: 20px; border-radius: 50px; cursor: pointer; box-shadow: 0 5px 0 #a04000; width: 260px; transition: 0.1s; }
+        .btn { background: linear-gradient(#e67e22, #d35400); border: none; padding: 12px 25px; margin: 6px; color: white; font-family: 'Lalezar'; font-size: 20px; border-radius: 50px; cursor: pointer; box-shadow: 0 5px 0 #a04000; width: 260px; transition: 0.1s; text-shadow: 1px 1px 0 rgba(0,0,0,0.3); }
         .btn:active { transform: translateY(5px); box-shadow: none; }
         .btn-blue { background: linear-gradient(#3498db, #2980b9); box-shadow: 0 5px 0 #1c5980; }
         .btn-gray { background: linear-gradient(#7f8c8d, #636e72); box-shadow: 0 5px 0 #4b5456; width: 140px; font-size: 16px; }
         .btn-green { background: linear-gradient(#2ecc71, #27ae60); box-shadow: 0 5px 0 #1e8449; }
+        .btn-small { width: auto; padding: 5px 15px; font-size: 14px; margin: 2px; }
 
         /* Shop & Grid */
         .grid-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 500px; margin-bottom: 20px; }
-        .grid-item { background: rgba(255,255,255,0.1); border: 2px solid #555; border-radius: 10px; padding: 10px; width: 90px; text-align: center; cursor: pointer; }
-        .grid-item.selected { border-color: #f1c40f; background: rgba(241, 196, 15, 0.2); }
-        .item-preview { width: 40px; height: 40px; margin: 0 auto 5px; border-radius: 5px; border: 2px solid #fff; }
+        .grid-item { background: rgba(255,255,255,0.1); border: 2px solid #555; border-radius: 10px; padding: 10px; width: 90px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .grid-item:hover { background: rgba(255,255,255,0.2); }
+        .grid-item.selected { border-color: #f1c40f; background: rgba(241, 196, 15, 0.2); box-shadow: 0 0 10px #f1c40f; }
+        .item-preview { width: 40px; height: 40px; margin: 0 auto 5px; border-radius: 5px; border: 2px solid #fff; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
         
+        /* Settings */
+        .setting-row { display: flex; justify-content: space-between; align-items: center; width: 90%; max-width: 300px; background: rgba(255,255,255,0.05); padding: 10px; margin: 5px 0; border-radius: 8px; }
+        select { background: #333; color: white; border: 1px solid #555; padding: 5px; border-radius: 5px; font-family: 'Lalezar'; }
+
         /* Effects */
         #blur-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; backdrop-filter: blur(0px); pointer-events: none; transition: 0.2s; z-index: 5; }
-        #toast { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: #f1c40f; padding: 10px 20px; border-radius: 20px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 30; border: 1px solid #f1c40f; }
+        #toast { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: #f1c40f; padding: 10px 25px; border-radius: 30px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 30; border: 2px solid #f1c40f; font-size: 18px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
 
         @keyframes slideIn { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
@@ -65,24 +71,25 @@
 
     <!-- Main Menu -->
     <div id="main-menu" class="menu-screen interactive">
-        <h1>SUBWAY V21</h1>
-        <p style="color:#aaa; margin-bottom:20px;">نسخه نهایی - پارکور و اجتماع</p>
+        <h1>SUBWAY V22</h1>
+        <p style="color:#aaa; margin-bottom:20px;">نسخه فول - موسیقی و گرافیک بالا</p>
         <div style="margin-bottom:15px; font-size:20px; color:#f1c40f;">سکه: <span id="menu-coins">0</span> | رکورد: <span id="menu-high">0</span></div>
         <button class="btn" onclick="game.start()">شروع دویدن 🏃‍♂️</button>
         <button class="btn btn-blue" onclick="ui.showShop()">فروشگاه 🛒</button>
         <button class="btn btn-green" onclick="ui.showAchievements()">دستاوردها 🏆</button>
-        <button class="btn btn-gray" onclick="audio.toggleMute()">صدا: <span id="mute-text">روشن</span> 🔊</button>
+        <button class="btn btn-gray" onclick="ui.showSettings()">تنظیمات ⚙️</button>
+        <button class="btn btn-small btn-gray" onclick="audio.toggleMute()" style="margin-top:10px;">صدا: <span id="mute-text">روشن</span> 🔊</button>
     </div>
 
     <!-- Shop Menu -->
     <div id="shop-menu" class="menu-screen interactive hidden">
         <h2>فروشگاه</h2>
-        <div style="color:#f1c40f; margin-bottom:10px;">موجودی: <span id="shop-coins">0</span> 🪙</div>
+        <div style="color:#f1c40f; margin-bottom:10px; font-size:20px;">موجودی: <span id="shop-coins">0</span> 🪙</div>
         
-        <h3 style="width:100%; text-align:center; color:#aaa; font-size:16px;">اسکین‌ها</h3>
+        <h3 style="width:100%; text-align:center; color:#aaa; font-size:16px; margin-top:10px;">👕 اسکین‌ها</h3>
         <div class="grid-container" id="skin-grid"></div>
         
-        <h3 style="width:100%; text-align:center; color:#aaa; font-size:16px;">ارتقا پاور-آپ</h3>
+        <h3 style="width:100%; text-align:center; color:#aaa; font-size:16px;">⚡ پاور-آپ‌ها (خرید/ارتقا)</h3>
         <div class="grid-container" id="upgrade-grid"></div>
 
         <button class="btn btn-gray" onclick="ui.showMain()">بازگشت</button>
@@ -92,6 +99,28 @@
     <div id="achieve-menu" class="menu-screen interactive hidden">
         <h2>دستاوردها</h2>
         <div id="achieve-list" style="width:90%; max-width:400px; text-align:right;"></div>
+        <button class="btn btn-gray" onclick="ui.showMain()" style="margin-top:20px;">بازگشت</button>
+    </div>
+
+    <!-- Settings Menu -->
+    <div id="settings-menu" class="menu-screen interactive hidden">
+        <h2>تنظیمات</h2>
+        <div class="setting-row">
+            <span>کیفیت گرافیک</span>
+            <select id="quality-select" onchange="game.setQuality(this.value)">
+                <option value="low">پایین (سریع)</option>
+                <option value="med" selected>متوسط</option>
+                <option value="high">بالا (زیبا)</option>
+            </select>
+        </div>
+        <div class="setting-row">
+            <span>سایه‌ها</span>
+            <input type="checkbox" id="shadow-toggle" checked onchange="game.toggleShadows(this.checked)">
+        </div>
+        <div class="setting-row">
+            <span>لرزش دوربین</span>
+            <input type="checkbox" id="shake-toggle" checked onchange="game.toggleShake(this.checked)">
+        </div>
         <button class="btn btn-gray" onclick="ui.showMain()" style="margin-top:20px;">بازگشت</button>
     </div>
 
@@ -107,22 +136,62 @@
     <script type="module">
         import * as THREE from 'three';
 
-        // --- AUDIO SYSTEM ---
+        // --- ADVANCED AUDIO SYSTEM (Music + SFX) ---
         const audio = {
-            ctx: null, muted: false,
-            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); if (this.ctx.state === 'suspended') this.ctx.resume(); },
-            play(freq, type, dur) {
+            ctx: null, 
+            muted: false,
+            musicGain: null,
+            musicInterval: null,
+            
+            init() { 
+                if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); 
+                if (this.ctx.state === 'suspended') this.ctx.resume(); 
+                this.startMusic();
+            },
+            
+            playTone(freq, type, dur, vol = 0.1) {
                 if (this.muted || !this.ctx) return;
                 const o = this.ctx.createOscillator(), g = this.ctx.createGain();
                 o.type = type; o.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                g.gain.setValueAtTime(0.1, this.ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
+                g.gain.setValueAtTime(vol, this.ctx.currentTime); 
+                g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
                 o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime + dur);
             },
-            coin() { this.play(1200, 'sine', 0.1); },
-            jump() { this.play(400, 'square', 0.2); },
-            crash() { this.play(100, 'sawtooth', 0.5); },
-            powerup() { this.play(800, 'triangle', 0.4); },
-            toggleMute() { this.muted = !this.muted; document.getElementById('mute-text').innerText = this.muted ? "خاموش" : "روشن"; }
+            
+            coin() { this.playTone(1200, 'sine', 0.1, 0.1); setTimeout(()=>this.playTone(1800, 'sine', 0.1, 0.1), 50); },
+            jump() { this.playTone(300, 'square', 0.2, 0.1); },
+            crash() { this.playTone(100, 'sawtooth', 0.5, 0.2); },
+            powerup() { this.playTone(600, 'triangle', 0.1, 0.1); setTimeout(()=>this.playTone(900, 'triangle', 0.2, 0.1), 100); },
+            
+            startMusic() {
+                if(this.musicInterval) clearInterval(this.musicInterval);
+                if(this.muted) return;
+                
+                // Simple Bassline Loop
+                const notes = [110, 110, 130, 110, 146, 130]; // A2, C3, D3...
+                let step = 0;
+                this.musicInterval = setInterval(() => {
+                    if(this.muted || !game.isPlaying) return;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.value = notes[step % notes.length];
+                    gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.3);
+                    step++;
+                }, 250); // 120 BPM approx
+            },
+
+            toggleMute() { 
+                this.muted = !this.muted; 
+                document.getElementById('mute-text').innerText = this.muted ? "خاموش" : "روشن"; 
+                if(!this.muted) this.startMusic();
+                else clearInterval(this.musicInterval);
+            }
         };
 
         // --- DATA ---
@@ -130,22 +199,34 @@
             { id: 'default', name: 'دونده', color: 0xe74c3c, price: 0 },
             { id: 'ninja', name: 'نینجا', color: 0x111111, price: 200 },
             { id: 'gold', name: 'طلایی', color: 0xf1c40f, price: 500 },
-            { id: 'cyber', name: 'سایبر', color: 0x00ffff, price: 1000 }
+            { id: 'cyber', name: 'سایبر', color: 0x00ffff, price: 1000 },
+            { id: 'zombie', name: 'زامبی', color: 0x27ae60, price: 1500 },
+            { id: 'king', name: 'پادشاه', color: 0x8e44ad, price: 3000 }
+        ];
+
+        const POWERUPS_SHOP = [
+            { id: 'magnet', name: 'آهنربا', icon: '🧲', price: 100 },
+            { id: 'jetpack', name: 'جت‌پک', icon: '🚀', price: 300 },
+            { id: 'shield', name: 'سپر', icon: '🛡️', price: 200 },
+            { id: 'multiplier', name: 'سکه x2', icon: '💰', price: 500 }
         ];
 
         const ACHIEVEMENTS = [
-            { id: 'score_1000', name: 'دونده تازه کار', desc: 'رسیدن به ۱۰۰۰ امتیاز', target: 1000, type: 'score' },
+            { id: 'score_1000', name: 'دونده تازه کار', desc: 'رسیدن به ۱۰۰ امتیاز', target: 1000, type: 'score' },
             { id: 'coins_500', name: 'ثروتمند', desc: 'جمع کردن ۵۰۰ سکه', target: 500, type: 'coins' },
-            { id: 'train_hopper', name: 'پارکور باز', desc: 'پرش روی ۱۰ قطار', target: 10, type: 'trains' }
+            { id: 'train_hopper', name: 'پارکور باز', desc: 'پرش روی ۱۰ قطار', target: 10, type: 'trains' },
+            { id: 'sky_high', name: 'پرنده', desc: 'پرواز با جت‌پک', target: 1, type: 'jetpack_used' }
         ];
 
         let state = {
-            coins: parseInt(localStorage.getItem('v21_coins')) || 0,
-            highScore: parseInt(localStorage.getItem('v21_high')) || 0,
-            unlockedSkins: JSON.parse(localStorage.getItem('v21_skins')) || ['default'],
-            currentSkin: localStorage.getItem('v21_skin') || 'default',
-            achievements: JSON.parse(localStorage.getItem('v21_ach')) || [],
-            stats: { trainsHopped: 0 }
+            coins: parseInt(localStorage.getItem('v22_coins')) || 0,
+            highScore: parseInt(localStorage.getItem('v22_high')) || 0,
+            unlockedSkins: JSON.parse(localStorage.getItem('v22_skins')) || ['default'],
+            currentSkin: localStorage.getItem('v22_skin') || 'default',
+            achievements: JSON.parse(localStorage.getItem('v22_ach')) || [],
+            ownedPowerups: JSON.parse(localStorage.getItem('v22_pu')) || [],
+            stats: { trainsHopped: 0, jetpackUsed: 0 },
+            settings: { quality: 'med', shadows: true, shake: true }
         };
 
         // --- GAME ENGINE ---
@@ -153,32 +234,33 @@
             constructor() {
                 this.scene = new THREE.Scene();
                 this.scene.background = new THREE.Color(0x87CEEB);
-                this.scene.fog = new THREE.Fog(0x87CEEB, 20, 110);
+                this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.015);
 
-                // Camera: Higher and further back for better view
+                // Camera: Optimized for gameplay
                 this.camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 200);
                 this.camera.position.set(0, 6, 10); 
                 this.camera.lookAt(0, 1, -10);
 
-                this.renderer = new THREE.WebGLRenderer({ antialias: true });
+                this.renderer = new THREE.WebGLRenderer({ antialias: state.settings.quality !== 'low' });
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.enabled = state.settings.shadows;
                 this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
                 document.body.appendChild(this.renderer.domElement);
 
                 // Lights
-                const sun = new THREE.DirectionalLight(0xffffff, 1.2);
-                sun.position.set(10, 30, 10);
-                sun.castShadow = true;
-                sun.shadow.mapSize.width = 2048; sun.shadow.mapSize.height = 2048;
-                this.scene.add(sun);
+                this.sun = new THREE.DirectionalLight(0xffffff, 1.2);
+                this.sun.position.set(10, 30, 10);
+                this.sun.castShadow = true;
+                this.sun.shadow.mapSize.width = 2048; this.sun.shadow.mapSize.height = 2048;
+                this.scene.add(this.sun);
                 this.scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+                this.scene.add(new THREE.HemisphereLight(0xffffbb, 0x080820, 0.5));
 
                 this.createWorld();
                 this.player = this.createPlayerMesh(SKINS.find(s=>s.id===state.currentSkin).color);
                 this.scene.add(this.player);
 
-                this.objects = []; // Trains, Barriers
+                this.objects = []; 
                 this.coins = [];
                 this.powerups = [];
                 
@@ -191,14 +273,16 @@
             }
 
             createWorld() {
-                // Ground
-                const ground = new THREE.Mesh(new THREE.PlaneGeometry(100, 600), new THREE.MeshStandardMaterial({ color: 0x333333 }));
+                // Ground with texture-like grid
+                const groundGeo = new THREE.PlaneGeometry(100, 600);
+                const groundMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
+                const ground = new THREE.Mesh(groundGeo, groundMat);
                 ground.rotation.x = -Math.PI/2; ground.position.z = -250; ground.receiveShadow = true;
                 this.scene.add(ground);
 
                 // Tracks
                 const railGeo = new THREE.BoxGeometry(0.15, 0.15, 600);
-                const railMat = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.8 });
+                const railMat = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.8, roughness: 0.2 });
                 [-2.5, 0, 2.5].forEach(x => {
                     [-0.8, 0.8].forEach(offset => {
                         const r = new THREE.Mesh(railGeo, railMat);
@@ -210,29 +294,42 @@
 
             createPlayerMesh(color) {
                 const g = new THREE.Group();
-                const b = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.9, 0.4), new THREE.MeshStandardMaterial({color}));
+                // Body
+                const bMat = new THREE.MeshStandardMaterial({color: color, roughness: 0.3, metalness: 0.1});
+                const b = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.9, 0.4), bMat);
                 b.position.y = 0.9; b.castShadow = true; g.add(b);
+                // Head
                 const h = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), new THREE.MeshStandardMaterial({color: 0xffccaa}));
-                h.position.y = 1.6; g.add(h);
+                h.position.y = 1.6; h.castShadow = true; g.add(h);
+                // Limbs
                 const lGeo = new THREE.BoxGeometry(0.2, 0.7, 0.2);
                 const lMat = new THREE.MeshStandardMaterial({color: 0x333});
                 const ll = new THREE.Mesh(lGeo, lMat); ll.position.set(-0.2, 0.35, 0); g.add(ll);
                 const rl = new THREE.Mesh(lGeo, lMat); rl.position.set(0.2, 0.35, 0); g.add(rl);
-                g.userData = { parts: { ll, rl } };
+                const la = new THREE.Mesh(lGeo, lMat); la.position.set(-0.4, 1.0, 0); g.add(la);
+                const ra = new THREE.Mesh(lGeo, lMat); ra.position.set(0.4, 1.0, 0); g.add(ra);
+                
+                g.userData = { parts: { ll, rl, la, ra } };
                 return g;
             }
 
             spawnTrain() {
                 const laneIdx = Math.floor(Math.random() * 3);
-                const length = 30 + Math.random() * 40; // Long trains
+                const length = 30 + Math.random() * 40; 
                 
                 const group = new THREE.Group();
-                const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 3.5, length), new THREE.MeshStandardMaterial({ color: 0x2980b9, metalness: 0.5, roughness: 0.2 }));
+                // Train Body
+                const bodyMat = new THREE.MeshStandardMaterial({ color: 0x2980b9, metalness: 0.6, roughness: 0.2 });
+                const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 3.5, length), bodyMat);
                 body.position.y = 1.75; body.castShadow = true; body.receiveShadow = true; group.add(body);
                 
                 // Roof
                 const roof = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.2, length-1), new THREE.MeshStandardMaterial({ color: 0xecf0f1 }));
                 roof.position.y = 3.6; group.add(roof);
+
+                // Stripes
+                const stripe = new THREE.Mesh(new THREE.BoxGeometry(2.25, 0.2, length), new THREE.MeshBasicMaterial({ color: 0xf1c40f }));
+                stripe.position.y = 2.5; group.add(stripe);
 
                 group.position.set([-2.5, 0, 2.5][laneIdx], 0, -160);
                 this.scene.add(group);
@@ -252,10 +349,10 @@
                 
                 if(type === 'low') {
                     const m = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 0.5), new THREE.MeshStandardMaterial({color: 0xe67e22}));
-                    m.position.y = 0.5; group.add(m);
+                    m.position.y = 0.5; m.castShadow = true; group.add(m);
                 } else {
                     const m = new THREE.Mesh(new THREE.BoxGeometry(2, 0.5, 0.5), new THREE.MeshStandardMaterial({color: 0xc0392b}));
-                    m.position.y = 2; group.add(m);
+                    m.position.y = 2; m.castShadow = true; group.add(m);
                     const pGeo = new THREE.CylinderGeometry(0.05, 0.05, 2);
                     const pMat = new THREE.MeshStandardMaterial({color: 0x7f8c8d});
                     const p1 = new THREE.Mesh(pGeo, pMat); p1.position.set(-0.9, 1, 0); group.add(p1);
@@ -268,7 +365,7 @@
             }
 
             spawnCoin(x, y, z) {
-                const c = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.1, 16), new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1, roughness: 0.2 }));
+                const c = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.1, 16), new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1, roughness: 0.2, emissive: 0xaa8800, emissiveIntensity: 0.2 }));
                 c.rotation.x = Math.PI/2; c.position.set(x, y, z);
                 this.scene.add(c);
                 this.coins.push(c);
@@ -297,8 +394,8 @@
                 this.isOnTrain = false;
                 this.activeTrain = null;
                 this.stunned = false;
+                this.jetpackFuel = 0;
                 
-                // Powerups
                 this.activePUs = {};
                 
                 this.objects.forEach(o => this.scene.remove(o.mesh));
@@ -308,6 +405,7 @@
                 
                 this.player.position.set(0, 0, 0);
                 this.player.scale.set(1,1,1);
+                this.player.rotation.set(0,0,0);
                 document.getElementById('active-powerups').innerHTML = '';
             }
 
@@ -376,8 +474,13 @@
 
                 this.activePUs[type] = true;
                 
+                if(type === 'jetpack') {
+                    this.jetpackFuel = 100;
+                    state.stats.jetpackUsed++;
+                }
+                
                 let duration = 8000;
-                if(type === 'jetpack') { this.vy = 0.5; duration = 6000; }
+                if(type === 'jetpack') duration = 6000;
                 
                 setTimeout(() => {
                     this.activePUs[type] = false;
@@ -391,18 +494,18 @@
                     this.activePUs.shield = false;
                     const el = document.getElementById('pu-shield');
                     if(el) el.remove();
-                    ui.toast("سپر محافظت کرد!");
+                    ui.toast("سپر محافظت کرد! 🛡️");
                     return;
                 }
 
                 this.stunned = true;
-                this.speed *= 0.4; // Slow down significantly
+                this.speed *= 0.4; 
                 document.getElementById('blur-overlay').style.backdropFilter = 'blur(8px)';
-                ui.toast("سرگیجه! مراقب باش");
+                ui.toast("سرگیجه! مراقب باش 😵");
                 
                 setTimeout(() => {
                     this.stunned = false;
-                    this.speed = Math.max(this.speed * 2, 0.4); // Recover
+                    this.speed = Math.max(this.speed * 2, 0.4); 
                     document.getElementById('blur-overlay').style.backdropFilter = 'blur(0px)';
                 }, 1500);
             }
@@ -417,14 +520,12 @@
                     const oBox = new THREE.Box3().setFromObject(obj.mesh);
                     
                     if(obj.type === 'train') {
-                        // Check Z overlap (Are we near the train?)
                         if(Math.abs(this.player.position.z - obj.mesh.position.z) < obj.length/2 + 0.5) {
-                            // Check X overlap (Are we in the same lane?)
                             if(Math.abs(this.player.position.x - obj.mesh.position.x) < 1.2) {
                                 const pBottom = this.player.position.y;
                                 const tTop = obj.height;
                                 
-                                // 1. On Top (Parkour)
+                                // On Top
                                 if(this.vy <= 0 && pBottom >= tTop - 0.5 && pBottom <= tTop + 1.5) {
                                     this.isOnTrain = true;
                                     if(this.activeTrain !== obj) {
@@ -435,13 +536,11 @@
                                     this.vy = 0;
                                     this.isJumping = false;
                                 } 
-                                // 2. Front Crash (Game Over)
+                                // Front Crash
                                 else if (pBottom < tTop - 0.5 && this.player.position.z > obj.mesh.position.z - obj.length/2) {
-                                    // Only crash if hitting the FRONT face
                                     if(Math.abs(this.player.position.z - (obj.mesh.position.z - obj.length/2)) < 1) {
                                         this.gameOver();
                                     } else {
-                                        // Side hit
                                         this.stumble();
                                     }
                                 }
@@ -449,10 +548,8 @@
                         }
                     } else if (obj.type === 'barrier') {
                         if(pBox.intersectsBox(oBox)) {
-                            if(obj.subType === 'high' && this.player.scale.y < 1) continue; // Rolled under
-                            if(obj.subType === 'low' && this.player.position.y > 1) continue; // Jumped over
-                            this.stumble(); // Barriers just stun you usually, or kill? Let's stun for side, kill for front.
-                            // Actually barriers are usually instant fail in subway surfers unless shield.
+                            if(obj.subType === 'high' && this.player.scale.y < 1) continue; 
+                            if(obj.subType === 'low' && this.player.position.y > 1) continue; 
                             if(!this.activePUs.shield) this.gameOver();
                             else this.stumble();
                         }
@@ -497,10 +594,9 @@
                 state.coins += this.runCoins;
                 if(this.score > state.highScore) state.highScore = Math.floor(this.score);
                 
-                // Save
-                localStorage.setItem('v21_coins', state.coins);
-                localStorage.setItem('v21_high', state.highScore);
-                localStorage.setItem('v21_stats', JSON.stringify(state.stats));
+                localStorage.setItem('v22_coins', state.coins);
+                localStorage.setItem('v22_high', state.highScore);
+                localStorage.setItem('v22_stats', JSON.stringify(state.stats));
                 
                 ui.checkAchievements();
                 ui.updateMenu();
@@ -520,27 +616,34 @@
                 this.start();
             }
 
+            setQuality(q) {
+                state.settings.quality = q;
+                location.reload();
+            }
+            toggleShadows(v) { state.settings.shadows = v; this.renderer.shadowMap.enabled = v; }
+            toggleShake(v) { state.settings.shake = v; }
+
             animate() {
                 requestAnimationFrame(() => this.animate());
 
                 if(this.isPlaying) {
-                    // Speed Curve: Starts slow (0.4), gets faster
                     if(!this.stunned) this.speed = Math.min(0.4 + (this.score * 0.00015), 1.4);
                     
                     this.score += this.speed;
                     document.getElementById('score').innerText = Math.floor(this.score);
                     document.getElementById('coins').innerText = state.coins + this.runCoins;
 
-                    // Lane Lerp
                     const targetX = [-2.5, 0, 2.5][this.lane];
                     this.player.position.x += (targetX - this.player.position.x) * 0.2;
                     this.player.rotation.z = (this.player.position.x - targetX) * -0.1;
 
-                    // Physics
+                    // Jetpack Physics Fix
                     if(this.activePUs.jetpack) {
-                        this.player.position.y += 0.2;
+                        this.player.position.y += 0.15; // Fly up
                         if(this.player.position.y > 8) this.player.position.y = 8;
                         this.player.rotation.x = -0.5;
+                        this.vy = 0; // Reset gravity velocity
+                        this.isJumping = false;
                     } else {
                         this.player.rotation.x = 0;
                         if(!this.isOnTrain) {
@@ -575,7 +678,6 @@
                     });
                     this.powerups = this.powerups.filter(p => !p.dead);
 
-                    // Spawning
                     if(this.objects.length < 2 && Math.random() < 0.025) {
                         if(Math.random() > 0.3) this.spawnTrain();
                         else this.spawnBarrier();
@@ -583,11 +685,21 @@
                     if(Math.random() < 0.04) this.spawnCoin([-2.5, 0, 2.5][Math.floor(Math.random()*3)], 1, -160);
                     if(Math.random() < 0.003) this.spawnPowerup();
 
-                    // Anim
                     if(!this.isJumping && !this.activePUs.jetpack) {
                         const t = Date.now() * 0.02 * (this.speed/0.4);
                         this.player.userData.parts.ll.rotation.x = Math.sin(t);
                         this.player.userData.parts.rl.rotation.x = Math.sin(t + Math.PI);
+                        this.player.userData.parts.la.rotation.x = Math.sin(t + Math.PI);
+                        this.player.userData.parts.ra.rotation.x = Math.sin(t);
+                    }
+
+                    // Camera Shake
+                    if(state.settings.shake && !this.stunned) {
+                        this.camera.position.x = (Math.random() - 0.5) * 0.05;
+                        this.camera.position.y = 6 + (Math.random() - 0.5) * 0.05;
+                    } else {
+                        this.camera.position.x = 0;
+                        this.camera.position.y = 6;
                     }
 
                     this.checkCollisions();
@@ -620,6 +732,13 @@
                 document.getElementById('achieve-menu').classList.remove('hidden');
                 ui.renderAchievements();
             },
+            showSettings: () => {
+                document.querySelectorAll('.menu-screen').forEach(el => el.classList.add('hidden'));
+                document.getElementById('settings-menu').classList.remove('hidden');
+                document.getElementById('quality-select').value = state.settings.quality;
+                document.getElementById('shadow-toggle').checked = state.settings.shadows;
+                document.getElementById('shake-toggle').checked = state.settings.shake;
+            },
             updateMenu: () => {
                 document.getElementById('menu-coins').innerText = state.coins;
                 document.getElementById('menu-high').innerText = state.highScore;
@@ -646,7 +765,7 @@
                     div.onclick = () => {
                         if(isUnlocked) {
                             state.currentSkin = skin.id;
-                            localStorage.setItem('v21_skin', skin.id);
+                            localStorage.setItem('v22_skin', skin.id);
                             game.scene.remove(game.player);
                             game.player = game.createPlayerMesh(skin.color);
                             game.scene.add(game.player);
@@ -655,9 +774,9 @@
                             state.coins -= skin.price;
                             state.unlockedSkins.push(skin.id);
                             state.currentSkin = skin.id;
-                            localStorage.setItem('v21_coins', state.coins);
-                            localStorage.setItem('v21_skins', JSON.stringify(state.unlockedSkins));
-                            localStorage.setItem('v21_skin', skin.id);
+                            localStorage.setItem('v22_coins', state.coins);
+                            localStorage.setItem('v22_skins', JSON.stringify(state.unlockedSkins));
+                            localStorage.setItem('v22_skin', skin.id);
                             game.scene.remove(game.player);
                             game.player = game.createPlayerMesh(skin.color);
                             game.scene.add(game.player);
@@ -668,9 +787,27 @@
                     sGrid.appendChild(div);
                 });
 
-                // Upgrades (Dummy for now)
+                // Powerups Shop
                 const uGrid = document.getElementById('upgrade-grid');
-                uGrid.innerHTML = '<div class="grid-item"><div class="item-preview" style="background:#555; display:flex; align-items:center; justify-content:center">🔒</div><div style="font-size:12px">به زودی</div></div>';
+                uGrid.innerHTML = '';
+                POWERUPS_SHOP.forEach(pu => {
+                    const isOwned = state.ownedPowerups.includes(pu.id);
+                    const div = document.createElement('div');
+                    div.className = `grid-item ${isOwned ? 'selected' : ''}`;
+                    div.innerHTML = `<div class="item-preview" style="background:#333; display:flex; align-items:center; justify-content:center; font-size:24px;">${pu.icon}</div><div style="font-size:12px">${pu.name}</div><div style="color:#f1c40f; font-size:10px">${isOwned ? '✓ موجود' : pu.price}</div>`;
+                    div.onclick = () => {
+                        if(!isOwned && state.coins >= pu.price) {
+                            state.coins -= pu.price;
+                            state.ownedPowerups.push(pu.id);
+                            localStorage.setItem('v22_coins', state.coins);
+                            localStorage.setItem('v22_pu', JSON.stringify(state.ownedPowerups));
+                            ui.renderShop();
+                            ui.updateMenu();
+                            ui.toast(`${pu.name} خریداری شد!`);
+                        }
+                    };
+                    uGrid.appendChild(div);
+                });
             },
             renderAchievements: () => {
                 const list = document.getElementById('achieve-list');
@@ -691,6 +828,7 @@
                         if(ach.type === 'score') val = state.highScore;
                         if(ach.type === 'coins') val = state.coins;
                         if(ach.type === 'trains') val = state.stats.trainsHopped || 0;
+                        if(ach.type === 'jetpack_used') val = state.stats.jetpackUsed || 0;
                         
                         if(val >= ach.target) {
                             state.achievements.push(ach.id);
@@ -699,7 +837,7 @@
                     }
                 });
                 if(newUnlock) {
-                    localStorage.setItem('v21_ach', JSON.stringify(state.achievements));
+                    localStorage.setItem('v22_ach', JSON.stringify(state.achievements));
                     ui.toast("دستاورد جدید باز شد! 🏆");
                 }
             }
