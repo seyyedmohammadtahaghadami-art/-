@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Subway Runner Pro V10 - Ultra Graphics</title>
+    <title>Subway Runner Pro V10.1 - Stable & Enhanced</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap');
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Vazirmatn', sans-serif; user-select: none; touch-action: none; }
+        body { margin: 0; overflow: hidden; background: #050510; font-family: 'Vazirmatn', sans-serif; user-select: none; touch-action: none; }
         canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
         
         /* UI Layer */
@@ -24,7 +24,7 @@
         .hidden { opacity: 0; pointer-events: none; visibility: hidden; }
         
         h1 { 
-            color: #fff; font-size: 4rem; margin: 0 0 40px 0; text-transform: uppercase; 
+            color: #fff; font-size: 3.5rem; margin: 0 0 40px 0; text-transform: uppercase; 
             background: linear-gradient(to bottom, #fff, #aaa); 
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
             filter: drop-shadow(0 0 20px rgba(255,255,255,0.3)); letter-spacing: 5px; text-align: center;
@@ -32,11 +32,11 @@
         
         button { 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            border: none; padding: 20px 60px; color: white; 
-            font-family: inherit; font-size: 1.4rem; font-weight: bold; 
+            border: none; padding: 18px 50px; color: white; 
+            font-family: inherit; font-size: 1.3rem; font-weight: bold; 
             border-radius: 60px; cursor: pointer; 
             box-shadow: 0 10px 30px rgba(118, 75, 162, 0.4); 
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); margin: 12px; min-width: 260px; 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); margin: 12px; min-width: 240px; 
             text-shadow: 0 2px 4px rgba(0,0,0,0.3); position: relative; overflow: hidden;
             border: 1px solid rgba(255,255,255,0.1);
         }
@@ -45,31 +45,24 @@
         button.secondary { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); box-shadow: none; }
         button.secondary:hover { background: rgba(255,255,255,0.1); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         
-        .panel-row { display: flex; justify-content: space-between; width: 350px; margin: 15px 0; color: white; font-size: 1.1rem; align-items: center; background: rgba(255,255,255,0.03); padding: 15px 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
+        .panel-row { display: flex; justify-content: space-between; width: 320px; margin: 12px 0; color: white; font-size: 1.1rem; align-items: center; background: rgba(255,255,255,0.03); padding: 12px 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
         .toggle-group { display: flex; gap: 8px; }
-        .toggle-btn { background: rgba(0,0,0,0.4); padding: 8px 20px; border-radius: 25px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; transition: 0.3s; }
+        .toggle-btn { background: rgba(0,0,0,0.4); padding: 8px 18px; border-radius: 25px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; transition: 0.3s; }
         .toggle-btn.active { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-color: transparent; color: white; font-weight: bold; box-shadow: 0 0 15px rgba(245, 87, 108, 0.4); }
 
-        .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 600px; margin-bottom: 30px; }
-        .shop-item { background: rgba(255,255,255,0.03); padding: 20px 15px; border-radius: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; color: white; transition: 0.3s; backdrop-filter: blur(5px); }
+        .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 500px; margin-bottom: 30px; }
+        .shop-item { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; color: white; transition: 0.3s; backdrop-filter: blur(5px); }
         .shop-item:hover { background: rgba(255,255,255,0.08); transform: translateY(-3px); }
         .shop-item.selected { border-color: #ffd700; background: rgba(255, 215, 0, 0.1); box-shadow: 0 0 20px rgba(255,215,0,0.15); }
-        .skin-preview { width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 12px; border: 3px solid rgba(255,255,255,0.1); box-shadow: inset 0 -10px 20px rgba(0,0,0,0.4), 0 5px 15px rgba(0,0,0,0.3); }
+        .skin-preview { width: 45px; height: 45px; border-radius: 50%; margin: 0 auto 10px; border: 3px solid rgba(255,255,255,0.1); box-shadow: inset 0 -10px 20px rgba(0,0,0,0.4); }
         
-        #pause-btn { pointer-events: auto; background: rgba(255,255,255,0.1); width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.5rem; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); transition: 0.3s; }
+        #pause-btn { pointer-events: auto; background: rgba(255,255,255,0.1); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.5rem; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); transition: 0.3s; }
         #pause-btn:hover { background: rgba(255,255,255,0.2); transform: rotate(90deg); }
         
         #stumble-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle, transparent 40%, rgba(255,0,0,0.4) 100%); opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 5; mix-blend-mode: overlay; }
     </style>
-    
-    <!-- Three.js Core + Post Processing -->
+    <!-- Only Core Three.js - No External Post Processing to prevent button failure -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 </head>
 <body>
 
@@ -81,8 +74,8 @@
             <div class="coin-box">🪙 <span id="coin-display">0</span></div>
             <div id="pause-btn">⏸️</div>
         </div>
-        <div class="hud" style="justify-content:center; padding-bottom:60px; pointer-events:none;">
-            <div id="score-display" style="font-size:3.5rem; letter-spacing:3px; text-shadow: 0 0 20px rgba(255,255,255,0.3);">0</div>
+        <div class="hud" style="justify-content:center; padding-bottom:50px; pointer-events:none;">
+            <div id="score-display" style="font-size:3rem; letter-spacing:2px; text-shadow: 0 0 20px rgba(255,255,255,0.3);">0</div>
         </div>
     </div>
 
@@ -96,7 +89,7 @@
 
     <!-- Settings -->
     <div id="settings-menu" class="menu-screen hidden">
-        <h2 style="color:white; margin-bottom:30px; font-size:2rem; font-weight:300;">تنظیمات گرافیک پیشرفته</h2>
+        <h2 style="color:white; margin-bottom:25px; font-size:1.8rem; font-weight:300;">تنظیمات گرافیک</h2>
         <div class="panel-row">
             <span>کیفیت رندر:</span>
             <div class="toggle-group">
@@ -106,24 +99,20 @@
             </div>
         </div>
         <div class="panel-row">
-            <span>Bloom (درخشش):</span>
-            <div class="toggle-btn active" onclick="Settings.toggleBloom()" id="t-bloom">روشن</div>
-        </div>
-        <div class="panel-row">
             <span>سایه‌زنی (Shadow):</span>
             <div class="toggle-btn active" onclick="Settings.toggleShadow()" id="t-shadow">روشن</div>
         </div>
         <div class="panel-row">
-            <span>Vignette:</span>
-            <div class="toggle-btn active" onclick="Settings.toggleVignette()" id="t-vignette">روشن</div>
+            <span>افکت ذرات:</span>
+            <div class="toggle-btn active" onclick="Settings.toggleParticles()" id="t-particles">روشن</div>
         </div>
-        <button class="secondary" onclick="UI.showMain()" style="margin-top:40px;">بازگشت به منو</button>
+        <button class="secondary" onclick="UI.showMain()" style="margin-top:30px;">بازگشت به منو</button>
     </div>
 
     <!-- Shop -->
     <div id="shop-menu" class="menu-screen hidden">
         <h2 style="color:white; margin-bottom:15px; font-weight:300;">فروشگاه شخصیت‌ها</h2>
-        <div style="color:#ffd700; margin-bottom:25px; font-size:1.4rem; background:rgba(255,215,0,0.1); padding:10px 30px; border-radius:30px; border:1px solid rgba(255,215,0,0.2);">موجودی: <span id="shop-coins">0</span> 🪙</div>
+        <div style="color:#ffd700; margin-bottom:20px; font-size:1.3rem; background:rgba(255,215,0,0.1); padding:8px 25px; border-radius:30px; border:1px solid rgba(255,215,0,0.2);">موجودی: <span id="shop-coins">0</span> 🪙</div>
         <div class="shop-grid" id="skin-container"></div>
         <button class="secondary" onclick="UI.showMain()">بازگشت</button>
     </div>
@@ -131,25 +120,25 @@
     <!-- Game Over -->
     <div id="game-over" class="menu-screen hidden">
         <h1 style="background:linear-gradient(to bottom, #ff416c, #ff4b2b); -webkit-background-clip:text; -webkit-text-fill-color:transparent; filter:drop-shadow(0 0 30px rgba(255,75,43,0.4));">GAME OVER</h1>
-        <h2 style="color:white; font-size:1.8rem; margin-bottom:40px; font-weight:300;">امتیاز نهایی: <span id="final-score" style="color:#fff; font-weight:900;">0</span></h2>
+        <h2 style="color:white; font-size:1.6rem; margin-bottom:30px; font-weight:300;">امتیاز نهایی: <span id="final-score" style="color:#fff; font-weight:900;">0</span></h2>
         <button onclick="Game.start()">🔄 تلاش مجدد</button>
         <button class="secondary" onclick="UI.showMain()">منوی اصلی</button>
     </div>
 
 <script>
 /**
- * SUBWAY RUNNER PRO V10 - ULTRA GRAPHICS ENGINE
- * Features: PBR Materials, Bloom, Vignette, HDR Env, Real Physics
+ * SUBWAY RUNNER PRO V10.1 - STABLE ENGINE
+ * Fixed: Button functionality, Internal Shaders, Optimized PBR
  */
 
 const CONFIG = {
     laneWidth: 3.5,
     baseSpeed: 20,
-    gravity: -50,
-    jumpForce: 18,
+    gravity: -55,
+    jumpForce: 19,
     stumbleDuration: 1.5,
     colors: {
-        fog: 0x2c3e50,
+        fog: 0x1a1a2e,
         skins: {
             'classic': { color: 0xFFCCAA, price: 0, name: 'کلاسیک' },
             'ninja': { color: 0x1a1a1a, price: 200, name: 'نینجا' },
@@ -173,13 +162,13 @@ let state = {
     stumbleTimer: 0,
     skin: localStorage.getItem('srp_skin_v10') || 'classic',
     ownedSkins: JSON.parse(localStorage.getItem('srp_owned_v10') || '["classic"]'),
-    settings: JSON.parse(localStorage.getItem('srp_settings_v10') || '{"quality":"med","bloom":true,"shadows":true,"vignette":true}')
+    settings: JSON.parse(localStorage.getItem('srp_settings_v10') || '{"quality":"med","shadows":true,"particles":true}')
 };
 
-// --- THREE.JS CORE + POST PROCESSING ---
+// --- THREE.JS CORE SETUP ---
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(CONFIG.colors.fog);
-scene.fog = new THREE.FogExp2(CONFIG.colors.fog, 0.015);
+scene.fog = new THREE.FogExp2(CONFIG.colors.fog, 0.018);
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 200);
 camera.position.set(0, 7, 10);
@@ -194,52 +183,26 @@ renderer.toneMappingExposure = 1.2;
 renderer.outputEncoding = THREE.sRGBEncoding;
 document.getElementById('game-container').appendChild(renderer.domElement);
 
-// Post Processing Setup
-const composer = new THREE.EffectComposer(renderer);
-const renderPass = new THREE.RenderPass(scene, camera);
-composer.addPass(renderPass);
+// Professional Three-Point Lighting
+const ambientLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+scene.add(ambientLight);
 
-// Bloom Pass
-const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-bloomPass.threshold = 0.2;
-bloomPass.strength = 0.6; // Subtle glow
-bloomPass.radius = 0.5;
-composer.addPass(bloomPass);
+const mainLight = new THREE.DirectionalLight(0xffeedd, 1.2);
+mainLight.position.set(20, 40, 30);
+mainLight.castShadow = true;
+mainLight.shadow.mapSize.width = 2048;
+mainLight.shadow.mapSize.height = 2048;
+mainLight.shadow.camera.near = 0.5;
+mainLight.shadow.camera.far = 100;
+mainLight.shadow.camera.left = -30;
+mainLight.shadow.camera.right = 30;
+mainLight.shadow.camera.top = 30;
+mainLight.shadow.camera.bottom = -30;
+mainLight.shadow.bias = -0.0001;
+mainLight.shadow.normalBias = 0.02;
+scene.add(mainLight);
 
-// Custom Vignette Shader
-const VignetteShader = {
-    uniforms: {
-        "tDiffuse": { value: null },
-        "offset": { value: 1.0 },
-        "darkness": { value: 1.2 }
-    },
-    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragmentShader: `uniform sampler2D tDiffuse; uniform float offset; uniform float darkness; varying vec2 vUv; void main() { vec4 texel = texture2D(tDiffuse, vUv); vec2 uv = (vUv - vec2(0.5)) * vec2(offset); gl_FragColor = vec4(mix(texel.rgb, vec3(0.0), dot(uv, uv) * darkness), texel.a); }`
-};
-const vignettePass = new THREE.ShaderPass(VignetteShader);
-composer.addPass(vignettePass);
-
-// Lighting System
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
-hemiLight.position.set(0, 20, 0);
-scene.add(hemiLight);
-
-const dirLight = new THREE.DirectionalLight(0xffeedd, 1.2);
-dirLight.position.set(20, 40, 30);
-dirLight.castShadow = true;
-dirLight.shadow.mapSize.width = 2048;
-dirLight.shadow.mapSize.height = 2048;
-dirLight.shadow.camera.near = 0.5;
-dirLight.shadow.camera.far = 100;
-dirLight.shadow.camera.left = -30;
-dirLight.shadow.camera.right = 30;
-dirLight.shadow.camera.top = 30;
-dirLight.shadow.camera.bottom = -30;
-dirLight.shadow.bias = -0.0001;
-dirLight.shadow.normalBias = 0.02;
-scene.add(dirLight);
-
-// Rim Light for cinematic look
+// Rim Light for cinematic separation
 const rimLight = new THREE.DirectionalLight(0x667eea, 0.8);
 rimLight.position.set(-10, 10, -20);
 scene.add(rimLight);
@@ -262,20 +225,13 @@ function createNoiseTexture(size, contrast) {
 }
 
 const roughnessMap = createNoiseTexture(512, 200);
-const groundNormal = createNoiseTexture(512, 100);
 
 const matGround = new THREE.MeshStandardMaterial({ 
-    color: 0x3a3a3a, 
-    roughness: 0.85, 
-    metalness: 0.1,
-    roughnessMap: roughnessMap,
-    normalMap: groundNormal,
-    normalScale: new THREE.Vector2(0.5, 0.5)
+    color: 0x3a3a3a, roughness: 0.85, metalness: 0.1, roughnessMap: roughnessMap
 });
 
 const matTrainBody = new THREE.MeshStandardMaterial({ 
-    color: 0xffffff, roughness: 0.2, metalness: 0.6, 
-    envMapIntensity: 1.0 
+    color: 0xffffff, roughness: 0.2, metalness: 0.6
 });
 
 const matGlass = new THREE.MeshPhysicalMaterial({
@@ -291,7 +247,6 @@ function createPlayerMesh(skinKey) {
     const group = new THREE.Group();
     const skinColor = CONFIG.colors.skins[skinKey]?.color || 0xFFCCAA;
     
-    // High quality materials
     const matSkin = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.5, metalness: 0.1 });
     const matCloth = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8, roughnessMap: roughnessMap });
     const matShoe = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, metalness: 0.2 });
@@ -301,12 +256,12 @@ function createPlayerMesh(skinKey) {
     const torso = new THREE.Mesh(torsoGeo, matSkin);
     torso.position.y = 1.1; torso.castShadow = true; group.add(torso);
 
-    // Head with smooth sphere
+    // Head
     const headGeo = new THREE.SphereGeometry(0.3, 32, 32);
     const head = new THREE.Mesh(headGeo, matSkin);
     head.position.y = 1.9; head.castShadow = true; group.add(head);
 
-    // Modern Cap
+    // Cap
     const capGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.15, 32);
     const capMat = new THREE.MeshStandardMaterial({color: 0xff4b2b, roughness: 0.4});
     const cap = new THREE.Mesh(capGeo, capMat);
@@ -316,12 +271,12 @@ function createPlayerMesh(skinKey) {
     const brim = new THREE.Mesh(brimGeo, capMat);
     brim.position.set(0, 2.05, 0.3); group.add(brim);
 
-    // Legs with rounded ends
+    // Legs
     const legGeo = new THREE.CapsuleGeometry(0.13, 0.7, 4, 8);
     const ll = new THREE.Mesh(legGeo, matCloth); ll.position.set(-0.18, 0.45, 0); ll.castShadow=true; group.add(ll);
     const rl = new THREE.Mesh(legGeo, matCloth); rl.position.set(0.18, 0.45, 0); rl.castShadow=true; group.add(rl);
 
-    // Detailed Shoes
+    // Shoes
     const shoeGeo = new THREE.BoxGeometry(0.2, 0.18, 0.35, 2, 2, 2);
     const ls = new THREE.Mesh(shoeGeo, matShoe); ls.position.set(-0.18, 0.09, 0.05); ls.castShadow=true; group.add(ls);
     const rs = new THREE.Mesh(shoeGeo, matShoe); rs.position.set(0.18, 0.09, 0.05); rs.castShadow=true; group.add(rs);
@@ -334,24 +289,19 @@ function createTrainMesh(color) {
     const bodyMat = matTrainBody.clone();
     bodyMat.color.setHex(color);
     
-    // Rounded Train Body using Lathe or modified Box
     const bodyGeo = new THREE.BoxGeometry(2.6, 3, 8, 4, 4, 4);
-    // Simple vertex displacement for rounded corners could go here, but high segment count helps
     const body = new THREE.Mesh(bodyGeo, bodyMat);
     body.position.y = 1.7; body.castShadow = true; body.receiveShadow = true;
     group.add(body);
 
-    // Glass Windows Strip
     const winGeo = new THREE.BoxGeometry(2.65, 0.9, 6);
     const win = new THREE.Mesh(winGeo, matGlass);
     win.position.y = 2.3; group.add(win);
 
-    // Roof Detail
     const roofGeo = new THREE.BoxGeometry(2.4, 0.15, 7.8);
     const roof = new THREE.Mesh(roofGeo, new THREE.MeshStandardMaterial({color:0x111111, roughness:0.9}));
     roof.position.y = 3.25; group.add(roof);
 
-    // Wheels with metallic shine
     const wheelGeo = new THREE.CylinderGeometry(0.45, 0.45, 0.3, 32);
     wheelGeo.rotateZ(Math.PI/2);
     const wheelMat = new THREE.MeshStandardMaterial({color:0x333333, metalness:0.8, roughness:0.2});
@@ -360,7 +310,7 @@ function createTrainMesh(color) {
         group.add(new THREE.Mesh(wheelGeo, wheelMat).translateX(1.2).translateY(0.45).translateZ(z));
     });
 
-    // Glowing Tail Lights (for Bloom)
+    // Glowing Tail Lights
     const lightGeo = new THREE.CircleGeometry(0.15, 16);
     const lightMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     const tl1 = new THREE.Mesh(lightGeo, lightMat); tl1.position.set(-0.8, 1.2, 4.01); group.add(tl1);
@@ -543,13 +493,7 @@ function animate() {
     requestAnimationFrame(animate);
     const delta = Math.min(clock.getDelta(), 0.1);
     update(delta);
-    
-    // Use Composer instead of standard render for Post-Processing
-    if(state.settings.bloom || state.settings.vignette) {
-        composer.render();
-    } else {
-        renderer.render(scene, camera);
-    }
+    renderer.render(scene, camera);
 }
 
 // --- INPUT ---
@@ -582,10 +526,15 @@ const UI = {
 
 const Game = {
     start: () => {
-        initWorld();
-        state.isPlaying = true; state.isPaused = false;
-        document.querySelectorAll('.menu-screen').forEach(el => el.classList.add('hidden'));
-        clock.start();
+        try {
+            initWorld();
+            state.isPlaying = true; state.isPaused = false;
+            document.querySelectorAll('.menu-screen').forEach(el => el.classList.add('hidden'));
+            clock.start();
+        } catch(err) {
+            console.error("Game Start Error:", err);
+            alert("خطا در شروع بازی: " + err.message);
+        }
     },
     pause: () => { state.isPaused = !state.isPaused; }
 };
@@ -602,24 +551,14 @@ function updateHUD() {
     document.getElementById('coin-display').innerText = state.coins;
 }
 
-// --- SETTINGS (REAL IMPACT ON RENDER PIPELINE) ---
+// --- SETTINGS ---
 const Settings = {
     setQuality: (level) => {
         state.settings.quality = level;
         const dpr = level === 'low' ? 0.7 : level === 'med' ? 1 : Math.min(window.devicePixelRatio, 2);
         renderer.setPixelRatio(dpr);
-        composer.setSize(window.innerWidth, window.innerHeight);
-        
-        // Adjust shadow quality based on setting
-        dirLight.shadow.mapSize.width = level === 'low' ? 512 : level === 'med' ? 1024 : 2048;
-        dirLight.shadow.mapSize.height = dirLight.shadow.mapSize.width;
-        
-        Settings.updateUI();
-        saveSettings();
-    },
-    toggleBloom: () => {
-        state.settings.bloom = !state.settings.bloom;
-        bloomPass.enabled = state.settings.bloom;
+        mainLight.shadow.mapSize.width = level === 'low' ? 512 : level === 'med' ? 1024 : 2048;
+        mainLight.shadow.mapSize.height = mainLight.shadow.mapSize.width;
         Settings.updateUI();
         saveSettings();
     },
@@ -630,19 +569,16 @@ const Settings = {
         Settings.updateUI();
         saveSettings();
     },
-    toggleVignette: () => {
-        state.settings.vignette = !state.settings.vignette;
-        vignettePass.enabled = state.settings.vignette;
+    toggleParticles: () => {
+        state.settings.particles = !state.settings.particles;
         Settings.updateUI();
         saveSettings();
     },
     updateUI: () => {
-        document.getElementById('t-bloom').className = `toggle-btn ${state.settings.bloom ? 'active' : ''}`;
-        document.getElementById('t-bloom').innerText = state.settings.bloom ? 'روشن' : 'خاموش';
         document.getElementById('t-shadow').className = `toggle-btn ${state.settings.shadows ? 'active' : ''}`;
         document.getElementById('t-shadow').innerText = state.settings.shadows ? 'روشن' : 'خاموش';
-        document.getElementById('t-vignette').className = `toggle-btn ${state.settings.vignette ? 'active' : ''}`;
-        document.getElementById('t-vignette').innerText = state.settings.vignette ? 'روشن' : 'خاموش';
+        document.getElementById('t-particles').className = `toggle-btn ${state.settings.particles ? 'active' : ''}`;
+        document.getElementById('t-particles').innerText = state.settings.particles ? 'روشن' : 'خاموش';
         ['low','med','high'].forEach(q => {
             document.getElementById(`q-${q}`).className = `toggle-btn ${state.settings.quality === q ? 'active' : ''}`;
         });
@@ -684,7 +620,6 @@ window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    composer.setSize(window.innerWidth, window.innerHeight);
 });
 </script>
 </body>
