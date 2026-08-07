@@ -3,39 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Subway Runner Pro V4</title>
+<title>Subway Runner Pro V5</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Lalezar&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#000;font-family:'Lalezar',cursive;touch-action:none;user-select:none}
+body{margin:0;overflow:hidden;background:#111;font-family:'Lalezar',cursive;touch-action:none;user-select:none}
 canvas{display:block;width:100%;height:100%}
 #ui-layer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5}
-.hud-top{display:flex;justify-content:space-between;padding:12px 16px;font-size:24px;color:#fff;text-shadow:2px 2px 4px #000}
-.stat-box{background:rgba(0,0,0,.5);padding:6px 16px;border-radius:22px;border:2px solid rgba(255,255,255,.2);backdrop-filter:blur(6px);display:flex;align-items:center;gap:6px}
+.hud-top{display:flex;justify-content:space-between;padding:12px 16px;font-size:24px;color:#fff;text-shadow:2px 2px 5px #000}
+.stat-box{background:rgba(0,0,0,.55);padding:6px 16px;border-radius:22px;border:2px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);display:flex;align-items:center;gap:6px}
 .coin-icon{color:#FFD700;font-size:26px}
 #powerups{position:absolute;top:70px;right:14px;display:flex;flex-direction:column;gap:5px}
-.pu-badge{background:rgba(0,220,255,.35);border:2px solid #0df;padding:5px 12px;border-radius:11px;color:#fff;font-size:15px;display:none;animation:pulse 1s infinite}
+.pu-badge{background:rgba(0,200,255,.35);border:2px solid #0cf;padding:5px 12px;border-radius:11px;color:#fff;font-size:15px;display:none;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-.menu-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle,rgba(25,20,35,.93) 0%,rgba(0,0,0,.97) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:auto;z-index:10;transition:opacity .3s;overflow-y:auto}
+.menu-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle,rgba(20,18,30,.94) 0%,rgba(0,0,0,.98) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:auto;z-index:10;transition:opacity .3s;overflow-y:auto}
 .hidden{opacity:0;pointer-events:none}
-h1{font-size:52px;color:#FFD700;text-shadow:0 0 25px #FFD700,3px 3px 0 #b33;letter-spacing:2px}
-h2{font-size:34px;color:#ff4757;margin:6px 0;text-shadow:2px 2px 0 #000}
-p{color:#eee;font-size:18px;margin-bottom:20px;text-shadow:1px 1px 2px #000}
-.subtitle{font-size:15px;color:#aaa;margin-top:-12px;margin-bottom:25px}
-button{background:linear-gradient(to bottom,#ff9f43,#ee5253);border:3px solid #fff;padding:11px 42px;color:#fff;font-size:24px;font-family:'Lalezar',cursive;border-radius:40px;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.45);transition:.2s;margin:6px}
+h1{font-size:52px;color:#FFD700;text-shadow:0 0 28px #FFD700,3px 3px 0 #a32;letter-spacing:2px}
+h2{font-size:32px;color:#ff4757;margin:6px 0;text-shadow:2px 2px 0 #000}
+p{color:#eee;font-size:18px;margin-bottom:18px;text-shadow:1px 1px 2px #000}
+.subtitle{font-size:15px;color:#aaa;margin-top:-10px;margin-bottom:22px}
+button{background:linear-gradient(to bottom,#ff9f43,#ee5253);border:3px solid #fff;padding:11px 40px;color:#fff;font-size:23px;font-family:'Lalezar',cursive;border-radius:40px;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.5);transition:.2s;margin:6px}
 button:hover{transform:scale(1.04) translateY(-2px)}
 button:active{transform:scale(.96)}
-.btn-secondary{background:linear-gradient(to bottom,#576574,#222f3e);font-size:18px;padding:9px 28px}
-/* Shop */
-#shop-modal{background:rgba(0,0,0,.92);z-index:20;padding:20px 0}
-.shop-panel{background:#1e2a38;padding:25px 20px;border-radius:20px;border:3px solid #f1c40f;width:92%;max-width:480px;max-height:85vh;overflow-y:auto}
-.shop-coins{font-size:22px;color:#f1c40f;margin-bottom:15px}
-.shop-section{margin:18px 0 10px;font-size:20px;color:#7fdbff;border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:6px}
-.shop-item{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.07);padding:12px 14px;margin:8px 0;border-radius:12px;color:#fff;font-size:17px;gap:10px}
+.btn-secondary{background:linear-gradient(to bottom,#576574,#222f3e);font-size:18px;padding:9px 26px}
+#shop-modal{background:rgba(0,0,0,.93);z-index:20;padding:15px 0}
+.shop-panel{background:#1a2530;padding:22px 16px;border-radius:18px;border:3px solid #f1c40f;width:93%;max-width:470px;max-height:86vh;overflow-y:auto}
+.shop-coins{font-size:21px;color:#f1c40f;margin-bottom:12px}
+.shop-section{margin:16px 0 8px;font-size:18px;color:#7fdbff;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:5px}
+.shop-item{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.06);padding:11px 12px;margin:7px 0;border-radius:11px;color:#fff;font-size:16px;gap:8px}
 .shop-item .info{flex:1;text-align:right}
-.shop-item .name{font-size:18px}
-.shop-item .desc{font-size:13px;color:#aaa;margin-top:2px}
-.buy-btn{background:#27ae60;border:none;padding:8px 14px;border-radius:14px;cursor:pointer;color:#fff;font-family:'Lalezar';font-size:15px;white-space:nowrap;min-width:70px}
+.shop-item .name{font-size:17px}
+.shop-item .desc{font-size:12px;color:#999;margin-top:2px}
+.buy-btn{background:#27ae60;border:none;padding:7px 13px;border-radius:13px;cursor:pointer;color:#fff;font-family:'Lalezar';font-size:14px;white-space:nowrap;min-width:65px}
 .buy-btn:disabled{background:#555;cursor:not-allowed}
 .buy-btn.owned{background:#3498db}
 .buy-btn.equipped{background:#9b59b6}
@@ -59,150 +58,85 @@ button:active{transform:scale(.96)}
 
 <div id="start-screen" class="menu-screen">
   <h1>SUBWAY PRO</h1>
-  <p class="subtitle">نسخه ۴ - فروشگاه بزرگ + ظاهر نرم‌تر</p>
+  <p class="subtitle">نسخه ۵ - ظاهر نرم + قطار واقعی‌تر</p>
   <button id="start-btn">شروع دویدن</button>
   <button id="shop-btn" class="btn-secondary">فروشگاه 🛒</button>
-  <p style="font-size:14px;margin-top:18px;opacity:.7">Swipe یا Arrow Keys</p>
+  <p style="font-size:14px;margin-top:16px;opacity:.7">Swipe یا Arrow Keys</p>
 </div>
 
 <div id="shop-modal" class="menu-screen hidden">
   <div class="shop-panel">
-    <h2 style="color:#f1c40f;margin-bottom:5px">فروشگاه</h2>
-    <div class="shop-coins">سکه‌های شما: <span id="shop-coins">0</span></div>
+    <h2 style="color:#f1c40f;margin-bottom:4px">فروشگاه</h2>
+    <div class="shop-coins">سکه‌ها: <span id="shop-coins">0</span></div>
 
-    <div class="shop-section">⚡ پاورآپ‌ها</div>
-    <div class="shop-item">
-      <div class="info"><div class="name">آهنربا</div><div class="desc">جذب سکه‌ها به مدت ۱۰ ثانیه</div></div>
-      <button class="buy-btn" data-item="magnet" data-cost="50">۵۰</button>
-    </div>
-    <div class="shop-item">
-      <div class="info"><div class="name">سپر محافظ</div><div class="desc">یک بار از مرگ نجاتت می‌ده</div></div>
-      <button class="buy-btn" data-item="shield" data-cost="100">۱۰۰</button>
-    </div>
-    <div class="shop-item">
-      <div class="info"><div class="name">سکه دوبرابر</div><div class="desc">۱۵ ثانیه سکه‌ها ×۲ می‌شن</div></div>
-      <button class="buy-btn" data-item="double" data-cost="120">۱۲۰</button>
-    </div>
-    <div class="shop-item">
-      <div class="info"><div class="name">آهسته‌کننده</div><div class="desc">۱۰ ثانیه سرعت بازی کم می‌شه</div></div>
-      <button class="buy-btn" data-item="slow" data-cost="90">۹۰</button>
-    </div>
-    <div class="shop-item">
-      <div class="info"><div class="name">پرش قوی</div><div class="desc">پرش بلندتر برای ۳ دور</div></div>
-      <button class="buy-btn" data-item="superjump" data-cost="80">۸۰</button>
-    </div>
+    <div class="shop-section">⚡ پاورآپ</div>
+    <div class="shop-item"><div class="info"><div class="name">آهنربا</div><div class="desc">جذب سکه ۱۰ ثانیه</div></div><button class="buy-btn" data-item="magnet" data-cost="50">۵۰</button></div>
+    <div class="shop-item"><div class="info"><div class="name">سپر</div><div class="desc">یک بار نجات</div></div><button class="buy-btn" data-item="shield" data-cost="100">۱۰۰</button></div>
+    <div class="shop-item"><div class="info"><div class="name">سکه دوبرابر</div><div class="desc">۱۵ ثانیه ×۲</div></div><button class="buy-btn" data-item="double" data-cost="120">۱۲۰</button></div>
+    <div class="shop-item"><div class="info"><div class="name">آهسته‌کننده</div><div class="desc">۱۰ ثانیه سرعت کم</div></div><button class="buy-btn" data-item="slow" data-cost="90">۹۰</button></div>
+    <div class="shop-item"><div class="info"><div class="name">پرش قوی</div><div class="desc">۳ پرش بلندتر</div></div><button class="buy-btn" data-item="superjump" data-cost="80">۸۰</button></div>
 
-    <div class="shop-section">👕 اسکین شخصیت</div>
-    <div class="shop-item">
-      <div class="info"><div class="name">هودی کلاسیک (مشکی)</div><div class="desc">حالت پیش‌فرض</div></div>
-      <button class="buy-btn" data-item="skin_black" data-cost="0">رایگان</button>
-    </div>
-    <div class="shop-item">
-      <div class="info"><div class="name">هودی قرمز</div><div class="desc">ظاهر آتشین</div></div>
-      <button class="buy-btn" data-item="skin_red" data-cost="200">۲۰۰</button>
-    </div>
-    <div class="shop-item">
-      <div class="info"><div class="name">هودی آبی نئون</div><div class="desc">درخشان و مدرن</div></div>
-      <button class="buy-btn" data-item="skin_blue" data-cost="250">۲۵۰</button>
-    </div>
-    <div class="shop-item">
-      <div class="info"><div class="name">هودی بنفش</div><div class="desc">استایل خاص</div></div>
-      <button class="buy-btn" data-item="skin_purple" data-cost="300">۳۰۰</button>
-    </div>
-    <div class="shop-item">
-      <div class="info"><div class="name">هودی طلایی</div><div class="desc">لوکس و براق</div></div>
-      <button class="buy-btn" data-item="skin_gold" data-cost="500">۵۰۰</button>
-    </div>
+    <div class="shop-section">👕 هودی</div>
+    <div class="shop-item"><div class="info"><div class="name">مشکی کلاسیک</div></div><button class="buy-btn" data-item="skin_black" data-cost="0">رایگان</button></div>
+    <div class="shop-item"><div class="info"><div class="name">قرمز</div></div><button class="buy-btn" data-item="skin_red" data-cost="200">۲۰۰</button></div>
+    <div class="shop-item"><div class="info"><div class="name">آبی نئون</div></div><button class="buy-btn" data-item="skin_blue" data-cost="250">۲۵۰</button></div>
+    <div class="shop-item"><div class="info"><div class="name">بنفش</div></div><button class="buy-btn" data-item="skin_purple" data-cost="300">۳۰۰</button></div>
+    <div class="shop-item"><div class="info"><div class="name">طلایی</div></div><button class="buy-btn" data-item="skin_gold" data-cost="500">۵۰۰</button></div>
 
     <div class="shop-section">👟 کفش</div>
-    <div class="shop-item">
-      <div class="info"><div class="name">کفش سفید کلاسیک</div><div class="desc">پیش‌فرض</div></div>
-      <button class="buy-btn" data-item="shoe_white" data-cost="0">رایگان</button>
-    </div>
-    <div class="shop-item">
-      <div class="info"><div class="name">کفش قرمز</div><div class="desc">سرعت ظاهری بیشتر</div></div>
-      <button class="buy-btn" data-item="shoe_red" data-cost="150">۱۵۰</button>
-    </div>
-    <div class="shop-item">
-      <div class="info"><div class="name">کفش سبز نئون</div><div class="desc">درخشان</div></div>
-      <button class="buy-btn" data-item="shoe_green" data-cost="180">۱۸۰</button>
-    </div>
+    <div class="shop-item"><div class="info"><div class="name">سفید</div></div><button class="buy-btn" data-item="shoe_white" data-cost="0">رایگان</button></div>
+    <div class="shop-item"><div class="info"><div class="name">قرمز</div></div><button class="buy-btn" data-item="shoe_red" data-cost="150">۱۵۰</button></div>
+    <div class="shop-item"><div class="info"><div class="name">سبز نئون</div></div><button class="buy-btn" data-item="shoe_green" data-cost="180">۱۸۰</button></div>
 
     <div class="shop-section">🎩 کلاه</div>
-    <div class="shop-item">
-      <div class="info"><div class="name">کلاه آبی</div><div class="desc">پیش‌فرض</div></div>
-      <button class="buy-btn" data-item="cap_blue" data-cost="0">رایگان</button>
-    </div>
-    <div class="shop-item">
-      <div class="info"><div class="name">کلاه قرمز</div><div class="desc"></div></div>
-      <button class="buy-btn" data-item="cap_red" data-cost="120">۱۲۰</button>
-    </div>
-    <div class="shop-item">
-      <div class="info"><div class="name">کلاه مشکی</div><div class="desc"></div></div>
-      <button class="buy-btn" data-item="cap_black" data-cost="100">۱۰۰</button>
-    </div>
+    <div class="shop-item"><div class="info"><div class="name">آبی</div></div><button class="buy-btn" data-item="cap_blue" data-cost="0">رایگان</button></div>
+    <div class="shop-item"><div class="info"><div class="name">قرمز</div></div><button class="buy-btn" data-item="cap_red" data-cost="120">۱۲۰</button></div>
+    <div class="shop-item"><div class="info"><div class="name">مشکی</div></div><button class="buy-btn" data-item="cap_black" data-cost="100">۱۰۰</button></div>
 
-    <button id="close-shop" class="btn-secondary" style="margin-top:20px;width:100%">بستن فروشگاه</button>
+    <button id="close-shop" class="btn-secondary" style="margin-top:18px;width:100%">بستن</button>
   </div>
 </div>
 
 <div id="game-over-screen" class="menu-screen hidden">
   <h1 style="color:#ff4757">GAME OVER</h1>
-  <p>امتیاز نهایی: <span id="final-score">0</span></p>
+  <p>امتیاز: <span id="final-score">0</span></p>
   <button id="retry-btn">دوباره</button>
   <button id="menu-btn" class="btn-secondary">منو</button>
 </div>
 
 <script>
 const CONFIG = {
-  laneWidth: 3.6,
-  baseSpeed: 0.52,
-  maxSpeed: 2.05,
-  jumpForce: 0.68,
-  gravity: 0.032,
-  trainHeight: 3.3
+  laneWidth: 3.7,
+  baseSpeed: 0.5,
+  maxSpeed: 2.0,
+  jumpForce: 0.7,
+  gravity: 0.033,
+  trainHeight: 3.25
 };
 
-const SKINS = {
-  skin_black: 0x1c1c1c,
-  skin_red: 0xc0392b,
-  skin_blue: 0x0984e3,
-  skin_purple: 0x8e44ad,
-  skin_gold: 0xf1c40f
-};
-
+const SKINS = { skin_black:0x1a1a1a, skin_red:0xc0392b, skin_blue:0x0984e3, skin_purple:0x8e44ad, skin_gold:0xf1c40f };
 const SHOES = {
-  shoe_white: { main: 0xf5f5f5, accent: 0x2563eb },
-  shoe_red: { main: 0xe74c3c, accent: 0xffffff },
-  shoe_green: { main: 0x2ecc71, accent: 0x111111 }
+  shoe_white: {main:0xf5f5f5, accent:0x2563eb},
+  shoe_red: {main:0xe74c3c, accent:0xffffff},
+  shoe_green: {main:0x2ecc71, accent:0x111}
 };
-
-const CAPS = {
-  cap_blue: 0x1e3a8a,
-  cap_red: 0xc0392b,
-  cap_black: 0x222222
-};
+const CAPS = { cap_blue:0x1e3a8a, cap_red:0xc0392b, cap_black:0x222 };
 
 class SubwayGame {
   constructor() {
     this.state = {
-      isPlaying: false,
-      score: 0,
-      coins: parseInt(localStorage.getItem('sp_v4_coins')) || 0,
-      speed: CONFIG.baseSpeed,
-      lane: 1,
-      targetX: 0,
-      velY: 0,
-      isJumping: false,
-      isRolling: false,
-      rollTimer: 0,
-      inventory: JSON.parse(localStorage.getItem('sp_v4_inv') || '{"magnet":0,"shield":0,"double":0,"slow":0,"superjump":0}'),
-      owned: JSON.parse(localStorage.getItem('sp_v4_owned') || '["skin_black","shoe_white","cap_blue"]'),
-      equipped: JSON.parse(localStorage.getItem('sp_v4_eq') || '{"skin":"skin_black","shoe":"shoe_white","cap":"cap_blue"}'),
-      activePowerups: { magnet: 0, shield: false, double: 0, slow: 0, superjump: 0 },
-      jumpBoost: 1
+      isPlaying: false, score: 0,
+      coins: parseInt(localStorage.getItem('sp_v5_coins')) || 0,
+      speed: CONFIG.baseSpeed, lane: 1, targetX: 0, velY: 0,
+      isJumping: false, isRolling: false, rollTimer: 0,
+      inventory: JSON.parse(localStorage.getItem('sp_v5_inv') || '{"magnet":0,"shield":0,"double":0,"slow":0,"superjump":0}'),
+      owned: JSON.parse(localStorage.getItem('sp_v5_owned') || '["skin_black","shoe_white","cap_blue"]'),
+      equipped: JSON.parse(localStorage.getItem('sp_v5_eq') || '{"skin":"skin_black","shoe":"shoe_white","cap":"cap_blue"}'),
+      activePowerups: {magnet:0, shield:false, double:0, slow:0, superjump:0},
+      jumpBoost: 1,
+      crashCooldown: 0
     };
-    this.entities = { trains: [], barriers: [], coins: [], powerups: [] };
+    this.entities = {trains:[], barriers:[], coins:[], powerups:[]};
     this.buildings = [];
     this.initThree();
     this.createWorld();
@@ -214,34 +148,32 @@ class SubwayGame {
 
   initThree() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x87CEEB);
-    this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.008);
+    this.scene.background = new THREE.Color(0x7ec8e3);
+    this.scene.fog = new THREE.FogExp2(0x7ec8e3, 0.0075);
 
-    this.camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 220);
-    this.camera.position.set(0, 6.2, 11.5);
+    this.camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 200);
+    this.camera.position.set(0, 6.5, 12);
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer = new THREE.WebGLRenderer({antialias:true});
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     document.getElementById('canvas-container').appendChild(this.renderer.domElement);
 
-    const hemi = new THREE.HemisphereLight(0xfff4e0, 0x4a5568, 0.8);
+    const hemi = new THREE.HemisphereLight(0xfff5e6, 0x556677, 0.85);
     this.scene.add(hemi);
 
-    const sun = new THREE.DirectionalLight(0xfff0cc, 1.15);
-    sun.position.set(18, 42, 10);
+    const sun = new THREE.DirectionalLight(0xfff2d5, 1.2);
+    sun.position.set(15, 40, 8);
     sun.castShadow = true;
     sun.shadow.mapSize.set(1536, 1536);
-    sun.shadow.camera.left = -32;
-    sun.shadow.camera.right = 32;
-    sun.shadow.camera.top = 32;
-    sun.shadow.camera.bottom = -32;
+    sun.shadow.camera.left = -30; sun.shadow.camera.right = 30;
+    sun.shadow.camera.top = 30; sun.shadow.camera.bottom = -30;
     this.scene.add(sun);
 
-    const fill = new THREE.DirectionalLight(0xffc888, 0.28);
-    fill.position.set(-14, 12, -6);
+    const fill = new THREE.DirectionalLight(0xffcc99, 0.3);
+    fill.position.set(-12, 10, -5);
     this.scene.add(fill);
 
     window.addEventListener('resize', () => {
@@ -253,45 +185,45 @@ class SubwayGame {
 
   createWorld() {
     const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(70, 450),
-      new THREE.MeshStandardMaterial({ color: 0x2c2c2c, roughness: 0.9 })
+      new THREE.PlaneGeometry(60, 400),
+      new THREE.MeshStandardMaterial({color:0x333333, roughness:0.92})
     );
-    ground.rotation.x = -Math.PI / 2;
-    ground.position.z = -100;
+    ground.rotation.x = -Math.PI/2;
+    ground.position.z = -90;
     ground.receiveShadow = true;
     this.scene.add(ground);
 
     this.trackGroup = new THREE.Group();
-    const railMat = new THREE.MeshStandardMaterial({ color: 0x6a6a6a, metalness: 0.8, roughness: 0.3 });
-    const sleeperMat = new THREE.MeshStandardMaterial({ color: 0x4a3525, roughness: 0.9 });
+    const railMat = new THREE.MeshStandardMaterial({color:0x777, metalness:0.85, roughness:0.25});
+    const sleeperMat = new THREE.MeshStandardMaterial({color:0x4a3528, roughness:0.9});
 
-    for (let i = -1; i <= 1; i++) {
+    for (let i=-1; i<=1; i++) {
       const off = i * CONFIG.laneWidth;
-      const r1 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.09, 450), railMat);
-      r1.position.set(off - 0.88, 0.05, -100);
-      const r2 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.09, 450), railMat);
-      r2.position.set(off + 0.88, 0.05, -100);
+      const r1 = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.08, 400), railMat);
+      r1.position.set(off-0.85, 0.04, -90);
+      const r2 = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.08, 400), railMat);
+      r2.position.set(off+0.85, 0.04, -90);
       this.trackGroup.add(r1, r2);
     }
-    for (let j = 0; j < 120; j++) {
-      const s = new THREE.Mesh(new THREE.BoxGeometry(11.5, 0.13, 0.48), sleeperMat);
-      s.position.set(0, 0.02, -j * 3.7);
+    for (let j=0; j<110; j++) {
+      const s = new THREE.Mesh(new THREE.BoxGeometry(11, 0.12, 0.45), sleeperMat);
+      s.position.set(0, 0.02, -j*3.6);
       this.trackGroup.add(s);
     }
     this.scene.add(this.trackGroup);
 
-    // ساختمان‌های ساده‌تر
-    for (let side = -1; side <= 1; side += 2) {
-      for (let i = 0; i < 12; i++) {
-        const h = 11 + Math.random() * 15;
+    // ساختمان‌های ساده و تمیز
+    for (let side=-1; side<=1; side+=2) {
+      for (let i=0; i<10; i++) {
+        const h = 10 + Math.random()*14;
         const b = new THREE.Mesh(
-          new THREE.BoxGeometry(6.5 + Math.random() * 3.5, h, 8 + Math.random() * 4),
+          new THREE.BoxGeometry(6+Math.random()*3, h, 7+Math.random()*3),
           new THREE.MeshStandardMaterial({
-            color: new THREE.Color().setHSL(0.07 + Math.random() * 0.04, 0.3, 0.32 + Math.random() * 0.12),
-            roughness: 0.88
+            color: new THREE.Color().setHSL(0.08, 0.25, 0.3+Math.random()*0.1),
+            roughness: 0.9
           })
         );
-        b.position.set(side * (12.5 + Math.random() * 3.5), h / 2, -i * 28 - Math.random() * 8);
+        b.position.set(side*(12+Math.random()*3), h/2, -i*30 - Math.random()*6);
         b.castShadow = true;
         b.receiveShadow = true;
         this.scene.add(b);
@@ -300,99 +232,104 @@ class SubwayGame {
     }
   }
 
+  // شخصیت خیلی نرم‌تر
   createPlayer() {
     this.player = new THREE.Group();
     this.playerParts = {};
 
-    const skinMat = new THREE.MeshStandardMaterial({ color: 0xf0c8a8, roughness: 0.48 });
-    this.playerParts.hoodieMat = new THREE.MeshStandardMaterial({ color: SKINS[this.state.equipped.skin], roughness: 0.6 });
-    this.playerParts.capMat = new THREE.MeshStandardMaterial({ color: CAPS[this.state.equipped.cap], roughness: 0.35 });
-    const pantsMat = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.55 });
-    const shoeData = SHOES[this.state.equipped.shoe];
-    this.playerParts.shoeMain = new THREE.MeshStandardMaterial({ color: shoeData.main, roughness: 0.25 });
-    this.playerParts.shoeAccent = new THREE.MeshStandardMaterial({ color: shoeData.accent, roughness: 0.35 });
+    const skinMat = new THREE.MeshStandardMaterial({color:0xf2c9a8, roughness:0.45});
+    this.playerParts.hoodieMat = new THREE.MeshStandardMaterial({color:SKINS[this.state.equipped.skin], roughness:0.55});
+    this.playerParts.capMat = new THREE.MeshStandardMaterial({color:CAPS[this.state.equipped.cap], roughness:0.3});
+    const pantsMat = new THREE.MeshStandardMaterial({color:0x1a1a1a, roughness:0.5});
+    const shoe = SHOES[this.state.equipped.shoe];
+    this.playerParts.shoeMain = new THREE.MeshStandardMaterial({color:shoe.main, roughness:0.22});
+    this.playerParts.shoeAccent = new THREE.MeshStandardMaterial({color:shoe.accent, roughness:0.3});
 
-    // بدن نرم‌تر
-    const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.46, 1.05, 14), this.playerParts.hoodieMat);
-    torso.position.y = 1.38;
+    // بدن گردتر
+    const torso = new THREE.Mesh(new THREE.SphereGeometry(0.48, 16, 12), this.playerParts.hoodieMat);
+    torso.scale.set(1, 1.35, 0.85);
+    torso.position.y = 1.4;
     torso.castShadow = true;
     this.player.add(torso);
     this.playerParts.torso = torso;
 
     // سر
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.33, 16, 14), skinMat);
-    head.position.y = 2.18;
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 16, 14), skinMat);
+    head.position.y = 2.15;
     head.castShadow = true;
     this.player.add(head);
 
     // کلاه
-    const capBase = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.37, 0.15, 14), this.playerParts.capMat);
-    capBase.position.y = 2.4;
-    const brim = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.045, 0.38), this.playerParts.capMat);
-    brim.position.set(0, 2.34, -0.28);
+    const capBase = new THREE.Mesh(new THREE.SphereGeometry(0.34, 14, 10, 0, Math.PI*2, 0, Math.PI*0.55), this.playerParts.capMat);
+    capBase.position.y = 2.35;
+    const brim = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.04, 0.36), this.playerParts.capMat);
+    brim.position.set(0, 2.28, -0.27);
     this.player.add(capBase, brim);
     this.playerParts.capBase = capBase;
     this.playerParts.brim = brim;
 
-    // بازوها
+    // بازوهای نرم
     this.limbs = {};
-    const armGeo = new THREE.CylinderGeometry(0.11, 0.12, 0.78, 10);
-
+    const armGeo = new THREE.SphereGeometry(0.13, 10, 8);
+    
     this.limbs.armL = new THREE.Group();
-    this.limbs.armL.position.set(-0.52, 1.72, 0);
-    const aL = new THREE.Mesh(armGeo, this.playerParts.hoodieMat);
-    aL.position.y = -0.36;
-    aL.castShadow = true;
-    this.limbs.armL.add(aL);
+    this.limbs.armL.position.set(-0.5, 1.65, 0);
+    const aL1 = new THREE.Mesh(armGeo, this.playerParts.hoodieMat);
+    aL1.scale.set(1, 2.2, 1);
+    aL1.position.y = -0.28;
+    aL1.castShadow = true;
+    this.limbs.armL.add(aL1);
     this.player.add(this.limbs.armL);
-    this.playerParts.armL = aL;
+    this.playerParts.armL = aL1;
 
     this.limbs.armR = new THREE.Group();
-    this.limbs.armR.position.set(0.52, 1.72, 0);
-    const aR = new THREE.Mesh(armGeo, this.playerParts.hoodieMat);
-    aR.position.y = -0.36;
-    aR.castShadow = true;
-    this.limbs.armR.add(aR);
+    this.limbs.armR.position.set(0.5, 1.65, 0);
+    const aR1 = new THREE.Mesh(armGeo, this.playerParts.hoodieMat);
+    aR1.scale.set(1, 2.2, 1);
+    aR1.position.y = -0.28;
+    aR1.castShadow = true;
+    this.limbs.armR.add(aR1);
     this.player.add(this.limbs.armR);
-    this.playerParts.armR = aR;
+    this.playerParts.armR = aR1;
 
-    // پاها + کفش
-    const legGeo = new THREE.CylinderGeometry(0.13, 0.14, 0.88, 10);
-
+    // پاها
     this.limbs.legL = new THREE.Group();
-    this.limbs.legL.position.set(-0.2, 0.78, 0);
-    const lL = new THREE.Mesh(legGeo, pantsMat);
-    lL.position.y = -0.4;
+    this.limbs.legL.position.set(-0.18, 0.75, 0);
+    const lL = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8), pantsMat);
+    lL.scale.set(1, 2.4, 1);
+    lL.position.y = -0.35;
     lL.castShadow = true;
     this.limbs.legL.add(lL);
-    const sL = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.16, 0.45), this.playerParts.shoeMain);
-    sL.position.set(0, -0.88, 0.02);
-    const stL = new THREE.Mesh(new THREE.BoxGeometry(0.31, 0.09, 0.16), this.playerParts.shoeAccent);
-    stL.position.set(0, -0.84, -0.03);
+    const sL = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), this.playerParts.shoeMain);
+    sL.scale.set(1.1, 0.7, 1.4);
+    sL.position.set(0, -0.82, 0.05);
+    const stL = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.08, 0.14), this.playerParts.shoeAccent);
+    stL.position.set(0, -0.78, -0.02);
     this.limbs.legL.add(sL, stL);
     this.player.add(this.limbs.legL);
     this.playerParts.shoeL = sL;
     this.playerParts.stripeL = stL;
 
     this.limbs.legR = new THREE.Group();
-    this.limbs.legR.position.set(0.2, 0.78, 0);
-    const lR = new THREE.Mesh(legGeo, pantsMat);
-    lR.position.y = -0.4;
+    this.limbs.legR.position.set(0.18, 0.75, 0);
+    const lR = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8), pantsMat);
+    lR.scale.set(1, 2.4, 1);
+    lR.position.y = -0.35;
     lR.castShadow = true;
     this.limbs.legR.add(lR);
-    const sR = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.16, 0.45), this.playerParts.shoeMain);
-    sR.position.set(0, -0.88, 0.02);
-    const stR = new THREE.Mesh(new THREE.BoxGeometry(0.31, 0.09, 0.16), this.playerParts.shoeAccent);
-    stR.position.set(0, -0.84, -0.03);
+    const sR = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), this.playerParts.shoeMain);
+    sR.scale.set(1.1, 0.7, 1.4);
+    sR.position.set(0, -0.82, 0.05);
+    const stR = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.08, 0.14), this.playerParts.shoeAccent);
+    stR.position.set(0, -0.78, -0.02);
     this.limbs.legR.add(sR, stR);
     this.player.add(this.limbs.legR);
     this.playerParts.shoeR = sR;
     this.playerParts.stripeR = stR;
 
-    // سپر
     this.shieldMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(1.45, 16, 12),
-      new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.25, wireframe: true })
+      new THREE.SphereGeometry(1.4, 16, 12),
+      new THREE.MeshBasicMaterial({color:0x00e5ff, transparent:true, opacity:0.22, wireframe:true})
     );
     this.shieldMesh.visible = false;
     this.player.add(this.shieldMesh);
@@ -401,66 +338,85 @@ class SubwayGame {
   }
 
   applySkin() {
-    const hoodieColor = SKINS[this.state.equipped.skin] || 0x1c1c1c;
-    this.playerParts.hoodieMat.color.setHex(hoodieColor);
+    const hc = SKINS[this.state.equipped.skin] || 0x1a1a1a;
+    this.playerParts.hoodieMat.color.setHex(hc);
+    this.playerParts.torso.material = this.playerParts.hoodieMat;
     this.playerParts.armL.material = this.playerParts.hoodieMat;
     this.playerParts.armR.material = this.playerParts.hoodieMat;
-    this.playerParts.torso.material = this.playerParts.hoodieMat;
 
-    const capColor = CAPS[this.state.equipped.cap] || 0x1e3a8a;
-    this.playerParts.capMat.color.setHex(capColor);
+    const cc = CAPS[this.state.equipped.cap] || 0x1e3a8a;
+    this.playerParts.capMat.color.setHex(cc);
     this.playerParts.capBase.material = this.playerParts.capMat;
     this.playerParts.brim.material = this.playerParts.capMat;
 
-    const shoe = SHOES[this.state.equipped.shoe] || SHOES.shoe_white;
-    this.playerParts.shoeMain.color.setHex(shoe.main);
-    this.playerParts.shoeAccent.color.setHex(shoe.accent);
+    const sh = SHOES[this.state.equipped.shoe] || SHOES.shoe_white;
+    this.playerParts.shoeMain.color.setHex(sh.main);
+    this.playerParts.shoeAccent.color.setHex(sh.accent);
   }
 
+  // قطار واقعی‌تر
   createTrain(lane, type) {
     const g = new THREE.Group();
-    const len = 13 + Math.random() * 10;
-    const cols = [0xd63031, 0xfdcb6e, 0x0984e3];
-    const col = cols[Math.floor(Math.random() * 3)];
-    const bodyMat = new THREE.MeshStandardMaterial({ color: col, metalness: 0.5, roughness: 0.28 });
+    const len = 14 + Math.random()*9;
+    const cols = [0xc0392b, 0xf1c40f, 0x2980b9];
+    const col = cols[Math.floor(Math.random()*3)];
 
-    const body = new THREE.Mesh(new THREE.BoxGeometry(2.65, CONFIG.trainHeight, len), bodyMat);
-    body.position.y = CONFIG.trainHeight / 2;
+    const bodyMat = new THREE.MeshStandardMaterial({color:col, metalness:0.6, roughness:0.22});
+    const darkMat = new THREE.MeshStandardMaterial({color:0x1a1a1a, metalness:0.7, roughness:0.3});
+    const winMat = new THREE.MeshStandardMaterial({color:0x1c2a3a, metalness:0.9, roughness:0.1});
+    const silver = new THREE.MeshStandardMaterial({color:0xcccccc, metalness:0.7, roughness:0.25});
+
+    // بدنه اصلی
+    const body = new THREE.Mesh(new THREE.BoxGeometry(2.6, CONFIG.trainHeight*0.92, len), bodyMat);
+    body.position.y = CONFIG.trainHeight*0.5;
     body.castShadow = true;
     body.receiveShadow = true;
     g.add(body);
 
-    const roof = new THREE.Mesh(
-      new THREE.BoxGeometry(2.8, 0.18, len + 0.1),
-      new THREE.MeshStandardMaterial({ color: 0xd0d0d0, metalness: 0.55, roughness: 0.3 })
-    );
-    roof.position.y = CONFIG.trainHeight + 0.04;
+    // قسمت جلویی کمی گرد (با مقیاس)
+    const front = new THREE.Mesh(new THREE.BoxGeometry(2.5, CONFIG.trainHeight*0.85, 0.8), bodyMat);
+    front.position.set(0, CONFIG.trainHeight*0.48, len/2 + 0.15);
+    g.add(front);
+
+    // سقف
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(2.7, 0.16, len+0.3), silver);
+    roof.position.y = CONFIG.trainHeight + 0.02;
     g.add(roof);
 
-    const winMat = new THREE.MeshStandardMaterial({ color: 0x1a2535, metalness: 0.85, roughness: 0.15 });
-    const wins = Math.floor(len / 2.6);
-    for (let i = 0; i < wins; i++) {
-      const z = -len / 2 + 1.5 + i * 2.6;
-      const wL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1, 1.4), winMat);
-      wL.position.set(-1.33, CONFIG.trainHeight * 0.58, z);
-      const wR = wL.clone();
-      wR.position.x = 1.33;
+    // پنجره‌ها
+    const wins = Math.floor(len / 2.5);
+    for (let i=0; i<wins; i++) {
+      const z = -len/2 + 1.4 + i*2.5;
+      const wL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.95, 1.35), winMat);
+      wL.position.set(-1.3, CONFIG.trainHeight*0.58, z);
+      const wR = wL.clone(); wR.position.x = 1.3;
       g.add(wL, wR);
     }
 
-    const stripe = new THREE.Mesh(
-      new THREE.BoxGeometry(2.67, 0.2, len * 0.85),
-      new THREE.MeshStandardMaterial({ color: 0xf0f0f0, roughness: 0.4 })
-    );
-    stripe.position.y = CONFIG.trainHeight * 0.24;
+    // نوار کناری
+    const stripe = new THREE.Mesh(new THREE.BoxGeometry(2.62, 0.18, len*0.9), 
+      new THREE.MeshStandardMaterial({color:0xf5f5f5, roughness:0.35}));
+    stripe.position.y = CONFIG.trainHeight * 0.22;
     g.add(stripe);
 
-    let moveSpeed = 0;
-    if (type === 'movingTowards') moveSpeed = -(CONFIG.baseSpeed + 1.25);
-    if (type === 'movingWith') moveSpeed = CONFIG.baseSpeed - 0.2;
+    // زیر بدنه
+    const under = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.35, len*0.9), darkMat);
+    under.position.y = 0.2;
+    g.add(under);
 
-    g.position.set((lane - 1) * CONFIG.laneWidth, 0, -105);
-    g.userData = { type: 'train', length: len, moveSpeed, height: CONFIG.trainHeight };
+    // چراغ جلو
+    const lightL = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 6), 
+      new THREE.MeshStandardMaterial({color:0xffffaa, emissive:0xffff88, emissiveIntensity:0.6}));
+    lightL.position.set(-0.7, 0.9, len/2 + 0.5);
+    const lightR = lightL.clone(); lightR.position.x = 0.7;
+    g.add(lightL, lightR);
+
+    let moveSpeed = 0;
+    if (type === 'movingTowards') moveSpeed = -(CONFIG.baseSpeed + 1.2);
+    if (type === 'movingWith') moveSpeed = CONFIG.baseSpeed - 0.18;
+
+    g.position.set((lane-1)*CONFIG.laneWidth, 0, -100);
+    g.userData = {type:'train', length:len, moveSpeed, height:CONFIG.trainHeight};
     this.scene.add(g);
     this.entities.trains.push(g);
   }
@@ -468,33 +424,33 @@ class SubwayGame {
   createBarrier(lane, high) {
     const g = new THREE.Group();
     if (high) {
-      const bar = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.38, 0.42), new THREE.MeshStandardMaterial({ color: 0xffaa00, metalness: 0.35 }));
-      bar.position.y = 1.48;
-      bar.castShadow = true;
-      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 1.48), new THREE.MeshStandardMaterial({ color: 0x444 }));
-      leg.position.set(-0.9, 0.74, 0);
-      const leg2 = leg.clone();
-      leg2.position.x = 0.9;
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.35, 0.4), 
+        new THREE.MeshStandardMaterial({color:0xffaa00, metalness:0.4}));
+      bar.position.y = 1.45; bar.castShadow = true;
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.45), 
+        new THREE.MeshStandardMaterial({color:0x444}));
+      leg.position.set(-0.85, 0.72, 0);
+      const leg2 = leg.clone(); leg2.position.x = 0.85;
       g.add(bar, leg, leg2);
-      g.userData = { type: 'barrier_high' };
+      g.userData = {type:'barrier_high'};
     } else {
-      const bar = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.9, 0.48), new THREE.MeshStandardMaterial({ color: 0xe67e22, metalness: 0.3 }));
-      bar.position.y = 0.48;
-      bar.castShadow = true;
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.85, 0.45), 
+        new THREE.MeshStandardMaterial({color:0xe67e22, metalness:0.3}));
+      bar.position.y = 0.45; bar.castShadow = true;
       g.add(bar);
-      g.userData = { type: 'barrier_low' };
+      g.userData = {type:'barrier_low'};
     }
-    g.position.set((lane - 1) * CONFIG.laneWidth, 0, -105);
+    g.position.set((lane-1)*CONFIG.laneWidth, 0, -100);
     this.scene.add(g);
     this.entities.barriers.push(g);
   }
 
   createCoin(x, y, z) {
     const coin = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.36, 0.36, 0.07, 14),
-      new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 0.92, roughness: 0.18, emissive: 0x443300, emissiveIntensity: 0.18 })
+      new THREE.CylinderGeometry(0.34, 0.34, 0.06, 14),
+      new THREE.MeshStandardMaterial({color:0xFFD700, metalness:0.93, roughness:0.15, emissive:0x443300, emissiveIntensity:0.15})
     );
-    coin.rotation.x = Math.PI / 2;
+    coin.rotation.x = Math.PI/2;
     coin.position.set(x, y, z);
     coin.castShadow = true;
     this.scene.add(coin);
@@ -502,58 +458,55 @@ class SubwayGame {
   }
 
   createPowerup(lane) {
-    const types = ['magnet', 'shield', 'double', 'slow'];
-    const type = types[Math.floor(Math.random() * types.length)];
-    const colors = { magnet: 0xff2244, shield: 0x00e5ff, double: 0xf1c40f, slow: 0x9b59b6 };
+    const types = ['magnet','shield','double','slow'];
+    const type = types[Math.floor(Math.random()*types.length)];
+    const colors = {magnet:0xff2244, shield:0x00e5ff, double:0xf1c40f, slow:0x9b59b6};
     const g = new THREE.Group();
-    const box = new THREE.Mesh(
-      new THREE.BoxGeometry(0.7, 0.7, 0.7),
-      new THREE.MeshStandardMaterial({ color: colors[type], emissive: colors[type], emissiveIntensity: 0.4 })
-    );
+    const box = new THREE.Mesh(new THREE.SphereGeometry(0.4, 12, 10),
+      new THREE.MeshStandardMaterial({color:colors[type], emissive:colors[type], emissiveIntensity:0.45}));
     g.add(box);
-    g.position.set((lane - 1) * CONFIG.laneWidth, 1.45, -105);
-    g.userData = { type };
+    g.position.set((lane-1)*CONFIG.laneWidth, 1.4, -100);
+    g.userData = {type};
     this.scene.add(g);
     this.entities.powerups.push(g);
   }
 
   spawnLogic() {
-    if (Math.random() < 0.028 + this.state.speed * 0.0038) {
-      const lane = Math.floor(Math.random() * 3);
+    if (Math.random() < 0.026 + this.state.speed*0.0035) {
+      const lane = Math.floor(Math.random()*3);
       let safe = true;
-      for (const t of this.entities.trains) {
-        if (Math.abs(t.position.x - (lane - 1) * CONFIG.laneWidth) < 0.2 && t.position.z > -115) safe = false;
-      }
-      for (const b of this.entities.barriers) {
-        if (Math.abs(b.position.x - (lane - 1) * CONFIG.laneWidth) < 0.2 && b.position.z > -115) safe = false;
-      }
+      for (const t of this.entities.trains)
+        if (Math.abs(t.position.x - (lane-1)*CONFIG.laneWidth) < 0.2 && t.position.z > -110) safe = false;
+      for (const b of this.entities.barriers)
+        if (Math.abs(b.position.x - (lane-1)*CONFIG.laneWidth) < 0.2 && b.position.z > -110) safe = false;
       if (!safe) return;
 
       const r = Math.random();
-      if (r < 0.38) {
-        const types = ['static', 'movingTowards', 'movingWith'];
-        this.createTrain(lane, types[Math.floor(Math.random() * 3)]);
-        if (Math.random() > 0.4) {
-          for (let i = 0; i < 4; i++) this.createCoin((lane - 1) * CONFIG.laneWidth, CONFIG.trainHeight + 0.48, -110 - i * 2.2);
-        }
-      } else if (r < 0.58) {
+      if (r < 0.36) {
+        const types = ['static','movingTowards','movingWith'];
+        this.createTrain(lane, types[Math.floor(Math.random()*3)]);
+        if (Math.random() > 0.4)
+          for (let i=0; i<4; i++) this.createCoin((lane-1)*CONFIG.laneWidth, CONFIG.trainHeight+0.45, -105-i*2.1);
+      } else if (r < 0.56) {
         this.createBarrier(lane, true);
-        for (let i = 0; i < 3; i++) this.createCoin((lane - 1) * CONFIG.laneWidth, 1, -108 - i * 2);
-      } else if (r < 0.78) {
+        for (let i=0; i<3; i++) this.createCoin((lane-1)*CONFIG.laneWidth, 0.95, -103-i*1.9);
+      } else if (r < 0.76) {
         this.createBarrier(lane, false);
-        for (let i = 0; i < 3; i++) this.createCoin((lane - 1) * CONFIG.laneWidth, 1.9, -108 - i * 2);
-      } else if (r < 0.92) {
+        for (let i=0; i<3; i++) this.createCoin((lane-1)*CONFIG.laneWidth, 1.85, -103-i*1.9);
+      } else if (r < 0.9) {
         this.createPowerup(lane);
       } else {
-        for (let i = 0; i < 5; i++) this.createCoin((lane - 1) * CONFIG.laneWidth, 1, -105 - i * 2);
+        for (let i=0; i<5; i++) this.createCoin((lane-1)*CONFIG.laneWidth, 0.95, -100-i*1.9);
       }
     }
   }
 
   updatePhysics() {
-    const lerp = this.state.isJumping ? 0.13 : 0.19;
+    if (this.state.crashCooldown > 0) this.state.crashCooldown--;
+
+    const lerp = this.state.isJumping ? 0.12 : 0.18;
     this.player.position.x += (this.state.targetX - this.player.position.x) * lerp;
-    this.player.rotation.z = (this.state.targetX - this.player.position.x) * -0.07;
+    this.player.rotation.z = (this.state.targetX - this.player.position.x) * -0.06;
 
     this.player.position.y += this.state.velY;
     this.state.velY -= CONFIG.gravity;
@@ -564,23 +517,29 @@ class SubwayGame {
       const dx = Math.abs(t.position.x - this.player.position.x);
       const dz = t.position.z - this.player.position.z;
       const half = t.userData.length / 2;
-      if (dx < 1.35 && dz < half && dz > -half) {
-        if (this.player.position.y >= t.userData.height - 0.55) {
+
+      if (dx < 1.3 && dz < half && dz > -half) {
+        if (this.player.position.y >= t.userData.height - 0.5) {
           onTrain = true;
           trainH = t.userData.height;
-        } else if (dz > 0 && dz < half + 0.85) {
-          if (this.state.isJumping && this.player.position.y > t.userData.height - 1.45) {
+        } else if (dz > 0 && dz < half + 0.8) {
+          if (this.state.isJumping && this.player.position.y > t.userData.height - 1.4) {
             this.player.position.y = t.userData.height;
             this.state.velY = 0;
             this.state.isJumping = false;
             onTrain = true;
             trainH = t.userData.height;
-          } else hitSide = true;
+          } else if (this.state.crashCooldown <= 0) {
+            hitSide = true;
+          }
         }
       }
     }
 
-    if (hitSide) { this.crash(); return; }
+    if (hitSide) {
+      this.crash();
+      return;
+    }
 
     if (onTrain) {
       if (this.player.position.y <= trainH) {
@@ -595,7 +554,7 @@ class SubwayGame {
     }
 
     if (this.state.isRolling) {
-      this.player.scale.y = 0.5;
+      this.player.scale.y = 0.48;
       this.state.rollTimer--;
       if (this.state.rollTimer <= 0) {
         this.state.isRolling = false;
@@ -603,100 +562,99 @@ class SubwayGame {
       }
     }
 
-    // انیمیشن
+    // انیمیشن دویدن خیلی نرم‌تر
     if (!this.state.isJumping && !this.state.isRolling) {
-      const t = Date.now() * 0.015 * (this.state.speed / CONFIG.baseSpeed);
-      this.limbs.legL.rotation.x = Math.sin(t) * 0.78;
-      this.limbs.legR.rotation.x = -Math.sin(t) * 0.78;
-      this.limbs.armL.rotation.x = -Math.sin(t) * 0.68;
-      this.limbs.armR.rotation.x = Math.sin(t) * 0.68;
-      if (!onTrain) this.player.position.y = Math.abs(Math.sin(t * 2)) * 0.06;
+      const t = Date.now() * 0.012 * (this.state.speed / CONFIG.baseSpeed);
+      const swing = Math.sin(t) * 0.55;
+      this.limbs.legL.rotation.x = swing;
+      this.limbs.legR.rotation.x = -swing;
+      this.limbs.armL.rotation.x = -swing * 0.85;
+      this.limbs.armR.rotation.x = swing * 0.85;
+      if (!onTrain) this.player.position.y = Math.abs(Math.sin(t*2)) * 0.045;
     } else if (this.state.isJumping) {
-      this.limbs.legL.rotation.x = -0.48;
-      this.limbs.legR.rotation.x = 0.18;
-      this.limbs.armL.rotation.x = -2.2;
-      this.limbs.armR.rotation.x = -2.2;
+      this.limbs.legL.rotation.x = -0.4;
+      this.limbs.legR.rotation.x = 0.15;
+      this.limbs.armL.rotation.x = -1.9;
+      this.limbs.armR.rotation.x = -1.9;
     }
 
     let speed = this.state.speed;
-    if (this.state.activePowerups.slow > 0) speed *= 0.6;
+    if (this.state.activePowerups.slow > 0) speed *= 0.58;
 
     // حرکت موجودیت‌ها
-    for (let i = this.entities.trains.length - 1; i >= 0; i--) {
+    for (let i=this.entities.trains.length-1; i>=0; i--) {
       const t = this.entities.trains[i];
       t.position.z += speed + t.userData.moveSpeed;
-      if (t.position.z > 22) { this.scene.remove(t); this.entities.trains.splice(i, 1); }
+      if (t.position.z > 20) { this.scene.remove(t); this.entities.trains.splice(i,1); }
     }
-    for (let i = this.entities.barriers.length - 1; i >= 0; i--) {
+    for (let i=this.entities.barriers.length-1; i>=0; i--) {
       const b = this.entities.barriers[i];
       b.position.z += speed;
       const dz = Math.abs(b.position.z - this.player.position.z);
       const dx = Math.abs(b.position.x - this.player.position.x);
-      if (dz < 0.95 && dx < 1.15) {
+      if (dz < 0.9 && dx < 1.1 && this.state.crashCooldown <= 0) {
         if (b.userData.type === 'barrier_high' && !this.state.isRolling) this.crash();
-        if (b.userData.type === 'barrier_low' && this.player.position.y < 0.95) this.crash();
+        if (b.userData.type === 'barrier_low' && this.player.position.y < 0.9) this.crash();
       }
-      if (b.position.z > 20) { this.scene.remove(b); this.entities.barriers.splice(i, 1); }
+      if (b.position.z > 18) { this.scene.remove(b); this.entities.barriers.splice(i,1); }
     }
-    for (let i = this.entities.coins.length - 1; i >= 0; i--) {
+    for (let i=this.entities.coins.length-1; i>=0; i--) {
       const c = this.entities.coins[i];
       c.position.z += speed;
       c.rotation.z += 0.1;
       if (this.state.activePowerups.magnet > 0) {
         const d = c.position.distanceTo(this.player.position);
-        if (d < 12) {
+        if (d < 11) {
           const dir = new THREE.Vector3().subVectors(this.player.position, c.position).normalize();
-          c.position.add(dir.multiplyScalar(0.9));
+          c.position.add(dir.multiplyScalar(0.88));
         }
       }
-      const pPos = new THREE.Vector3(this.player.position.x, this.player.position.y + 1, this.player.position.z);
-      if (c.position.distanceTo(pPos) < 1.45) {
+      const pPos = new THREE.Vector3(this.player.position.x, this.player.position.y+0.95, this.player.position.z);
+      if (c.position.distanceTo(pPos) < 1.4) {
         const gain = this.state.activePowerups.double > 0 ? 2 : 1;
         this.state.coins += gain;
         this.state.score += 5 * gain;
         this.updateUI();
         this.scene.remove(c);
-        this.entities.coins.splice(i, 1);
-      } else if (c.position.z > 12) {
+        this.entities.coins.splice(i,1);
+      } else if (c.position.z > 11) {
         this.scene.remove(c);
-        this.entities.coins.splice(i, 1);
+        this.entities.coins.splice(i,1);
       }
     }
-    for (let i = this.entities.powerups.length - 1; i >= 0; i--) {
+    for (let i=this.entities.powerups.length-1; i>=0; i--) {
       const p = this.entities.powerups[i];
       p.position.z += speed;
-      p.rotation.y += 0.05;
-      if (p.position.distanceTo(this.player.position) < 1.45) {
+      p.rotation.y += 0.06;
+      if (p.position.distanceTo(this.player.position) < 1.4) {
         this.activatePowerup(p.userData.type);
         this.scene.remove(p);
-        this.entities.powerups.splice(i, 1);
-      } else if (p.position.z > 12) {
+        this.entities.powerups.splice(i,1);
+      } else if (p.position.z > 11) {
         this.scene.remove(p);
-        this.entities.powerups.splice(i, 1);
+        this.entities.powerups.splice(i,1);
       }
     }
 
-    // تایمر پاورآپ‌ها
-    ['magnet', 'double', 'slow'].forEach(k => {
+    ['magnet','double','slow'].forEach(k => {
       if (this.state.activePowerups[k] > 0) {
         this.state.activePowerups[k]--;
         if (this.state.activePowerups[k] <= 0) {
-          const el = document.getElementById('pu-' + k);
+          const el = document.getElementById('pu-'+k);
           if (el) el.style.display = 'none';
-          if (k === 'slow') this.state.speed = Math.min(CONFIG.maxSpeed, CONFIG.baseSpeed + this.state.score * 0.00016);
         }
       }
     });
 
     this.trackGroup.position.z += speed;
-    if (this.trackGroup.position.z > 3.7) this.trackGroup.position.z = 0;
+    if (this.trackGroup.position.z > 3.6) this.trackGroup.position.z = 0;
 
     for (const b of this.buildings) {
-      b.position.z += speed * 0.11;
-      if (b.position.z > 35) b.position.z -= 360;
+      b.position.z += speed * 0.1;
+      if (b.position.z > 30) b.position.z -= 320;
     }
 
-    this.state.speed = Math.min(CONFIG.maxSpeed, CONFIG.baseSpeed + this.state.score * 0.00016);
+    this.state.speed = Math.min(CONFIG.maxSpeed, CONFIG.baseSpeed + this.state.score * 0.00015);
     this.state.score += speed * 0.1;
     this.updateUI();
   }
@@ -726,7 +684,8 @@ class SubwayGame {
       this.state.activePowerups.shield = false;
       this.shieldMesh.visible = false;
       document.getElementById('pu-shield').style.display = 'none';
-      [...this.entities.trains, ...this.entities.barriers].forEach(o => o.position.z += 10);
+      this.state.crashCooldown = 30;
+      [...this.entities.trains, ...this.entities.barriers].forEach(o => o.position.z += 9);
     } else {
       this.gameOver();
     }
@@ -740,11 +699,11 @@ class SubwayGame {
       if (e.key === 'ArrowUp') this.jump();
       if (e.key === 'ArrowDown') this.roll();
     });
-    let tx = 0, ty = 0;
+    let tx=0, ty=0;
     document.addEventListener('touchstart', e => {
       tx = e.changedTouches[0].screenX;
       ty = e.changedTouches[0].screenY;
-    }, { passive: false });
+    }, {passive:false});
     document.addEventListener('touchend', e => {
       if (!this.state.isPlaying) return;
       const dx = e.changedTouches[0].screenX - tx;
@@ -756,13 +715,13 @@ class SubwayGame {
         if (dy < -28) this.jump();
         else if (dy > 28) this.roll();
       }
-    }, { passive: false });
+    }, {passive:false});
   }
 
   moveLane(dir) {
-    const newLane = Math.max(0, Math.min(2, this.state.lane + dir));
-    if (newLane === this.state.lane) return;
-    this.state.lane = newLane;
+    const nl = Math.max(0, Math.min(2, this.state.lane + dir));
+    if (nl === this.state.lane) return;
+    this.state.lane = nl;
     this.state.targetX = (this.state.lane - 1) * CONFIG.laneWidth;
   }
 
@@ -782,8 +741,8 @@ class SubwayGame {
   roll() {
     if (!this.state.isRolling) {
       this.state.isRolling = true;
-      this.state.rollTimer = 38;
-      if (this.state.isJumping) this.state.velY = -0.75;
+      this.state.rollTimer = 36;
+      if (this.state.isJumping) this.state.velY = -0.7;
     }
   }
 
@@ -799,28 +758,28 @@ class SubwayGame {
     this.state.isJumping = false;
     this.state.isRolling = false;
     this.state.jumpBoost = 1;
-    this.player.position.set(0, 0, 0);
+    this.state.crashCooldown = 0;
+    this.player.position.set(0,0,0);
     this.player.scale.y = 1;
     this.applySkin();
 
-    // اعمال موجودی
-    ['magnet', 'shield', 'double', 'slow', 'superjump'].forEach(k => {
+    ['magnet','shield','double','slow','superjump'].forEach(k => {
       if (this.state.inventory[k] > 0) {
         this.activatePowerup(k);
         this.state.inventory[k]--;
       }
     });
-    localStorage.setItem('sp_v4_inv', JSON.stringify(this.state.inventory));
+    localStorage.setItem('sp_v5_inv', JSON.stringify(this.state.inventory));
 
     [...this.entities.trains, ...this.entities.barriers, ...this.entities.coins, ...this.entities.powerups]
       .forEach(o => this.scene.remove(o));
-    this.entities = { trains: [], barriers: [], coins: [], powerups: [] };
+    this.entities = {trains:[], barriers:[], coins:[], powerups:[]};
     this.updateUI();
   }
 
   gameOver() {
     this.state.isPlaying = false;
-    localStorage.setItem('sp_v4_coins', this.state.coins);
+    localStorage.setItem('sp_v5_coins', this.state.coins);
     document.getElementById('final-score').innerText = Math.floor(this.state.score);
     document.getElementById('game-over-screen').classList.remove('hidden');
   }
@@ -844,15 +803,13 @@ class SubwayGame {
   }
 
   buyOrEquip(item, cost) {
-    const isSkin = item.startsWith('skin_') || item.startsWith('shoe_') || item.startsWith('cap_');
-
-    if (isSkin) {
+    const isCos = item.startsWith('skin_') || item.startsWith('shoe_') || item.startsWith('cap_');
+    if (isCos) {
       if (this.state.owned.includes(item)) {
-        // Equip
         if (item.startsWith('skin_')) this.state.equipped.skin = item;
         else if (item.startsWith('shoe_')) this.state.equipped.shoe = item;
-        else if (item.startsWith('cap_')) this.state.equipped.cap = item;
-        localStorage.setItem('sp_v4_eq', JSON.stringify(this.state.equipped));
+        else this.state.equipped.cap = item;
+        localStorage.setItem('sp_v5_eq', JSON.stringify(this.state.equipped));
         this.applySkin();
         this.updateShopUI();
         return;
@@ -862,21 +819,20 @@ class SubwayGame {
         this.state.owned.push(item);
         if (item.startsWith('skin_')) this.state.equipped.skin = item;
         else if (item.startsWith('shoe_')) this.state.equipped.shoe = item;
-        else if (item.startsWith('cap_')) this.state.equipped.cap = item;
-        localStorage.setItem('sp_v4_coins', this.state.coins);
-        localStorage.setItem('sp_v4_owned', JSON.stringify(this.state.owned));
-        localStorage.setItem('sp_v4_eq', JSON.stringify(this.state.equipped));
+        else this.state.equipped.cap = item;
+        localStorage.setItem('sp_v5_coins', this.state.coins);
+        localStorage.setItem('sp_v5_owned', JSON.stringify(this.state.owned));
+        localStorage.setItem('sp_v5_eq', JSON.stringify(this.state.equipped));
         this.applySkin();
         this.updateShopUI();
         this.updateUI();
       }
     } else {
-      // Powerup
       if (this.state.coins >= cost) {
         this.state.coins -= cost;
-        this.state.inventory[item] = (this.state.inventory[item] || 0) + 1;
-        localStorage.setItem('sp_v4_coins', this.state.coins);
-        localStorage.setItem('sp_v4_inv', JSON.stringify(this.state.inventory));
+        this.state.inventory[item] = (this.state.inventory[item]||0) + 1;
+        localStorage.setItem('sp_v5_coins', this.state.coins);
+        localStorage.setItem('sp_v5_inv', JSON.stringify(this.state.inventory));
         this.updateShopUI();
         this.updateUI();
       }
@@ -888,28 +844,26 @@ class SubwayGame {
     document.querySelectorAll('.buy-btn[data-item]').forEach(btn => {
       const item = btn.dataset.item;
       const cost = parseInt(btn.dataset.cost);
-      const isSkin = item.startsWith('skin_') || item.startsWith('shoe_') || item.startsWith('cap_');
-
-      if (isSkin) {
+      const isCos = item.startsWith('skin_') || item.startsWith('shoe_') || item.startsWith('cap_');
+      if (isCos) {
         if (this.state.owned.includes(item)) {
-          const equipped =
-            (item.startsWith('skin_') && this.state.equipped.skin === item) ||
-            (item.startsWith('shoe_') && this.state.equipped.shoe === item) ||
-            (item.startsWith('cap_') && this.state.equipped.cap === item);
-          btn.textContent = equipped ? 'پوشیده' : 'پوشیدن';
-          btn.classList.toggle('equipped', equipped);
-          btn.classList.toggle('owned', !equipped);
+          const eq = (item.startsWith('skin_') && this.state.equipped.skin===item) ||
+                     (item.startsWith('shoe_') && this.state.equipped.shoe===item) ||
+                     (item.startsWith('cap_') && this.state.equipped.cap===item);
+          btn.textContent = eq ? 'پوشیده' : 'پوشیدن';
+          btn.classList.toggle('equipped', eq);
+          btn.classList.toggle('owned', !eq);
           btn.disabled = false;
         } else {
-          btn.textContent = cost === 0 ? 'رایگان' : cost;
-          btn.classList.remove('owned', 'equipped');
+          btn.textContent = cost===0 ? 'رایگان' : cost;
+          btn.classList.remove('owned','equipped');
           btn.disabled = this.state.coins < cost;
         }
       } else {
-        const count = this.state.inventory[item] || 0;
-        btn.textContent = count > 0 ? `${cost} (${count})` : cost;
+        const cnt = this.state.inventory[item] || 0;
+        btn.textContent = cnt > 0 ? `${cost} (${cnt})` : cost;
         btn.disabled = this.state.coins < cost;
-        btn.classList.remove('owned', 'equipped');
+        btn.classList.remove('owned','equipped');
       }
     });
   }
@@ -925,26 +879,20 @@ class SubwayGame {
       this.updatePhysics();
       this.spawnLogic();
     }
-    this.camera.position.x += (this.player.position.x * 0.28 - this.camera.position.x) * 0.07;
-    this.camera.lookAt(this.player.position.x * 0.22, 2, this.player.position.z - 11);
+    this.camera.position.x += (this.player.position.x*0.25 - this.camera.position.x)*0.06;
+    this.camera.lookAt(this.player.position.x*0.2, 2.1, this.player.position.z - 10);
     this.renderer.render(this.scene, this.camera);
   }
 }
 
 const game = new SubwayGame();
-
 document.getElementById('start-btn').onclick = () => game.start();
 document.getElementById('retry-btn').onclick = () => game.start();
 document.getElementById('menu-btn').onclick = () => game.showMenu();
 document.getElementById('shop-btn').onclick = () => game.openShop();
 document.getElementById('close-shop').onclick = () => game.closeShop();
-
 document.querySelectorAll('.buy-btn[data-item]').forEach(btn => {
-  btn.onclick = () => {
-    const item = btn.dataset.item;
-    const cost = parseInt(btn.dataset.cost);
-    game.buyOrEquip(item, cost);
-  };
+  btn.onclick = () => game.buyOrEquip(btn.dataset.item, parseInt(btn.dataset.cost));
 });
 </script>
 </body>
