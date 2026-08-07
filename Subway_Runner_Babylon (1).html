@@ -3,56 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Subway Runner Pro V9 - Physics & Graphics Fix</title>
+    <title>Subway Runner Pro V10 - Ultra Graphics</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;900&display=swap');
-        body { margin: 0; overflow: hidden; background: #0f0f1a; font-family: 'Vazirmatn', sans-serif; user-select: none; touch-action: none; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Vazirmatn', sans-serif; user-select: none; touch-action: none; }
         canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
         
+        /* UI Layer */
         #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; }
-        .hud { padding: 20px; display: flex; justify-content: space-between; align-items: center; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.8); font-weight: 900; font-size: 1.5rem; pointer-events: auto; }
-        .coin-box { background: rgba(0,0,0,0.4); padding: 5px 15px; border-radius: 20px; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,215,0,0.3); }
+        .hud { padding: 20px; display: flex; justify-content: space-between; align-items: center; color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.9); font-weight: 900; font-size: 1.5rem; pointer-events: auto; }
+        .coin-box { background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,140,0,0.2)); backdrop-filter: blur(10px); padding: 8px 20px; border-radius: 30px; display: flex; align-items: center; gap: 10px; border: 1px solid rgba(255,215,0,0.4); box-shadow: 0 4px 15px rgba(255,165,0,0.2); }
         
+        /* Glassmorphism Menus */
         .menu-screen { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(15, 15, 26, 0.92); backdrop-filter: blur(10px); 
+            background: rgba(10, 10, 15, 0.85); backdrop-filter: blur(20px) saturate(180%); 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            pointer-events: auto; transition: opacity 0.3s; z-index: 20; 
+            pointer-events: auto; transition: opacity 0.4s ease; z-index: 20; 
         }
         .hidden { opacity: 0; pointer-events: none; visibility: hidden; }
         
-        h1 { color: #fff; font-size: 3.5rem; margin: 0 0 30px 0; text-transform: uppercase; background: linear-gradient(to bottom, #ffeb3b, #ff9800); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); letter-spacing: 2px; text-align: center;}
+        h1 { 
+            color: #fff; font-size: 4rem; margin: 0 0 40px 0; text-transform: uppercase; 
+            background: linear-gradient(to bottom, #fff, #aaa); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.3)); letter-spacing: 5px; text-align: center;
+        }
         
         button { 
-            background: linear-gradient(to bottom, #4caf50, #2e7d32); 
-            border: none; padding: 18px 50px; color: white; 
-            font-family: inherit; font-size: 1.3rem; font-weight: bold; 
-            border-radius: 50px; cursor: pointer; box-shadow: 0 6px 0 #1b5e20, 0 10px 20px rgba(0,0,0,0.3); 
-            transition: all 0.1s; margin: 10px; min-width: 240px; 
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3); position: relative; overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            border: none; padding: 20px 60px; color: white; 
+            font-family: inherit; font-size: 1.4rem; font-weight: bold; 
+            border-radius: 60px; cursor: pointer; 
+            box-shadow: 0 10px 30px rgba(118, 75, 162, 0.4); 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); margin: 12px; min-width: 260px; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3); position: relative; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        button::after { content:''; position:absolute; top:0; left:0; width:100%; height:50%; background:rgba(255,255,255,0.1); }
-        button:active { transform: translateY(6px); box-shadow: 0 0 0 #1b5e20; }
-        button.secondary { background: linear-gradient(to bottom, #546e7a, #37474f); box-shadow: 0 6px 0 #263238; }
-        button.secondary:active { box-shadow: 0 0 0 #263238; }
+        button:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 15px 40px rgba(118, 75, 162, 0.6); }
+        button:active { transform: translateY(2px) scale(0.98); }
+        button.secondary { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); box-shadow: none; }
+        button.secondary:hover { background: rgba(255,255,255,0.1); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         
-        .panel-row { display: flex; justify-content: space-between; width: 320px; margin: 12px 0; color: white; font-size: 1.1rem; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 12px; }
-        .toggle-group { display: flex; gap: 5px; }
-        .toggle-btn { background: rgba(0,0,0,0.3); padding: 6px 16px; border-radius: 20px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; transition: 0.2s; }
-        .toggle-btn.active { background: #ff9800; border-color: #ffb74d; color: black; font-weight: bold; box-shadow: 0 0 10px rgba(255,152,0,0.4); }
+        .panel-row { display: flex; justify-content: space-between; width: 350px; margin: 15px 0; color: white; font-size: 1.1rem; align-items: center; background: rgba(255,255,255,0.03); padding: 15px 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
+        .toggle-group { display: flex; gap: 8px; }
+        .toggle-btn { background: rgba(0,0,0,0.4); padding: 8px 20px; border-radius: 25px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; transition: 0.3s; }
+        .toggle-btn.active { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-color: transparent; color: white; font-weight: bold; box-shadow: 0 0 15px rgba(245, 87, 108, 0.4); }
 
-        .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 500px; margin-bottom: 25px; }
-        .shop-item { background: rgba(255,255,255,0.05); padding: 15px 10px; border-radius: 15px; text-align: center; border: 2px solid rgba(255,255,255,0.05); cursor: pointer; color: white; transition: 0.2s; }
-        .shop-item:hover { background: rgba(255,255,255,0.1); }
-        .shop-item.selected { border-color: #ffeb3b; background: rgba(255, 235, 59, 0.15); box-shadow: 0 0 15px rgba(255,235,59,0.2); }
-        .skin-preview { width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 8px; border: 2px solid rgba(255,255,255,0.2); box-shadow: inset 0 -5px 10px rgba(0,0,0,0.3); }
+        .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 600px; margin-bottom: 30px; }
+        .shop-item { background: rgba(255,255,255,0.03); padding: 20px 15px; border-radius: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; color: white; transition: 0.3s; backdrop-filter: blur(5px); }
+        .shop-item:hover { background: rgba(255,255,255,0.08); transform: translateY(-3px); }
+        .shop-item.selected { border-color: #ffd700; background: rgba(255, 215, 0, 0.1); box-shadow: 0 0 20px rgba(255,215,0,0.15); }
+        .skin-preview { width: 50px; height: 50px; border-radius: 50%; margin: 0 auto 12px; border: 3px solid rgba(255,255,255,0.1); box-shadow: inset 0 -10px 20px rgba(0,0,0,0.4), 0 5px 15px rgba(0,0,0,0.3); }
         
-        #pause-btn { pointer-events: auto; background: rgba(0,0,0,0.4); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.5rem; border: 2px solid rgba(255,255,255,0.2); backdrop-filter: blur(4px); }
+        #pause-btn { pointer-events: auto; background: rgba(255,255,255,0.1); width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.5rem; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); transition: 0.3s; }
+        #pause-btn:hover { background: rgba(255,255,255,0.2); transform: rotate(90deg); }
         
-        /* Stumble Effect Overlay */
-        #stumble-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle, transparent 50%, rgba(255,0,0,0.3) 100%); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 5; }
+        #stumble-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle, transparent 40%, rgba(255,0,0,0.4) 100%); opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 5; mix-blend-mode: overlay; }
     </style>
+    
+    <!-- Three.js Core + Post Processing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 </head>
 <body>
 
@@ -64,14 +81,14 @@
             <div class="coin-box">🪙 <span id="coin-display">0</span></div>
             <div id="pause-btn">⏸️</div>
         </div>
-        <div class="hud" style="justify-content:center; padding-bottom:50px; pointer-events:none;">
-            <div id="score-display" style="font-size:3rem; letter-spacing:2px;">0</div>
+        <div class="hud" style="justify-content:center; padding-bottom:60px; pointer-events:none;">
+            <div id="score-display" style="font-size:3.5rem; letter-spacing:3px; text-shadow: 0 0 20px rgba(255,255,255,0.3);">0</div>
         </div>
     </div>
 
     <!-- Main Menu -->
     <div id="main-menu" class="menu-screen">
-        <h1>SUBWAY PRO V9</h1>
+        <h1>SUBWAY PRO V10</h1>
         <button onclick="Game.start()">🏃‍♂️ شروع دویدن</button>
         <button class="secondary" onclick="UI.showShop()">🛒 فروشگاه و اسکین</button>
         <button class="secondary" onclick="UI.showSettings()">⚙️ تنظیمات گرافیک</button>
@@ -79,7 +96,7 @@
 
     <!-- Settings -->
     <div id="settings-menu" class="menu-screen hidden">
-        <h2 style="color:white; margin-bottom:25px; font-size:1.8rem;">تنظیمات گرافیک</h2>
+        <h2 style="color:white; margin-bottom:30px; font-size:2rem; font-weight:300;">تنظیمات گرافیک پیشرفته</h2>
         <div class="panel-row">
             <span>کیفیت رندر:</span>
             <div class="toggle-group">
@@ -89,56 +106,56 @@
             </div>
         </div>
         <div class="panel-row">
+            <span>Bloom (درخشش):</span>
+            <div class="toggle-btn active" onclick="Settings.toggleBloom()" id="t-bloom">روشن</div>
+        </div>
+        <div class="panel-row">
             <span>سایه‌زنی (Shadow):</span>
             <div class="toggle-btn active" onclick="Settings.toggleShadow()" id="t-shadow">روشن</div>
         </div>
         <div class="panel-row">
-            <span>افکت ذرات:</span>
-            <div class="toggle-btn active" onclick="Settings.toggleParticles()" id="t-particles">روشن</div>
+            <span>Vignette:</span>
+            <div class="toggle-btn active" onclick="Settings.toggleVignette()" id="t-vignette">روشن</div>
         </div>
-        <button class="secondary" onclick="UI.showMain()" style="margin-top:30px;">بازگشت به منو</button>
+        <button class="secondary" onclick="UI.showMain()" style="margin-top:40px;">بازگشت به منو</button>
     </div>
 
     <!-- Shop -->
     <div id="shop-menu" class="menu-screen hidden">
-        <h2 style="color:white; margin-bottom:10px;">فروشگاه شخصیت‌ها</h2>
-        <div style="color:#ffd700; margin-bottom:20px; font-size:1.3rem; background:rgba(0,0,0,0.3); padding:8px 20px; border-radius:20px;">موجودی: <span id="shop-coins">0</span> 🪙</div>
+        <h2 style="color:white; margin-bottom:15px; font-weight:300;">فروشگاه شخصیت‌ها</h2>
+        <div style="color:#ffd700; margin-bottom:25px; font-size:1.4rem; background:rgba(255,215,0,0.1); padding:10px 30px; border-radius:30px; border:1px solid rgba(255,215,0,0.2);">موجودی: <span id="shop-coins">0</span> 🪙</div>
         <div class="shop-grid" id="skin-container"></div>
         <button class="secondary" onclick="UI.showMain()">بازگشت</button>
     </div>
 
     <!-- Game Over -->
     <div id="game-over" class="menu-screen hidden">
-        <h1 style="background:linear-gradient(to bottom, #ff5252, #b71c1c); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">GAME OVER</h1>
-        <h2 style="color:white; font-size:1.5rem; margin-bottom:30px;">امتیاز نهایی: <span id="final-score" style="color:#ffeb3b">0</span></h2>
+        <h1 style="background:linear-gradient(to bottom, #ff416c, #ff4b2b); -webkit-background-clip:text; -webkit-text-fill-color:transparent; filter:drop-shadow(0 0 30px rgba(255,75,43,0.4));">GAME OVER</h1>
+        <h2 style="color:white; font-size:1.8rem; margin-bottom:40px; font-weight:300;">امتیاز نهایی: <span id="final-score" style="color:#fff; font-weight:900;">0</span></h2>
         <button onclick="Game.start()">🔄 تلاش مجدد</button>
         <button class="secondary" onclick="UI.showMain()">منوی اصلی</button>
     </div>
 
 <script>
 /**
- * SUBWAY RUNNER PRO V9 - PHYSICS & COLLISION OVERHAUL
- * - Real Jump Arc & Landing
- * - Side Collision = Stumble (Not Death)
- * - Train Roof Walking
- * - True Graphics Settings
+ * SUBWAY RUNNER PRO V10 - ULTRA GRAPHICS ENGINE
+ * Features: PBR Materials, Bloom, Vignette, HDR Env, Real Physics
  */
 
 const CONFIG = {
-    laneWidth: 3.2,
-    baseSpeed: 18,
-    gravity: -45,
-    jumpForce: 16,
-    stumbleDuration: 1.5, // Seconds of dizziness after side hit
+    laneWidth: 3.5,
+    baseSpeed: 20,
+    gravity: -50,
+    jumpForce: 18,
+    stumbleDuration: 1.5,
     colors: {
-        fog: 0x87CEEB,
-        ground: 0x5D4037,
+        fog: 0x2c3e50,
         skins: {
             'classic': { color: 0xFFCCAA, price: 0, name: 'کلاسیک' },
-            'ninja': { color: 0x212121, price: 200, name: 'نینجا' },
-            'red': { color: 0xD32F2F, price: 250, name: 'قرمز' },
-            'blue': { color: 0x1976D2, price: 300, name: 'آبی' },
-            'gold': { color: 0xFFD700, price: 500, name: 'طلایی' }
+            'ninja': { color: 0x1a1a1a, price: 200, name: 'نینجا' },
+            'cyber': { color: 0x00d2ff, price: 300, name: 'سایبر' },
+            'neon': { color: 0xff00cc, price: 400, name: 'نئون' },
+            'gold': { color: 0xffd700, price: 600, name: 'طلایی' }
         }
     }
 };
@@ -147,75 +164,123 @@ let state = {
     isPlaying: false,
     isPaused: false,
     score: 0,
-    coins: parseInt(localStorage.getItem('srp_coins_v9') || '0'),
+    coins: parseInt(localStorage.getItem('srp_coins_v10') || '0'),
     speed: CONFIG.baseSpeed,
     lane: 0,
     yVel: 0,
     isJumping: false,
-    onTrain: null, // Reference to train object if riding
-    stumbleTimer: 0, // > 0 means player is stumbling
-    skin: localStorage.getItem('srp_skin_v9') || 'classic',
-    ownedSkins: JSON.parse(localStorage.getItem('srp_owned_v9') || '["classic"]'),
-    settings: JSON.parse(localStorage.getItem('srp_settings_v9') || '{"quality":"med","shadows":true,"particles":true}')
+    onTrain: null,
+    stumbleTimer: 0,
+    skin: localStorage.getItem('srp_skin_v10') || 'classic',
+    ownedSkins: JSON.parse(localStorage.getItem('srp_owned_v10') || '["classic"]'),
+    settings: JSON.parse(localStorage.getItem('srp_settings_v10') || '{"quality":"med","bloom":true,"shadows":true,"vignette":true}')
 };
 
-// --- THREE.JS CORE ---
+// --- THREE.JS CORE + POST PROCESSING ---
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(CONFIG.colors.fog);
-scene.fog = new THREE.FogExp2(CONFIG.colors.fog, 0.012);
+scene.fog = new THREE.FogExp2(CONFIG.colors.fog, 0.015);
 
-const camera = new THREE.PerspectiveCamera(65, window.innerWidth/window.innerHeight, 0.1, 150);
-camera.position.set(0, 6, 9);
-camera.lookAt(0, 1, -5);
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 200);
+camera.position.set(0, 7, 10);
+camera.lookAt(0, 2, -5);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", alpha: false });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = state.settings.shadows;
+renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
 renderer.outputEncoding = THREE.sRGBEncoding;
 document.getElementById('game-container').appendChild(renderer.domElement);
 
-// Lighting
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8);
+// Post Processing Setup
+const composer = new THREE.EffectComposer(renderer);
+const renderPass = new THREE.RenderPass(scene, camera);
+composer.addPass(renderPass);
+
+// Bloom Pass
+const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+bloomPass.threshold = 0.2;
+bloomPass.strength = 0.6; // Subtle glow
+bloomPass.radius = 0.5;
+composer.addPass(bloomPass);
+
+// Custom Vignette Shader
+const VignetteShader = {
+    uniforms: {
+        "tDiffuse": { value: null },
+        "offset": { value: 1.0 },
+        "darkness": { value: 1.2 }
+    },
+    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `uniform sampler2D tDiffuse; uniform float offset; uniform float darkness; varying vec2 vUv; void main() { vec4 texel = texture2D(tDiffuse, vUv); vec2 uv = (vUv - vec2(0.5)) * vec2(offset); gl_FragColor = vec4(mix(texel.rgb, vec3(0.0), dot(uv, uv) * darkness), texel.a); }`
+};
+const vignettePass = new THREE.ShaderPass(VignetteShader);
+composer.addPass(vignettePass);
+
+// Lighting System
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+hemiLight.position.set(0, 20, 0);
 scene.add(hemiLight);
 
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
-dirLight.position.set(15, 30, 20);
+const dirLight = new THREE.DirectionalLight(0xffeedd, 1.2);
+dirLight.position.set(20, 40, 30);
 dirLight.castShadow = true;
 dirLight.shadow.mapSize.width = 2048;
 dirLight.shadow.mapSize.height = 2048;
 dirLight.shadow.camera.near = 0.5;
-dirLight.shadow.camera.far = 80;
-dirLight.shadow.camera.left = -20;
-dirLight.shadow.camera.right = 20;
-dirLight.shadow.camera.top = 20;
-dirLight.shadow.camera.bottom = -20;
-dirLight.shadow.bias = -0.0005;
+dirLight.shadow.camera.far = 100;
+dirLight.shadow.camera.left = -30;
+dirLight.shadow.camera.right = 30;
+dirLight.shadow.camera.top = 30;
+dirLight.shadow.camera.bottom = -30;
+dirLight.shadow.bias = -0.0001;
+dirLight.shadow.normalBias = 0.02;
 scene.add(dirLight);
 
-// --- ASSETS ---
-function createProceduralTexture() {
+// Rim Light for cinematic look
+const rimLight = new THREE.DirectionalLight(0x667eea, 0.8);
+rimLight.position.set(-10, 10, -20);
+scene.add(rimLight);
+
+// --- PROCEDURAL TEXTURES & MATERIALS ---
+function createNoiseTexture(size, contrast) {
     const canvas = document.createElement('canvas');
-    canvas.width = 512; canvas.height = 512;
+    canvas.width = canvas.height = size;
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#5D4037'; ctx.fillRect(0,0,512,512);
-    for(let i=0; i<8000; i++) {
-        ctx.fillStyle = Math.random() > 0.5 ? '#4E342E' : '#6D4C41';
-        ctx.fillRect(Math.random()*512, Math.random()*512, 2, 2);
+    ctx.fillStyle = '#888';
+    ctx.fillRect(0,0,size,size);
+    for(let i=0; i<size*size*0.5; i++) {
+        const v = Math.random() * contrast;
+        ctx.fillStyle = `rgb(${v},${v},${v})`;
+        ctx.fillRect(Math.random()*size, Math.random()*size, 2, 2);
     }
-    ctx.fillStyle = '#3E2723';
-    [100, 256, 412].forEach(x => ctx.fillRect(x, 0, 20, 512));
-    ctx.fillStyle = '#212121';
-    for(let y=0; y<512; y+=40) ctx.fillRect(80, y, 352, 10);
-    
     const tex = new THREE.CanvasTexture(canvas);
-    tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(1, 10);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
     return tex;
 }
 
-const groundMat = new THREE.MeshStandardMaterial({ map: createProceduralTexture(), roughness: 0.9, metalness: 0.1 });
+const roughnessMap = createNoiseTexture(512, 200);
+const groundNormal = createNoiseTexture(512, 100);
+
+const matGround = new THREE.MeshStandardMaterial({ 
+    color: 0x3a3a3a, 
+    roughness: 0.85, 
+    metalness: 0.1,
+    roughnessMap: roughnessMap,
+    normalMap: groundNormal,
+    normalScale: new THREE.Vector2(0.5, 0.5)
+});
+
+const matTrainBody = new THREE.MeshStandardMaterial({ 
+    color: 0xffffff, roughness: 0.2, metalness: 0.6, 
+    envMapIntensity: 1.0 
+});
+
+const matGlass = new THREE.MeshPhysicalMaterial({
+    color: 0x88ccff, metalness: 0.1, roughness: 0.05, transmission: 0.6, transparent: true, opacity: 0.9
+});
 
 // --- OBJECT FACTORIES ---
 let player, ground;
@@ -225,79 +290,100 @@ let clock = new THREE.Clock();
 function createPlayerMesh(skinKey) {
     const group = new THREE.Group();
     const skinColor = CONFIG.colors.skins[skinKey]?.color || 0xFFCCAA;
-    const matSkin = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.4 });
-    const matCloth = new THREE.MeshStandardMaterial({ color: 0x37474F, roughness: 0.7 });
-    const matShoe = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.5 });
+    
+    // High quality materials
+    const matSkin = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.5, metalness: 0.1 });
+    const matCloth = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8, roughnessMap: roughnessMap });
+    const matShoe = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, metalness: 0.2 });
 
-    const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.3, 0.9, 12), matSkin);
+    // Smooth Capsule Body
+    const torsoGeo = new THREE.CapsuleGeometry(0.38, 0.9, 8, 16);
+    const torso = new THREE.Mesh(torsoGeo, matSkin);
     torso.position.y = 1.1; torso.castShadow = true; group.add(torso);
 
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 16), matSkin);
-    head.position.y = 1.85; head.castShadow = true; group.add(head);
+    // Head with smooth sphere
+    const headGeo = new THREE.SphereGeometry(0.3, 32, 32);
+    const head = new THREE.Mesh(headGeo, matSkin);
+    head.position.y = 1.9; head.castShadow = true; group.add(head);
 
-    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.15, 16), new THREE.MeshStandardMaterial({color: 0xD32F2F}));
-    cap.position.y = 1.95; group.add(cap);
-    const brim = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.05, 0.3), new THREE.MeshStandardMaterial({color: 0xD32F2F}));
-    brim.position.set(0, 1.95, 0.25); group.add(brim);
+    // Modern Cap
+    const capGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.15, 32);
+    const capMat = new THREE.MeshStandardMaterial({color: 0xff4b2b, roughness: 0.4});
+    const cap = new THREE.Mesh(capGeo, capMat);
+    cap.position.y = 2.05; group.add(cap);
+    
+    const brimGeo = new THREE.BoxGeometry(0.18, 0.04, 0.35);
+    const brim = new THREE.Mesh(brimGeo, capMat);
+    brim.position.set(0, 2.05, 0.3); group.add(brim);
 
-    const legGeo = new THREE.CylinderGeometry(0.12, 0.1, 0.8, 8);
-    const ll = new THREE.Mesh(legGeo, matCloth); ll.position.set(-0.15, 0.4, 0); ll.castShadow=true; group.add(ll);
-    const rl = new THREE.Mesh(legGeo, matCloth); rl.position.set(0.15, 0.4, 0); rl.castShadow=true; group.add(rl);
+    // Legs with rounded ends
+    const legGeo = new THREE.CapsuleGeometry(0.13, 0.7, 4, 8);
+    const ll = new THREE.Mesh(legGeo, matCloth); ll.position.set(-0.18, 0.45, 0); ll.castShadow=true; group.add(ll);
+    const rl = new THREE.Mesh(legGeo, matCloth); rl.position.set(0.18, 0.45, 0); rl.castShadow=true; group.add(rl);
 
-    const shoeGeo = new THREE.BoxGeometry(0.18, 0.15, 0.3);
-    group.add(new THREE.Mesh(shoeGeo, matShoe).translateX(-0.15).translateY(0.07).translateZ(0.05));
-    group.add(new THREE.Mesh(shoeGeo, matShoe).translateX(0.15).translateY(0.07).translateZ(0.05));
+    // Detailed Shoes
+    const shoeGeo = new THREE.BoxGeometry(0.2, 0.18, 0.35, 2, 2, 2);
+    const ls = new THREE.Mesh(shoeGeo, matShoe); ls.position.set(-0.18, 0.09, 0.05); ls.castShadow=true; group.add(ls);
+    const rs = new THREE.Mesh(shoeGeo, matShoe); rs.position.set(0.18, 0.09, 0.05); rs.castShadow=true; group.add(rs);
 
     return group;
 }
 
 function createTrainMesh(color) {
     const group = new THREE.Group();
-    const matBody = new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.4 });
-    const matDark = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8 });
-    const matWindow = new THREE.MeshStandardMaterial({ color: 0x81D4FA, roughness: 0.1, metalness: 0.8 });
-
-    const body = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.8, 7), matBody);
-    body.position.y = 1.6; body.castShadow = true; body.receiveShadow = true;
+    const bodyMat = matTrainBody.clone();
+    bodyMat.color.setHex(color);
+    
+    // Rounded Train Body using Lathe or modified Box
+    const bodyGeo = new THREE.BoxGeometry(2.6, 3, 8, 4, 4, 4);
+    // Simple vertex displacement for rounded corners could go here, but high segment count helps
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.position.y = 1.7; body.castShadow = true; body.receiveShadow = true;
     group.add(body);
 
-    const roof = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.2, 6.8), matDark);
-    roof.position.y = 3.1; group.add(roof);
+    // Glass Windows Strip
+    const winGeo = new THREE.BoxGeometry(2.65, 0.9, 6);
+    const win = new THREE.Mesh(winGeo, matGlass);
+    win.position.y = 2.3; group.add(win);
 
-    const win = new THREE.Mesh(new THREE.BoxGeometry(2.45, 0.8, 5), matWindow);
-    win.position.y = 2.2; group.add(win);
+    // Roof Detail
+    const roofGeo = new THREE.BoxGeometry(2.4, 0.15, 7.8);
+    const roof = new THREE.Mesh(roofGeo, new THREE.MeshStandardMaterial({color:0x111111, roughness:0.9}));
+    roof.position.y = 3.25; group.add(roof);
 
-    const wheelGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.3, 16);
+    // Wheels with metallic shine
+    const wheelGeo = new THREE.CylinderGeometry(0.45, 0.45, 0.3, 32);
     wheelGeo.rotateZ(Math.PI/2);
-    [-2.5, 2.5].forEach(z => {
-        group.add(new THREE.Mesh(wheelGeo, matDark).translateX(-1.1).translateY(0.4).translateZ(z));
-        group.add(new THREE.Mesh(wheelGeo, matDark).translateX(1.1).translateY(0.4).translateZ(z));
+    const wheelMat = new THREE.MeshStandardMaterial({color:0x333333, metalness:0.8, roughness:0.2});
+    [-3, 3].forEach(z => {
+        group.add(new THREE.Mesh(wheelGeo, wheelMat).translateX(-1.2).translateY(0.45).translateZ(z));
+        group.add(new THREE.Mesh(wheelGeo, wheelMat).translateX(1.2).translateY(0.45).translateZ(z));
     });
 
-    // Collision Box Data attached to mesh
-    group.userData = { 
-        type: 'train', 
-        topY: 3.2, // Height of roof for landing
-        width: 2.4, 
-        length: 7 
-    };
+    // Glowing Tail Lights (for Bloom)
+    const lightGeo = new THREE.CircleGeometry(0.15, 16);
+    const lightMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const tl1 = new THREE.Mesh(lightGeo, lightMat); tl1.position.set(-0.8, 1.2, 4.01); group.add(tl1);
+    const tl2 = new THREE.Mesh(lightGeo, lightMat); tl2.position.set(0.8, 1.2, 4.01); group.add(tl2);
+
+    group.userData = { type: 'train', topY: 3.3, width: 2.6, length: 8 };
     return group;
 }
 
 function createBarrierMesh() {
     const group = new THREE.Group();
-    const matWood = new THREE.MeshStandardMaterial({ color: 0x8D6E63, roughness: 0.9 });
-    const matMetal = new THREE.MeshStandardMaterial({ color: 0xBDBDBD, metalness: 0.6, roughness: 0.4 });
+    const matWood = new THREE.MeshStandardMaterial({ color: 0x8D6E63, roughness: 0.9, roughnessMap: roughnessMap });
+    const matMetal = new THREE.MeshStandardMaterial({ color: 0xBDBDBD, metalness: 0.7, roughness: 0.3 });
 
-    const legGeo = new THREE.BoxGeometry(0.15, 1.2, 0.15);
-    group.add(new THREE.Mesh(legGeo, matMetal).translateX(-1.2).translateY(0.6));
-    group.add(new THREE.Mesh(legGeo, matMetal).translateX(1.2).translateY(0.6));
+    const legGeo = new THREE.CylinderGeometry(0.08, 0.08, 1.3, 16);
+    group.add(new THREE.Mesh(legGeo, matMetal).translateX(-1.3).translateY(0.65));
+    group.add(new THREE.Mesh(legGeo, matMetal).translateX(1.3).translateY(0.65));
 
-    const barGeo = new THREE.BoxGeometry(2.6, 0.2, 0.1);
-    group.add(new THREE.Mesh(barGeo, matWood).translateY(0.9));
+    const barGeo = new THREE.BoxGeometry(2.8, 0.25, 0.15);
+    group.add(new THREE.Mesh(barGeo, matWood).translateY(1.0));
     group.add(new THREE.Mesh(barGeo, matWood).translateY(0.5));
 
-    group.userData = { type: 'barrier', topY: 1.1, width: 2.6 };
+    group.userData = { type: 'barrier', topY: 1.15, width: 2.8 };
     return group;
 }
 
@@ -308,7 +394,7 @@ function initWorld() {
     obstacles = [];
 
     if(!ground) {
-        ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 300), groundMat);
+        ground = new THREE.Mesh(new THREE.PlaneGeometry(50, 400, 1, 1), matGround);
         ground.rotation.x = -Math.PI / 2;
         ground.receiveShadow = true;
         scene.add(ground);
@@ -317,15 +403,9 @@ function initWorld() {
     player = createPlayerMesh(state.skin);
     scene.add(player);
 
-    state.lane = 0;
-    state.score = 0;
-    state.speed = CONFIG.baseSpeed;
-    state.isJumping = false;
-    state.yVel = 0;
-    state.onTrain = null;
-    state.stumbleTimer = 0;
-    player.position.set(0, 0, 0);
-    player.rotation.set(0,0,0);
+    state.lane = 0; state.score = 0; state.speed = CONFIG.baseSpeed;
+    state.isJumping = false; state.yVel = 0; state.onTrain = null; state.stumbleTimer = 0;
+    player.position.set(0, 0, 0); player.rotation.set(0,0,0);
     updateHUD();
 }
 
@@ -347,14 +427,12 @@ function spawnObstacle(zPos) {
 
 function triggerStumble() {
     state.stumbleTimer = CONFIG.stumbleDuration;
-    state.speed *= 0.5; // Slow down significantly
+    state.speed *= 0.4;
     document.getElementById('stumble-overlay').style.opacity = 1;
-    
-    // Visual wobble
     const wobbleAnim = () => {
         if(state.stumbleTimer <= 0) return;
-        player.rotation.z = Math.sin(Date.now() * 0.02) * 0.3;
-        player.rotation.x = Math.cos(Date.now() * 0.015) * 0.2;
+        player.rotation.z = Math.sin(Date.now() * 0.025) * 0.4;
+        player.rotation.x = Math.cos(Date.now() * 0.02) * 0.25;
         requestAnimationFrame(wobbleAnim);
     };
     wobbleAnim();
@@ -363,10 +441,9 @@ function triggerStumble() {
 function update(delta) {
     if(!state.isPlaying || state.isPaused) return;
 
-    // Recover from stumble
     if(state.stumbleTimer > 0) {
         state.stumbleTimer -= delta;
-        state.speed = Math.min(state.speed + delta * 5, CONFIG.baseSpeed); // Gradually recover speed
+        state.speed = Math.min(state.speed + delta * 8, CONFIG.baseSpeed);
         if(state.stumbleTimer <= 0) {
             document.getElementById('stumble-overlay').style.opacity = 0;
             player.rotation.set(0,0,0);
@@ -375,68 +452,50 @@ function update(delta) {
 
     const move = state.speed * delta;
     state.score += Math.floor(move * 10);
-    if(state.stumbleTimer <= 0) state.speed = Math.min(state.speed + delta * 0.05, 45);
+    if(state.stumbleTimer <= 0) state.speed = Math.min(state.speed + delta * 0.08, 50);
 
-    // Lane Movement (Slower during stumble)
-    const laneSpeed = state.stumbleTimer > 0 ? 5 : 12;
+    const laneSpeed = state.stumbleTimer > 0 ? 6 : 15;
     const targetX = state.lane * CONFIG.laneWidth;
     player.position.x += (targetX - player.position.x) * laneSpeed * delta;
-    
-    // Normal lean only if not stumbling
-    if(state.stumbleTimer <= 0) {
-        player.rotation.z = (player.position.x - targetX) * -0.08;
-    }
+    if(state.stumbleTimer <= 0) player.rotation.z = (player.position.x - targetX) * -0.08;
 
     // Vertical Physics & Train Riding
     let groundLevel = 0;
     let ridingTrain = false;
 
-    // Check if we are above a train/barrier to land on it
     for(let ob of obstacles) {
         const dz = ob.position.z - player.position.z;
         const dx = Math.abs(ob.position.x - player.position.x);
-        
-        // Are we within the horizontal bounds of this obstacle?
-        const halfW = (ob.userData.width || 2.4) / 2;
+        const halfW = (ob.userData.width || 2.6) / 2;
         const halfL = (ob.userData.length || 1) / 2;
         
-        if(dx < halfW + 0.2 && dz > -halfL && dz < halfL) {
+        if(dx < halfW + 0.3 && dz > -halfL && dz < halfL) {
             const topY = ob.userData.topY;
-            // If falling and feet are near the top surface
-            if(state.yVel <= 0 && player.position.y >= topY - 0.5 && player.position.y <= topY + 1.0) {
+            if(state.yVel <= 0 && player.position.y >= topY - 0.5 && player.position.y <= topY + 1.2) {
                 groundLevel = topY;
-                if(ob.userData.type === 'train') {
-                    state.onTrain = ob;
-                    ridingTrain = true;
-                }
+                if(ob.userData.type === 'train') { state.onTrain = ob; ridingTrain = true; }
                 break;
             }
         }
     }
 
-    // Apply Gravity or Snap to Surface
     if(player.position.y > groundLevel + 0.1 || state.yVel > 0) {
         state.yVel += CONFIG.gravity * delta;
         player.position.y += state.yVel * delta;
         state.isJumping = true;
     } else {
-        // Landed
         player.position.y = groundLevel;
         state.yVel = 0;
         state.isJumping = false;
         if(!ridingTrain) state.onTrain = null;
     }
 
-    // If riding train, move with it (trains move at same speed as world in this engine)
-    // Actually in this engine obstacles move towards player, so no extra X/Z needed for riding
-    // But we must ensure Y stays locked
     if(ridingTrain && state.onTrain) {
         player.position.y = state.onTrain.userData.topY;
-        state.isJumping = false;
-        state.yVel = 0;
+        state.isJumping = false; state.yVel = 0;
     }
 
-    // Collision Detection
+    // Collision
     for(let i = obstacles.length - 1; i >= 0; i--) {
         let ob = obstacles[i];
         ob.position.z += move;
@@ -444,52 +503,37 @@ function update(delta) {
         const dz = ob.position.z - player.position.z;
         const dx = Math.abs(ob.position.x - player.position.x);
         const dy = player.position.y;
-
-        // Z overlap check
         const halfL = (ob.userData.length || 1) / 2;
+        
         if(dz > -halfL - 0.3 && dz < halfL + 0.3) {
+            const halfW = (ob.userData.width || 2.6) / 2;
+            const playerHalfW = 0.38;
             
-            // SIDE COLLISION (Stumble Logic)
-            // Player is beside the train but overlapping slightly in X
-            const halfW = (ob.userData.width || 2.4) / 2;
-            const playerHalfW = 0.35;
-            
-            // If X distance indicates partial overlap (grazing) AND we are NOT on top
-            if(dx < halfW + playerHalfW && dx > halfW - 0.4 && dy < ob.userData.topY - 0.5) {
+            // Side Collision -> Stumble
+            if(dx < halfW + playerHalfW && dx > halfW - 0.5 && dy < ob.userData.topY - 0.5) {
                 if(state.stumbleTimer <= 0) triggerStumble();
             }
-            
-            // FRONT/DIRECT COLLISION (Death Logic)
-            // Direct center overlap AND not jumping high enough over barriers
+            // Front/Direct Collision -> Death
             else if(dx < halfW - 0.2 && dy < ob.userData.topY - 0.5) {
-                // For trains: only die if hitting front face (dz close to front edge)
-                if(ob.userData.type === 'train' && dz > halfL - 1.0 && dz < halfL + 0.5) {
-                    gameOver(); return;
-                }
-                // For barriers: die if not cleared
-                if(ob.userData.type === 'barrier' && dy < 0.9) {
-                    gameOver(); return;
-                }
+                if(ob.userData.type === 'train' && dz > halfL - 1.2 && dz < halfL + 0.5) { gameOver(); return; }
+                if(ob.userData.type === 'barrier' && dy < 0.9) { gameOver(); return; }
             }
         }
 
-        if(ob.position.z > 12) {
+        if(ob.position.z > 15) {
             scene.remove(ob);
             obstacles.splice(i, 1);
             if(state.onTrain === ob) state.onTrain = null;
         }
     }
 
-    // Spawning
     const lastZ = obstacles.length > 0 ? obstacles[obstacles.length-1].position.z : -30;
-    if(lastZ > -120) spawnObstacle(lastZ - (18 + Math.random() * 18));
+    if(lastZ > -130) spawnObstacle(lastZ - (20 + Math.random() * 20));
 
-    // Ground Scroll
     ground.position.z += move;
     if(ground.position.z > 100) ground.position.z = -100;
 
-    // Camera
-    camera.position.z = player.position.z + 9;
+    camera.position.z = player.position.z + 10;
     camera.position.x += (player.position.x * 0.4 - camera.position.x) * 4 * delta;
     
     updateHUD();
@@ -499,7 +543,13 @@ function animate() {
     requestAnimationFrame(animate);
     const delta = Math.min(clock.getDelta(), 0.1);
     update(delta);
-    renderer.render(scene, camera);
+    
+    // Use Composer instead of standard render for Post-Processing
+    if(state.settings.bloom || state.settings.vignette) {
+        composer.render();
+    } else {
+        renderer.render(scene, camera);
+    }
 }
 
 // --- INPUT ---
@@ -508,8 +558,7 @@ window.addEventListener('keydown', e => {
     if(e.key === 'ArrowLeft' && state.lane > -1) state.lane--;
     if(e.key === 'ArrowRight' && state.lane < 1) state.lane++;
     if((e.key === 'ArrowUp' || e.key === ' ') && !state.isJumping) {
-        state.isJumping = true;
-        state.yVel = CONFIG.jumpForce;
+        state.isJumping = true; state.yVel = CONFIG.jumpForce;
     }
 });
 
@@ -534,8 +583,7 @@ const UI = {
 const Game = {
     start: () => {
         initWorld();
-        state.isPlaying = true;
-        state.isPaused = false;
+        state.isPlaying = true; state.isPaused = false;
         document.querySelectorAll('.menu-screen').forEach(el => el.classList.add('hidden'));
         clock.start();
     },
@@ -544,7 +592,7 @@ const Game = {
 
 function gameOver() {
     state.isPlaying = false;
-    localStorage.setItem('srp_coins_v9', state.coins);
+    localStorage.setItem('srp_coins_v10', state.coins);
     document.getElementById('final-score').innerText = state.score;
     document.getElementById('game-over').classList.remove('hidden');
 }
@@ -554,12 +602,24 @@ function updateHUD() {
     document.getElementById('coin-display').innerText = state.coins;
 }
 
-// --- SETTINGS (REAL IMPACT) ---
+// --- SETTINGS (REAL IMPACT ON RENDER PIPELINE) ---
 const Settings = {
     setQuality: (level) => {
         state.settings.quality = level;
-        const dpr = level === 'low' ? 0.75 : level === 'med' ? 1 : Math.min(window.devicePixelRatio, 2);
+        const dpr = level === 'low' ? 0.7 : level === 'med' ? 1 : Math.min(window.devicePixelRatio, 2);
         renderer.setPixelRatio(dpr);
+        composer.setSize(window.innerWidth, window.innerHeight);
+        
+        // Adjust shadow quality based on setting
+        dirLight.shadow.mapSize.width = level === 'low' ? 512 : level === 'med' ? 1024 : 2048;
+        dirLight.shadow.mapSize.height = dirLight.shadow.mapSize.width;
+        
+        Settings.updateUI();
+        saveSettings();
+    },
+    toggleBloom: () => {
+        state.settings.bloom = !state.settings.bloom;
+        bloomPass.enabled = state.settings.bloom;
         Settings.updateUI();
         saveSettings();
     },
@@ -570,23 +630,26 @@ const Settings = {
         Settings.updateUI();
         saveSettings();
     },
-    toggleParticles: () => {
-        state.settings.particles = !state.settings.particles;
+    toggleVignette: () => {
+        state.settings.vignette = !state.settings.vignette;
+        vignettePass.enabled = state.settings.vignette;
         Settings.updateUI();
         saveSettings();
     },
     updateUI: () => {
+        document.getElementById('t-bloom').className = `toggle-btn ${state.settings.bloom ? 'active' : ''}`;
+        document.getElementById('t-bloom').innerText = state.settings.bloom ? 'روشن' : 'خاموش';
         document.getElementById('t-shadow').className = `toggle-btn ${state.settings.shadows ? 'active' : ''}`;
         document.getElementById('t-shadow').innerText = state.settings.shadows ? 'روشن' : 'خاموش';
-        document.getElementById('t-particles').className = `toggle-btn ${state.settings.particles ? 'active' : ''}`;
-        document.getElementById('t-particles').innerText = state.settings.particles ? 'روشن' : 'خاموش';
+        document.getElementById('t-vignette').className = `toggle-btn ${state.settings.vignette ? 'active' : ''}`;
+        document.getElementById('t-vignette').innerText = state.settings.vignette ? 'روشن' : 'خاموش';
         ['low','med','high'].forEach(q => {
             document.getElementById(`q-${q}`).className = `toggle-btn ${state.settings.quality === q ? 'active' : ''}`;
         });
     }
 };
 
-function saveSettings() { localStorage.setItem('srp_settings_v9', JSON.stringify(state.settings)); }
+function saveSettings() { localStorage.setItem('srp_settings_v10', JSON.stringify(state.settings)); }
 
 // --- SHOP ---
 function renderShop() {
@@ -598,14 +661,14 @@ function renderShop() {
         const selected = state.skin === key;
         const div = document.createElement('div');
         div.className = `shop-item ${selected ? 'selected' : ''} ${!owned ? 'locked' : ''}`;
-        div.innerHTML = `<div class="skin-preview" style="background:#${data.color.toString(16).padStart(6,'0')}"></div><div style="font-weight:bold">${data.name}</div><div style="font-size:0.8rem;color:#aaa;margin-top:4px">${owned ? '✓ انتخاب شده' : data.price + ' 🪙'}</div>`;
+        div.innerHTML = `<div class="skin-preview" style="background:#${data.color.toString(16).padStart(6,'0')}"></div><div style="font-weight:bold">${data.name}</div><div style="font-size:0.8rem;color:#aaa;margin-top:6px">${owned ? '✓ انتخاب شده' : data.price + ' 🪙'}</div>`;
         div.onclick = () => {
-            if(owned) { state.skin = key; localStorage.setItem('srp_skin_v9', key); renderShop(); }
+            if(owned) { state.skin = key; localStorage.setItem('srp_skin_v10', key); renderShop(); }
             else if(state.coins >= data.price) {
                 state.coins -= data.price; state.ownedSkins.push(key); state.skin = key;
-                localStorage.setItem('srp_coins_v9', state.coins);
-                localStorage.setItem('srp_owned_v9', JSON.stringify(state.ownedSkins));
-                localStorage.setItem('srp_skin_v9', key);
+                localStorage.setItem('srp_coins_v10', state.coins);
+                localStorage.setItem('srp_owned_v10', JSON.stringify(state.ownedSkins));
+                localStorage.setItem('srp_skin_v10', key);
                 renderShop();
             } else { alert("سکه کافی نیست!"); }
         };
@@ -621,6 +684,7 @@ window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    composer.setSize(window.innerWidth, window.innerHeight);
 });
 </script>
 </body>
