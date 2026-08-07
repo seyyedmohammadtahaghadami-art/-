@@ -3,36 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Subway Runner V24 - Ultimate Edition</title>
+    <title>Subway Runner V24 - Stable Ultimate</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lalezar&display=swap');
-
         body { margin: 0; overflow: hidden; background: #000; font-family: 'Lalezar', sans-serif; user-select: none; touch-action: none; color: white; }
-        
-        /* UI Layers */
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
         .interactive { pointer-events: auto; }
         
         /* HUD */
-        #hud { position: absolute; top: 10px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box; text-shadow: 2px 2px 0 #000; font-size: 22px; display: none; }
+        #hud { position: absolute; top: 10px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box; text-shadow: 2px 2px 0 #000; font-size: 22px; display: none; pointer-events: none; }
         .hud-box { background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; border: 2px solid #f1c40f; backdrop-filter: blur(4px); display: flex; align-items: center; gap: 5px; }
-        #mission-hud { position: absolute; top: 60px; right: 20px; background: rgba(0,0,0,0.7); padding: 8px 15px; border-radius: 10px; border-right: 4px solid #e67e22; font-size: 16px; display: none; animation: slideIn 0.3s; }
+        #mission-hud { position: absolute; top: 60px; right: 20px; background: rgba(0,0,0,0.7); padding: 8px 15px; border-radius: 10px; border-right: 4px solid #e67e22; font-size: 16px; display: none; pointer-events: none; }
         
-        /* Pause Button */
         #pause-btn { position: absolute; top: 10px; right: 20px; z-index: 25; background: rgba(0,0,0,0.5); border: 2px solid #fff; color: white; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; display: none; pointer-events: auto; }
-
-        /* Active Powerups */
-        #active-powerups { position: absolute; top: 70px; left: 10px; display: flex; flex-direction: column; gap: 5px; }
-        .pu-badge { background: rgba(0,0,0,0.8); padding: 5px 10px; border-radius: 10px; border-left: 4px solid #fff; font-size: 14px; display: flex; align-items: center; gap: 5px; animation: slideIn 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        #active-powerups { position: absolute; top: 70px; left: 10px; display: flex; flex-direction: column; gap: 5px; pointer-events: none; }
+        .pu-badge { background: rgba(0,0,0,0.8); padding: 5px 10px; border-radius: 10px; border-left: 4px solid #fff; font-size: 14px; display: flex; align-items: center; gap: 5px; }
 
         /* Menus */
         .menu-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; overflow-y: auto; padding: 20px 0; backdrop-filter: blur(5px); }
         .hidden { display: none !important; }
-        
         h1 { color: #f1c40f; font-size: 45px; margin: 0 0 10px 0; text-shadow: 3px 3px 0 #c0392b; transform: skew(-5deg); }
         h2 { color: #ecf0f1; margin-bottom: 15px; font-size: 24px; border-bottom: 2px solid #f1c40f; padding-bottom: 5px; display: inline-block; }
         
-        .btn { background: linear-gradient(#e67e22, #d35400); border: none; padding: 12px 25px; margin: 6px; color: white; font-family: 'Lalezar'; font-size: 20px; border-radius: 50px; cursor: pointer; box-shadow: 0 5px 0 #a04000; width: 260px; transition: 0.1s; text-shadow: 1px 1px 0 rgba(0,0,0,0.3); }
+        .btn { background: linear-gradient(#e67e22, #d35400); border: none; padding: 12px 25px; margin: 6px; color: white; font-family: 'Lalezar'; font-size: 20px; border-radius: 50px; cursor: pointer; box-shadow: 0 5px 0 #a04000; width: 260px; transition: 0.1s; }
         .btn:active { transform: translateY(5px); box-shadow: none; }
         .btn-blue { background: linear-gradient(#3498db, #2980b9); box-shadow: 0 5px 0 #1c5980; }
         .btn-gray { background: linear-gradient(#7f8c8d, #636e72); box-shadow: 0 5px 0 #4b5456; width: 140px; font-size: 16px; }
@@ -40,23 +32,18 @@
         .btn-red { background: linear-gradient(#e74c3c, #c0392b); box-shadow: 0 5px 0 #922b21; }
         .btn-revive { background: linear-gradient(#9b59b6, #8e44ad); box-shadow: 0 5px 0 #6c3483; animation: pulse 1.5s infinite; }
 
-        /* Shop & Grid */
         .grid-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 500px; margin-bottom: 20px; }
-        .grid-item { background: rgba(255,255,255,0.1); border: 2px solid #555; border-radius: 10px; padding: 10px; width: 90px; text-align: center; cursor: pointer; transition: 0.2s; }
-        .grid-item:hover { background: rgba(255,255,255,0.2); }
-        .grid-item.selected { border-color: #f1c40f; background: rgba(241, 196, 15, 0.2); box-shadow: 0 0 10px #f1c40f; }
-        .item-preview { width: 40px; height: 40px; margin: 0 auto 5px; border-radius: 5px; border: 2px solid #fff; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .grid-item { background: rgba(255,255,255,0.1); border: 2px solid #555; border-radius: 10px; padding: 10px; width: 90px; text-align: center; cursor: pointer; }
+        .grid-item.selected { border-color: #f1c40f; background: rgba(241, 196, 15, 0.2); }
+        .item-preview { width: 40px; height: 40px; margin: 0 auto 5px; border-radius: 5px; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; }
         
-        /* Settings */
         .setting-row { display: flex; justify-content: space-between; align-items: center; width: 90%; max-width: 300px; background: rgba(255,255,255,0.05); padding: 10px; margin: 5px 0; border-radius: 8px; }
         select { background: #333; color: white; border: 1px solid #555; padding: 5px; border-radius: 5px; font-family: 'Lalezar'; }
 
-        /* Effects */
         #blur-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; backdrop-filter: blur(0px); pointer-events: none; transition: 0.2s; z-index: 5; }
-        #toast { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: #f1c40f; padding: 10px 25px; border-radius: 30px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 30; border: 2px solid #f1c40f; font-size: 18px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); white-space: nowrap;}
+        #toast { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: #f1c40f; padding: 10px 25px; border-radius: 30px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 30; border: 2px solid #f1c40f; font-size: 18px; white-space: nowrap;}
         #new-record-banner { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%) scale(0); color: #f1c40f; font-size: 40px; text-shadow: 0 0 20px #e67e22; pointer-events: none; z-index: 15; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-        @keyframes slideIn { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
     <script type="importmap">
@@ -68,9 +55,8 @@
     <div id="blur-overlay"></div>
     <div id="toast">پیام</div>
     <div id="new-record-banner">🏆 رکورد جدید!</div>
-    <button id="pause-btn" onclick="game.togglePause()">⏸️</button>
+    <button id="pause-btn">⏸️</button>
 
-    <!-- HUD -->
     <div id="hud">
         <div class="hud-box">امتیاز: <span id="score">0</span></div>
         <div class="hud-box">🪙 <span id="coins">0</span></div>
@@ -79,125 +65,95 @@
     <div id="mission-hud">🎯 مأموریت: <span id="mission-text">...</span> (<span id="mission-prog">0</span>)</div>
     <div id="active-powerups"></div>
 
-    <!-- Main Menu -->
     <div id="main-menu" class="menu-screen interactive">
         <h1>SUBWAY V24</h1>
-        <p style="color:#aaa; margin-bottom:20px;">نسخه نهایی - قطار متحرک + ساختمان</p>
+        <p style="color:#aaa; margin-bottom:20px;">نسخه پایدار نهایی - بدون هنگی</p>
         <div style="margin-bottom:15px; font-size:20px; color:#f1c40f;">سکه: <span id="menu-coins">0</span> | رکورد: <span id="menu-high">0</span></div>
-        <button class="btn" onclick="game.start()">شروع دویدن 🏃‍♂️</button>
-        <button class="btn btn-blue" onclick="ui.showShop()">فروشگاه 🛒</button>
-        <button class="btn btn-green" onclick="ui.showAchievements()">دستاوردها 🏆</button>
-        <button class="btn btn-gray" onclick="ui.showSettings()">تنظیمات ⚙️</button>
-        <button class="btn btn-small btn-gray" onclick="audio.toggleMute()" style="margin-top:10px;">صدا: <span id="mute-text">روشن</span> 🔊</button>
+        <button class="btn" id="btn-start">شروع دویدن 🏃‍♂️</button>
+        <button class="btn btn-blue" id="btn-shop">فروشگاه 🛒</button>
+        <button class="btn btn-green" id="btn-ach">دستاوردها 🏆</button>
+        <button class="btn btn-gray" id="btn-set">تنظیمات ⚙️</button>
+        <button class="btn btn-small btn-gray" id="btn-mute" style="margin-top:10px;">صدا: <span id="mute-text">روشن</span> 🔊</button>
     </div>
 
-    <!-- Pause Menu -->
     <div id="pause-menu" class="menu-screen interactive hidden">
         <h1 style="color:#fff">PAUSED</h1>
-        <button class="btn" onclick="game.resume()">ادامه ▶️</button>
-        <button class="btn btn-red" onclick="game.quitToMenu()">خروج ❌</button>
+        <button class="btn" id="btn-resume">ادامه ▶️</button>
+        <button class="btn btn-red" id="btn-quit">خروج ❌</button>
     </div>
 
-    <!-- Shop Menu -->
     <div id="shop-menu" class="menu-screen interactive hidden">
         <h2>فروشگاه</h2>
         <div style="color:#f1c40f; margin-bottom:10px; font-size:20px;">موجودی: <span id="shop-coins">0</span> 🪙</div>
-        
-        <h3 style="width:100%; text-align:center; color:#aaa; font-size:16px; margin-top:10px;">👕 اسکین‌ها (۹ مدل)</h3>
+        <h3 style="width:100%; text-align:center; color:#aaa; font-size:16px; margin-top:10px;">👕 اسکین‌ها</h3>
         <div class="grid-container" id="skin-grid"></div>
-        
         <h3 style="width:100%; text-align:center; color:#aaa; font-size:16px;">⚡ ارتقاهای دائمی</h3>
         <div class="grid-container" id="upgrade-grid"></div>
-
-        <button class="btn btn-gray" onclick="ui.showMain()">بازگشت</button>
+        <button class="btn btn-gray" id="btn-shop-back">بازگشت</button>
     </div>
 
-    <!-- Achievements Menu -->
     <div id="achieve-menu" class="menu-screen interactive hidden">
         <h2>دستاوردها</h2>
         <div id="achieve-list" style="width:90%; max-width:400px; text-align:right;"></div>
-        <button class="btn btn-gray" onclick="ui.showMain()" style="margin-top:20px;">بازگشت</button>
+        <button class="btn btn-gray" id="btn-ach-back" style="margin-top:20px;">بازگشت</button>
     </div>
 
-    <!-- Settings Menu -->
     <div id="settings-menu" class="menu-screen interactive hidden">
         <h2>تنظیمات</h2>
-        <div class="setting-row">
-            <span>کیفیت گرافیک</span>
-            <select id="quality-select" onchange="game.setQuality(this.value)">
-                <option value="low">پایین</option>
-                <option value="med" selected>متوسط</option>
-                <option value="high">بالا (Ultra)</option>
-            </select>
-        </div>
-        <div class="setting-row">
-            <span>سایه‌ها</span>
-            <input type="checkbox" id="shadow-toggle" checked onchange="game.toggleShadows(this.checked)">
-        </div>
-        <div class="setting-row">
-            <span>لرزش دوربین</span>
-            <input type="checkbox" id="shake-toggle" checked onchange="game.toggleShake(this.checked)">
-        </div>
-        <button class="btn btn-gray" onclick="ui.showMain()" style="margin-top:20px;">بازگشت</button>
+        <div class="setting-row"><span>کیفیت گرافیک</span><select id="quality-select"><option value="low">پایین</option><option value="med" selected>متوسط</option><option value="high">بالا</option></select></div>
+        <div class="setting-row"><span>سایه‌ها</span><input type="checkbox" id="shadow-toggle" checked></div>
+        <div class="setting-row"><span>لرزش دوربین</span><input type="checkbox" id="shake-toggle" checked></div>
+        <button class="btn btn-gray" id="btn-set-back" style="margin-top:20px;">بازگشت</button>
     </div>
 
-    <!-- Game Over -->
     <div id="game-over" class="menu-screen interactive hidden">
         <h1 style="color:#e74c3c">BUSTED!</h1>
         <div style="font-size:28px; margin:10px;">امتیاز: <span id="final-score">0</span></div>
         <div style="font-size:18px; color:#aaa;">رکورد: <span id="final-high">0</span></div>
         <div style="font-size:20px; color:#f1c40f; margin-bottom:20px;">سکه: +<span id="final-coins">0</span></div>
-        <button class="btn btn-revive" onclick="game.revive()">ادامه با ۱۰۰ سکه 💎</button>
-        <button class="btn" onclick="game.restart()">دوباره 🔄</button>
-        <button class="btn btn-gray" onclick="ui.showMain()">منو</button>
+        <button class="btn btn-revive" id="btn-revive">ادامه با ۱۰۰ سکه 💎</button>
+        <button class="btn" id="btn-restart">دوباره 🔄</button>
+        <button class="btn btn-gray" id="btn-go-menu">منو</button>
     </div>
 
     <script type="module">
         import * as THREE from 'three';
 
-        // --- AUDIO SYSTEM ---
+        // --- AUDIO SYSTEM (Stable) ---
         const audio = {
-            ctx: null, muted: false, musicInterval: null,
+            ctx: null, muted: false, musicTimer: 0,
             init() { 
-                if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); 
-                if (this.ctx.state === 'suspended') this.ctx.resume(); 
-                this.startMusic();
+                try {
+                    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); 
+                    if (this.ctx.state === 'suspended') this.ctx.resume(); 
+                } catch(e) { console.warn("Audio not supported"); }
             },
             playTone(freq, type, dur, vol = 0.1) {
                 if (this.muted || !this.ctx) return;
-                const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-                o.type = type; o.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                g.gain.setValueAtTime(vol, this.ctx.currentTime); 
-                g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
-                o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime + dur);
+                try {
+                    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+                    o.type = type; o.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    g.gain.setValueAtTime(vol, this.ctx.currentTime); 
+                    g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
+                    o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime + dur);
+                } catch(e){}
             },
-            coin() { this.playTone(1200, 'sine', 0.1, 0.1); setTimeout(()=>this.playTone(1800, 'sine', 0.1, 0.1), 50); },
+            coin() { this.playTone(1200, 'sine', 0.1, 0.1); this.playTone(1800, 'sine', 0.1, 0.1); },
             jump() { this.playTone(300, 'square', 0.2, 0.1); },
             crash() { this.playTone(100, 'sawtooth', 0.5, 0.2); },
-            powerup() { this.playTone(600, 'triangle', 0.1, 0.1); setTimeout(()=>this.playTone(900, 'triangle', 0.2, 0.1), 100); },
-            revive() { this.playTone(400, 'sine', 0.3, 0.2); setTimeout(()=>this.playTone(800, 'sine', 0.4, 0.2), 200); },
-            startMusic() {
-                if(this.musicInterval) clearInterval(this.musicInterval);
-                if(this.muted) return;
-                const notes = [110, 110, 130, 110, 146, 130];
-                let step = 0;
-                this.musicInterval = setInterval(() => {
-                    if(this.muted || !game.isPlaying || game.isPaused) return;
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = 'triangle';
-                    osc.frequency.value = notes[step % notes.length];
-                    gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
-                    osc.connect(gain); gain.connect(this.ctx.destination);
-                    osc.start(); osc.stop(this.ctx.currentTime + 0.3);
-                    step++;
-                }, 250);
+            powerup() { this.playTone(600, 'triangle', 0.1, 0.1); },
+            revive() { this.playTone(400, 'sine', 0.3, 0.2); },
+            updateMusic(dt) {
+                if(this.muted || !game.isPlaying || game.isPaused || !this.ctx) return;
+                this.musicTimer -= dt;
+                if(this.musicTimer <= 0) {
+                    this.playTone(110 + (Math.random()*50), 'triangle', 0.2, 0.03);
+                    this.musicTimer = 250;
+                }
             },
             toggleMute() { 
                 this.muted = !this.muted; 
                 document.getElementById('mute-text').innerText = this.muted ? "خاموش" : "روشن"; 
-                if(!this.muted) this.startMusic(); else clearInterval(this.musicInterval);
             }
         };
 
@@ -243,7 +199,7 @@
             mission: { type: 'coins', target: 50, current: 0, completed: false }
         };
 
-        // --- GAME ENGINE ---
+        // --- STABLE GAME ENGINE ---
         class Game {
             constructor() {
                 this.scene = new THREE.Scene();
@@ -253,14 +209,11 @@
                 this.baseCamPos = new THREE.Vector3(0, 6, 10);
                 this.camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 300);
                 this.camera.position.copy(this.baseCamPos);
-                this.camera.lookAt(0, 1, -10);
-
-                this.renderer = new THREE.WebGLRenderer({ antialias: state.settings.quality !== 'low' });
+                
+                this.renderer = new THREE.WebGLRenderer({ antialias: state.settings.quality !== 'low', powerPreference: "high-performance" });
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
-                // FIX #4: Pixel Ratio & Tone Mapping
                 this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                 this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-                this.renderer.toneMappingExposure = 1.2;
                 this.renderer.shadowMap.enabled = state.settings.shadows;
                 this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
                 document.body.appendChild(this.renderer.domElement);
@@ -269,13 +222,9 @@
                 this.sun = new THREE.DirectionalLight(0xffffff, 1.5);
                 this.sun.position.set(20, 40, 20);
                 this.sun.castShadow = true;
-                this.sun.shadow.mapSize.width = 2048; this.sun.shadow.mapSize.height = 2048;
-                this.sun.shadow.camera.near = 0.5; this.sun.shadow.camera.far = 100;
-                this.sun.shadow.camera.left = -30; this.sun.shadow.camera.right = 30;
-                this.sun.shadow.camera.top = 30; this.sun.shadow.camera.bottom = -30;
+                this.sun.shadow.mapSize.set(1024, 1024); // Optimized shadow map
                 this.scene.add(this.sun);
-                this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-                this.scene.add(new THREE.HemisphereLight(0xffffbb, 0x080820, 0.6));
+                this.scene.add(new THREE.AmbientLight(0xffffff, 0.6));
 
                 this.createWorld();
                 this.player = this.createPlayerMesh(SKINS.find(s=>s.id===state.currentSkin).color);
@@ -285,13 +234,16 @@
                 this.coins = [];
                 this.powerups = [];
                 this.environment = [];
-                
-                // FIX #2: Internal Timer System instead of setTimeout
                 this.timers = []; 
-                this.gameTime = 0;
                 
-                this.resetState();
+                this.gameTime = 0;
+                this.lastTime = performance.now();
+                this.spawnTimer = 0;
+                this.envSpawnTimer = 0;
+                
+                this.resetState(true);
                 this.setupInputs();
+                this.bindUI();
                 this.animate();
                 
                 window.addEventListener('resize', () => this.onResize());
@@ -299,76 +251,46 @@
                 ui.updateMission();
             }
 
+            bindUI() {
+                // استفاده از addEventListener به جای onclick داخل HTML برای پایداری بیشتر
+                document.getElementById('pause-btn').addEventListener('click', () => this.togglePause());
+                document.getElementById('btn-start').addEventListener('click', () => this.start());
+                document.getElementById('btn-shop').addEventListener('click', () => ui.showShop());
+                document.getElementById('btn-ach').addEventListener('click', () => ui.showAchievements());
+                document.getElementById('btn-set').addEventListener('click', () => ui.showSettings());
+                document.getElementById('btn-mute').addEventListener('click', () => audio.toggleMute());
+                document.getElementById('btn-resume').addEventListener('click', () => this.resume());
+                document.getElementById('btn-quit').addEventListener('click', () => this.quitToMenu());
+                document.getElementById('btn-shop-back').addEventListener('click', () => ui.showMain());
+                document.getElementById('btn-ach-back').addEventListener('click', () => ui.showMain());
+                document.getElementById('btn-set-back').addEventListener('click', () => ui.showMain());
+                document.getElementById('btn-revive').addEventListener('click', () => this.revive());
+                document.getElementById('btn-restart').addEventListener('click', () => this.restart());
+                document.getElementById('btn-go-menu').addEventListener('click', () => ui.showMain());
+                
+                document.getElementById('quality-select').addEventListener('change', (e) => { state.settings.quality = e.target.value; location.reload(); });
+                document.getElementById('shadow-toggle').addEventListener('change', (e) => { state.settings.shadows = e.target.checked; this.renderer.shadowMap.enabled = e.target.checked; });
+                document.getElementById('shake-toggle').addEventListener('change', (e) => { state.settings.shake = e.target.checked; });
+            }
+
             createWorld() {
-                // Ground
-                const groundGeo = new THREE.PlaneGeometry(200, 800);
-                const groundMat = new THREE.MeshStandardMaterial({ color: 0x2c3e50, roughness: 0.9 });
-                const ground = new THREE.Mesh(groundGeo, groundMat);
+                const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 800), new THREE.MeshStandardMaterial({ color: 0x2c3e50, roughness: 0.9 }));
                 ground.rotation.x = -Math.PI/2; ground.position.z = -300; ground.receiveShadow = true;
                 this.scene.add(ground);
 
-                // Rails
-                const railGeo = new THREE.BoxGeometry(0.15, 0.15, 800);
                 const railMat = new THREE.MeshStandardMaterial({ color: 0x7f8c8d, metalness: 0.9, roughness: 0.1 });
                 [-2.5, 0, 2.5].forEach(x => {
                     [-0.8, 0.8].forEach(offset => {
-                        const r = new THREE.Mesh(railGeo, railMat);
+                        const r = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 800), railMat);
                         r.position.set(x + offset, 0.08, -300);
                         this.scene.add(r);
                     });
                 });
-
-                // Sun Mesh (Visual)
-                const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(5, 16, 16), new THREE.MeshBasicMaterial({color: 0xffdd00}));
-                sunMesh.position.set(50, 60, -200);
-                this.scene.add(sunMesh);
-            }
-
-            spawnEnvironment(zPos) {
-                // Buildings
-                if(Math.random() > 0.3) {
-                    const side = Math.random() > 0.5 ? 1 : -1;
-                    const h = 10 + Math.random() * 30;
-                    const w = 5 + Math.random() * 10;
-                    const d = 10 + Math.random() * 20;
-                    const geo = new THREE.BoxGeometry(w, h, d);
-                    const mat = new THREE.MeshStandardMaterial({ color: Math.random() * 0x555555 + 0x222222 });
-                    const b = new THREE.Mesh(geo, mat);
-                    b.position.set(side * (15 + Math.random() * 20), h/2, zPos);
-                    b.castShadow = true; b.receiveShadow = true;
-                    this.scene.add(b);
-                    this.environment.push(b);
-                }
-                // Clouds
-                if(Math.random() > 0.7) {
-                    const cGroup = new THREE.Group();
-                    for(let i=0; i<3; i++) {
-                        const s = 2 + Math.random() * 3;
-                        const c = new THREE.Mesh(new THREE.SphereGeometry(s, 8, 8), new THREE.MeshStandardMaterial({color: 0xffffff, transparent: true, opacity: 0.8}));
-                        c.position.set((Math.random()-0.5)*5, (Math.random()-0.5)*2, (Math.random()-0.5)*3);
-                        cGroup.add(c);
-                    }
-                    cGroup.position.set((Math.random()-0.5)*80, 20 + Math.random()*15, zPos);
-                    this.scene.add(cGroup);
-                    this.environment.push(cGroup);
-                }
-                // Lamp Posts
-                if(Math.random() > 0.8) {
-                    const side = Math.random() > 0.5 ? 1 : -1;
-                    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 6), new THREE.MeshStandardMaterial({color: 0x333}));
-                    pole.position.set(side * 6, 3, zPos);
-                    const light = new THREE.PointLight(0xffaa00, 1, 15);
-                    light.position.set(0, 3, 0);
-                    pole.add(light);
-                    this.scene.add(pole);
-                    this.environment.push(pole);
-                }
             }
 
             createPlayerMesh(color) {
                 const g = new THREE.Group();
-                const bMat = new THREE.MeshStandardMaterial({color: color, roughness: 0.3, metalness: 0.1});
-                const b = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.9, 0.4), bMat);
+                const b = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.9, 0.4), new THREE.MeshStandardMaterial({color: color}));
                 b.position.y = 0.9; b.castShadow = true; g.add(b);
                 const h = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), new THREE.MeshStandardMaterial({color: 0xffccaa}));
                 h.position.y = 1.6; h.castShadow = true; g.add(h);
@@ -382,29 +304,39 @@
                 return g;
             }
 
+            spawnEnvironment(zPos) {
+                // محدودیت تعداد برای جلوگیری از هنگی
+                if(this.environment.length > 40) return; 
+
+                if(Math.random() > 0.3) {
+                    const side = Math.random() > 0.5 ? 1 : -1;
+                    const h = 10 + Math.random() * 30;
+                    const b = new THREE.Mesh(new THREE.BoxGeometry(8, h, 15), new THREE.MeshStandardMaterial({ color: Math.random() * 0x555555 + 0x222222 }));
+                    b.position.set(side * (15 + Math.random() * 20), h/2, zPos);
+                    b.castShadow = true; b.receiveShadow = true;
+                    this.scene.add(b);
+                    this.environment.push(b);
+                }
+                if(Math.random() > 0.8) {
+                    const side = Math.random() > 0.5 ? 1 : -1;
+                    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 6), new THREE.MeshStandardMaterial({color: 0x333}));
+                    pole.position.set(side * 6, 3, zPos);
+                    this.scene.add(pole);
+                    this.environment.push(pole);
+                }
+            }
+
             spawnTrain() {
+                if(this.objects.length > 8) return; // سقف تولید
                 const laneIdx = Math.floor(Math.random() * 3);
                 const length = 30 + Math.random() * 40; 
                 const group = new THREE.Group();
                 
-                const bodyMat = new THREE.MeshStandardMaterial({ color: 0x2980b9, metalness: 0.6, roughness: 0.2 });
-                const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 3.5, length), bodyMat);
+                const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 3.5, length), new THREE.MeshStandardMaterial({ color: 0x2980b9, metalness: 0.6 }));
                 body.position.y = 1.75; body.castShadow = true; body.receiveShadow = true; group.add(body);
                 
                 const roof = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.2, length-1), new THREE.MeshStandardMaterial({ color: 0xecf0f1 }));
                 roof.position.y = 3.6; group.add(roof);
-
-                const stripe = new THREE.Mesh(new THREE.BoxGeometry(2.25, 0.2, length), new THREE.MeshBasicMaterial({ color: 0xf1c40f }));
-                stripe.position.y = 2.5; group.add(stripe);
-
-                // Headlights
-                const hlGeo = new THREE.CircleGeometry(0.3, 16);
-                const hlMat = new THREE.MeshBasicMaterial({color: 0xffffaa});
-                const hl1 = new THREE.Mesh(hlGeo, hlMat); hl1.position.set(-0.6, 1.5, length/2 + 0.01); group.add(hl1);
-                const hl2 = new THREE.Mesh(hlGeo, hlMat); hl2.position.set(0.6, 1.5, length/2 + 0.01); group.add(hl2);
-                const spot = new THREE.SpotLight(0xffffaa, 2, 30, 0.5, 0.5, 1);
-                spot.position.set(0, 1.5, length/2); spot.target.position.set(0, 0, length/2 + 10);
-                group.add(spot); group.add(spot.target);
 
                 group.position.set([-2.5, 0, 2.5][laneIdx], 0, -200);
                 this.scene.add(group);
@@ -416,12 +348,13 @@
 
                 this.objects.push({ mesh: group, type: 'train', lane: laneIdx, length: length, height: 3.5, moveSpeed: moveSpeed });
 
-                for(let z = -length/2 + 5; z < length/2 - 5; z+=3) {
+                for(let z = -length/2 + 5; z < length/2 - 5; z+=4) {
                     this.spawnCoin([-2.5, 0, 2.5][laneIdx], 4.0, -200 + z);
                 }
             }
 
             spawnBarrier() {
+                if(this.objects.length > 8) return;
                 const laneIdx = Math.floor(Math.random() * 3);
                 const type = Math.random() > 0.5 ? 'low' : 'high';
                 const group = new THREE.Group();
@@ -431,10 +364,6 @@
                 } else {
                     const m = new THREE.Mesh(new THREE.BoxGeometry(2, 0.5, 0.5), new THREE.MeshStandardMaterial({color: 0xc0392b}));
                     m.position.y = 2; m.castShadow = true; group.add(m);
-                    const pGeo = new THREE.CylinderGeometry(0.05, 0.05, 2);
-                    const pMat = new THREE.MeshStandardMaterial({color: 0x7f8c8d});
-                    const p1 = new THREE.Mesh(pGeo, pMat); p1.position.set(-0.9, 1, 0); group.add(p1);
-                    const p2 = new THREE.Mesh(pGeo, pMat); p2.position.set(0.9, 1, 0); group.add(p2);
                 }
                 group.position.set([-2.5, 0, 2.5][laneIdx], 0, -200);
                 this.scene.add(group);
@@ -442,13 +371,15 @@
             }
 
             spawnCoin(x, y, z) {
-                const c = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.1, 16), new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1, roughness: 0.2, emissive: 0xaa8800, emissiveIntensity: 0.2 }));
+                if(this.coins.length > 50) return;
+                const c = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.1, 8), new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1 }));
                 c.rotation.x = Math.PI/2; c.position.set(x, y, z);
                 this.scene.add(c);
                 this.coins.push(c);
             }
 
             spawnPowerup() {
+                if(this.powerups.length > 3) return;
                 const laneIdx = Math.floor(Math.random() * 3);
                 const types = ['magnet', 'shield', 'jetpack', 'multiplier', 'slowmo', 'superjump', 'hoverboard'];
                 const type = types[Math.floor(Math.random() * types.length)];
@@ -475,10 +406,7 @@
                     this.activePUs = {};
                     this.jetpackDescending = false;
                     
-                    this.objects.forEach(o => this.scene.remove(o.mesh));
-                    this.coins.forEach(c => this.scene.remove(c));
-                    this.powerups.forEach(p => this.scene.remove(p.mesh));
-                    this.environment.forEach(e => this.scene.remove(e));
+                    [...this.objects, ...this.coins, ...this.powerups, ...this.environment].forEach(o => this.scene.remove(o.mesh || o));
                     this.objects = []; this.coins = []; this.powerups = []; this.environment = [];
                     
                     this.player.position.set(0, 0, 0);
@@ -487,7 +415,6 @@
                     document.getElementById('active-powerups').innerHTML = '';
                     this.camera.position.copy(this.baseCamPos);
                     
-                    // Reset Mission
                     state.mission.current = 0;
                     state.mission.completed = false;
                     state.mission.target = 50 + Math.floor(Math.random() * 100);
@@ -495,16 +422,17 @@
                 }
                 this.timers = [];
                 this.gameTime = 0;
+                this.spawnTimer = 0;
+                this.envSpawnTimer = 0;
             }
 
-            // FIX #2: Custom Timer System
             addTimer(duration, callback) {
                 this.timers.push({ end: this.gameTime + duration, callback: callback });
             }
 
-            updateTimers(delta) {
+            updateTimers(dtMs) {
                 if(this.isPaused) return;
-                this.gameTime += delta;
+                this.gameTime += dtMs;
                 for(let i = this.timers.length - 1; i >= 0; i--) {
                     if(this.gameTime >= this.timers[i].end) {
                         this.timers[i].callback();
@@ -543,9 +471,7 @@
 
             jump() {
                 if(!this.isJumping && !this.activePUs.jetpack && !this.jetpackDescending) {
-                    let force = 0.6;
-                    if(this.activePUs.superjump) force = 0.9;
-                    this.vy = force;
+                    this.vy = this.activePUs.superjump ? 0.9 : 0.6;
                     this.isJumping = true;
                     this.isOnTrain = false;
                     this.activeTrain = null;
@@ -569,14 +495,11 @@
                 const container = document.getElementById('active-powerups');
                 const names = { magnet: '🧲 آهنربا', shield: '🛡️ سپر', jetpack: '🚀 جت‌پک', multiplier: '💰 سکه x2', slowmo: '🐢 آهسته', superjump: '⬆️ پرش قوی', hoverboard: '🛹 هاوربرد' };
                 
-                // Remove existing badge if any
                 const existing = document.getElementById(`pu-${type}`);
                 if(existing) existing.remove();
 
                 const div = document.createElement('div');
-                div.className = 'pu-badge';
-                div.id = `pu-${type}`;
-                div.innerText = names[type];
+                div.className = 'pu-badge'; div.id = `pu-${type}`; div.innerText = names[type];
                 container.appendChild(div);
 
                 this.activePUs[type] = true;
@@ -590,26 +513,18 @@
                     this.activePUs[type] = false;
                     const el = document.getElementById(`pu-${type}`);
                     if(el) el.remove();
-                    
-                    // FIX #3: Jetpack Soft Landing
-                    if(type === 'jetpack') {
-                        this.jetpackDescending = true;
-                        ui.toast("فرود نرم... 🪂");
-                    }
+                    if(type === 'jetpack') this.jetpackDescending = true;
                 });
             }
 
             stumble(fromSide = false) {
                 if(this.activePUs.shield || this.activePUs.hoverboard) {
-                    if(this.activePUs.hoverboard) {
-                        this.activePUs.hoverboard = false;
-                        const el = document.getElementById('pu-hoverboard');
-                        if(el) el.remove();
-                    } else {
-                        this.activePUs.shield = false;
-                        const el = document.getElementById('pu-shield');
-                        if(el) el.remove();
-                    }
+                    if(this.activePUs.hoverboard) this.activePUs.hoverboard = false;
+                    else this.activePUs.shield = false;
+                    
+                    const elId = this.activePUs.hoverboard ? 'pu-hoverboard' : 'pu-shield';
+                    const el = document.getElementById(elId);
+                    if(el) el.remove();
                     ui.toast("محافظت فعال شد! 🛡️");
                     return;
                 }
@@ -617,10 +532,8 @@
                 this.speed *= 0.4; 
                 document.getElementById('blur-overlay').style.backdropFilter = 'blur(8px)';
                 
-                // FIX #1: Push back to previous lane if hit from side
                 if(fromSide) {
-                    if(this.lane < 2) this.lane++;
-                    else this.lane--;
+                    if(this.lane < 2) this.lane++; else this.lane--;
                     ui.toast("هل داده شدی! 😵");
                 } else {
                     ui.toast("سرگیجه! مراقب باش 😵");
@@ -634,53 +547,37 @@
             }
 
             checkCollisions() {
-                const pBox = new THREE.Box3().setFromObject(this.player);
-                pBox.expandByScalar(-0.2);
+                // ساده‌سازی برخورد برای کاهش بار CPU
+                const px = this.player.position.x;
+                const py = this.player.position.y;
+                const pz = this.player.position.z;
+                const isRolling = this.player.scale.y < 1;
+
                 this.isOnTrain = false;
 
                 for(let obj of this.objects) {
-                    const oBox = new THREE.Box3().setFromObject(obj.mesh);
+                    const oz = obj.mesh.position.z;
+                    const ox = obj.mesh.position.x;
+                    
                     if(obj.type === 'train') {
-                        if(Math.abs(this.player.position.z - obj.mesh.position.z) < obj.length/2 + 0.5) {
-                            if(Math.abs(this.player.position.x - obj.mesh.position.x) < 1.2) {
-                                const pBottom = this.player.position.y;
-                                const tTop = obj.height;
-                                
-                                // Landing on train
-                                if(this.vy <= 0 && pBottom >= tTop - 0.5 && pBottom <= tTop + 1.5) {
-                                    this.isOnTrain = true;
-                                    if(this.activeTrain !== obj) {
-                                        state.stats.trainsHopped++;
-                                        this.activeTrain = obj;
-                                    }
-                                    this.player.position.y = tTop;
-                                    this.vy = 0;
-                                    this.isJumping = false;
-                                    this.jetpackDescending = false; // Cancel descent if landed
-                                } 
-                                // FIX #1: Correct Front vs Side Collision
-                                else if (pBottom < tTop - 0.5) {
-                                    const trainFrontZ = obj.mesh.position.z + obj.length/2; // Front is +Z because trains move +Z relative to world or player moves -Z? 
-                                    // Actually in this engine, objects move +Z towards camera. So front is +Z edge.
-                                    // Player is at Z~0. Train comes from -Z.
-                                    // So front of train is obj.mesh.position.z + length/2.
-                                    
-                                    const distToFront = Math.abs(this.player.position.z - trainFrontZ);
-                                    
-                                    if(distToFront < 1.0) {
-                                        // Direct frontal crash
-                                        this.gameOver(); 
-                                    } else {
-                                        // Side rub / clipping
-                                        this.stumble(true); 
-                                    }
-                                }
+                        const halfLen = obj.length / 2;
+                        if(Math.abs(pz - oz) < halfLen + 0.3 && Math.abs(px - ox) < 1.0) {
+                            const tTop = obj.height;
+                            if(this.vy <= 0 && py >= tTop - 0.5 && py <= tTop + 1.5) {
+                                this.isOnTrain = true;
+                                if(this.activeTrain !== obj) { state.stats.trainsHopped++; this.activeTrain = obj; }
+                                this.player.position.y = tTop;
+                                this.vy = 0; this.isJumping = false; this.jetpackDescending = false;
+                            } else if (py < tTop - 0.5) {
+                                const trainFrontZ = oz + halfLen;
+                                if(Math.abs(pz - trainFrontZ) < 0.8) this.gameOver();
+                                else this.stumble(true);
                             }
                         }
                     } else if (obj.type === 'barrier') {
-                        if(pBox.intersectsBox(oBox)) {
-                            if(obj.subType === 'high' && this.player.scale.y < 1) continue; 
-                            if(obj.subType === 'low' && this.player.position.y > 1) continue; 
+                        if(Math.abs(pz - oz) < 0.5 && Math.abs(px - ox) < 1.0) {
+                            if(obj.subType === 'high' && isRolling) continue;
+                            if(obj.subType === 'low' && py > 1) continue;
                             if(!this.activePUs.shield && !this.activePUs.hoverboard) this.gameOver();
                             else this.stumble(false);
                         }
@@ -689,29 +586,22 @@
 
                 for(let i=this.coins.length-1; i>=0; i--) {
                     const c = this.coins[i];
-                    if(this.activePUs.magnet) {
-                        const d = this.player.position.distanceTo(c.position);
-                        if(d < 15) c.position.lerp(this.player.position, 0.2);
+                    if(this.activePUs.magnet && c.position.distanceTo(this.player.position) < 15) {
+                        c.position.lerp(this.player.position, 0.2);
                     }
-                    if(pBox.intersectsBox(new THREE.Box3().setFromObject(c))) {
+                    if(Math.abs(c.position.z - pz) < 0.8 && Math.abs(c.position.x - px) < 0.8 && Math.abs(c.position.y - py) < 1.5) {
                         this.scene.remove(c);
                         this.coins.splice(i, 1);
                         const amount = (this.activePUs.multiplier || state.ownedPowerups.includes('multiplier')) ? 2 : 1;
                         this.runCoins += amount;
-                        
-                        // Mission Progress
-                        if(!state.mission.completed && state.mission.type === 'coins') {
-                            state.mission.current += amount;
-                            ui.updateMission();
-                        }
-                        
+                        if(!state.mission.completed && state.mission.type === 'coins') { state.mission.current += amount; ui.updateMission(); }
                         audio.coin();
                     }
                 }
 
                 for(let i=this.powerups.length-1; i>=0; i--) {
                     const p = this.powerups[i];
-                    if(pBox.intersectsBox(new THREE.Box3().setFromObject(p.mesh))) {
+                    if(Math.abs(p.mesh.position.z - pz) < 0.8 && Math.abs(p.mesh.position.x - px) < 0.8) {
                         this.activatePowerup(p.type);
                         this.scene.remove(p.mesh);
                         this.powerups.splice(i, 1);
@@ -734,7 +624,6 @@
                 state.coins += this.runCoins;
                 if(this.score > state.highScore) {
                     state.highScore = Math.floor(this.score);
-                    // New Record Banner
                     const banner = document.getElementById('new-record-banner');
                     banner.style.transform = "translate(-50%, -50%) scale(1)";
                     setTimeout(() => banner.style.transform = "translate(-50%, -50%) scale(0)", 3000);
@@ -743,7 +632,6 @@
                 localStorage.setItem('v24_coins', state.coins);
                 localStorage.setItem('v24_high', state.highScore);
                 localStorage.setItem('v24_stats', JSON.stringify(state.stats));
-                
                 ui.checkAchievements();
                 ui.updateMenu();
             }
@@ -754,30 +642,17 @@
                     state.stats.reviveUsed++;
                     localStorage.setItem('v24_coins', state.coins);
                     localStorage.setItem('v24_stats', JSON.stringify(state.stats));
-                    
                     audio.revive();
+                    
                     document.getElementById('game-over').classList.add('hidden');
                     document.getElementById('hud').style.display = 'flex';
                     document.getElementById('mission-hud').style.display = 'block';
                     document.getElementById('pause-btn').style.display = 'block';
                     
-                    // Clear immediate danger
-                    this.objects.forEach(o => {
-                        if(o.mesh.position.z > -20 && o.mesh.position.z < 20) {
-                            o.mesh.position.z -= 30; // Push back
-                        }
-                    });
-                    
-                    this.player.position.y = 2;
-                    this.vy = 0;
-                    this.stunned = false;
-                    this.isPlaying = true;
-                    
-                    ui.updateMenu();
-                    ui.checkAchievements();
-                } else {
-                    ui.toast("سکه کافی نیست! 💸");
-                }
+                    this.objects.forEach(o => { if(o.mesh.position.z > -20 && o.mesh.position.z < 20) o.mesh.position.z -= 30; });
+                    this.player.position.y = 2; this.vy = 0; this.stunned = false; this.isPlaying = true;
+                    ui.updateMenu(); ui.checkAchievements();
+                } else { ui.toast("سکه کافی نیست! 💸"); }
             }
 
             start() {
@@ -788,59 +663,29 @@
                 document.getElementById('pause-btn').style.display = 'block';
                 this.resetState(true);
                 this.isPlaying = true;
-                this.spawnTrain();
             }
 
-            restart() {
-                document.getElementById('game-over').classList.add('hidden');
-                this.start();
-            }
-
-            togglePause() {
-                if(!this.isPlaying) return;
-                this.isPaused = !this.isPaused;
-                if(this.isPaused) {
-                    document.getElementById('pause-menu').classList.remove('hidden');
-                } else {
-                    document.getElementById('pause-menu').classList.add('hidden');
-                }
-            }
-
-            resume() {
-                this.isPaused = false;
-                document.getElementById('pause-menu').classList.add('hidden');
-            }
-
-            quitToMenu() {
-                this.isPlaying = false;
-                this.isPaused = false;
-                document.getElementById('pause-menu').classList.add('hidden');
-                ui.showMain();
-            }
-
-            setQuality(q) { state.settings.quality = q; location.reload(); }
-            toggleShadows(v) { state.settings.shadows = v; this.renderer.shadowMap.enabled = v; }
-            toggleShake(v) { state.settings.shake = v; }
+            restart() { document.getElementById('game-over').classList.add('hidden'); this.start(); }
+            togglePause() { if(!this.isPlaying) return; this.isPaused = !this.isPaused; document.getElementById('pause-menu').classList.toggle('hidden', !this.isPaused); }
+            resume() { this.isPaused = false; document.getElementById('pause-menu').classList.add('hidden'); }
+            quitToMenu() { this.isPlaying = false; this.isPaused = false; document.getElementById('pause-menu').classList.add('hidden'); ui.showMain(); }
 
             animate() {
                 requestAnimationFrame(() => this.animate());
-                
-                // Delta time calculation for smooth movement regardless of framerate
                 const now = performance.now();
-                const delta = Math.min((now - (this.lastTime || now)) / 1000, 0.1); // Cap at 100ms
+                // Clamp delta to prevent physics explosion after lag spike
+                const dt = Math.min((now - this.lastTime) / 1000, 0.1); 
                 this.lastTime = now;
 
-                // FIX #2: Update internal timers
-                this.updateTimers(delta * 1000);
+                audio.updateMusic(dt * 1000);
+                this.updateTimers(dt * 1000);
 
                 if(this.isPlaying && !this.isPaused) {
                     let currentSpeed = this.speed;
                     if(this.activePUs.slowmo) currentSpeed *= 0.5;
                     
-                    // Progressive Difficulty
                     const level = Math.floor(this.score / 1000);
-                    const baseSpeed = 0.4 + (level * 0.05);
-                    if(!this.stunned) this.speed = Math.min(baseSpeed + (this.score * 0.0001), 2.2);
+                    if(!this.stunned) this.speed = Math.min(0.4 + (level * 0.05) + (this.score * 0.0001), 2.2);
                     
                     this.score += currentSpeed;
                     document.getElementById('score').innerText = Math.floor(this.score);
@@ -848,132 +693,106 @@
                     document.getElementById('hud-high').innerText = state.highScore;
 
                     const targetX = [-2.5, 0, 2.5][this.lane];
-                    this.player.position.x += (targetX - this.player.position.x) * 10 * delta;
+                    this.player.position.x += (targetX - this.player.position.x) * 10 * dt;
                     this.player.rotation.z = (this.player.position.x - targetX) * -0.1;
 
-                    // --- CAMERA LOGIC ---
                     let targetCamY = this.baseCamPos.y;
                     let targetCamZ = this.baseCamPos.z;
 
-                    // FIX #3: Jetpack Logic + Soft Descent
                     if(this.activePUs.jetpack) {
-                        this.player.position.y += 8 * delta; 
+                        this.player.position.y += 8 * dt; 
                         if(this.player.position.y > 12) this.player.position.y = 12;
                         this.player.rotation.x = -0.5;
-                        this.vy = 0; 
-                        this.isJumping = false;
-                        this.jetpackDescending = false;
-                        
-                        targetCamY = 16; 
-                        targetCamZ = 18;
-
-                        if(Math.random() < 0.3) {
-                            this.spawnCoin([-2.5, 0, 2.5][Math.floor(Math.random()*3)], 10 + Math.random()*3, -150);
-                        }
+                        this.vy = 0; this.isJumping = false; this.jetpackDescending = false;
+                        targetCamY = 16; targetCamZ = 18;
+                        if(Math.random() < 0.1) this.spawnCoin([-2.5, 0, 2.5][Math.floor(Math.random()*3)], 10 + Math.random()*3, -150);
                     } else if (this.jetpackDescending) {
-                        // Soft landing parachute physics
-                        this.player.position.y -= 3 * delta;
+                        this.player.position.y -= 3 * dt;
                         this.player.rotation.x = -0.2;
-                        if(this.player.position.y <= 0) {
-                            this.player.position.y = 0;
-                            this.jetpackDescending = false;
-                            this.player.rotation.x = 0;
-                        }
+                        if(this.player.position.y <= 0) { this.player.position.y = 0; this.jetpackDescending = false; this.player.rotation.x = 0; }
                         targetCamY = 8 + this.player.position.y;
                     } else {
                         this.player.rotation.x = 0;
                         if(!this.isOnTrain) {
                             this.player.position.y += this.vy;
-                            this.vy -= 1.5 * delta; // Gravity scaled by delta
-                            if(this.player.position.y < 0) {
-                                this.player.position.y = 0;
-                                this.vy = 0;
-                                this.isJumping = false;
-                            }
-                        } else {
-                            targetCamY = 8;
-                        }
+                            this.vy -= 1.5 * dt;
+                            if(this.player.position.y < 0) { this.player.position.y = 0; this.vy = 0; this.isJumping = false; }
+                        } else { targetCamY = 8; }
                     }
 
-                    this.camera.position.y += (targetCamY - this.camera.position.y) * 3 * delta;
-                    this.camera.position.z += (targetCamZ - this.camera.position.z) * 3 * delta;
+                    this.camera.position.y += (targetCamY - this.camera.position.y) * 3 * dt;
+                    this.camera.position.z += (targetCamZ - this.camera.position.z) * 3 * dt;
                     this.camera.lookAt(0, this.player.position.y + 2, -10);
 
-                    // Move World Objects (Scaled by delta * 60 to maintain original feel)
-                    const moveFactor = delta * 60;
+                    const moveFactor = dt * 60;
                     
-                    this.objects.forEach(o => {
+                    // Cleanup & Move Objects safely
+                    for(let i=this.objects.length-1; i>=0; i--) {
+                        const o = this.objects[i];
                         let move = currentSpeed;
                         if(o.type === 'train') move += o.moveSpeed;
                         o.mesh.position.z += move * moveFactor;
-                        if(o.mesh.position.z > 30) { o.dead = true; this.scene.remove(o.mesh); }
-                    });
-                    this.objects = this.objects.filter(o => !o.dead);
-
-                    this.coins.forEach(c => {
-                        c.position.z += currentSpeed * moveFactor;
-                        c.rotation.z += 5 * delta;
-                        if(c.position.z > 10) { c.dead = true; this.scene.remove(c); }
-                    });
-                    this.coins = this.coins.filter(c => !c.dead);
-
-                    this.powerups.forEach(p => {
-                        p.mesh.position.z += currentSpeed * moveFactor;
-                        p.mesh.rotation.y += 3 * delta;
-                        if(p.mesh.position.z > 10) { p.dead = true; this.scene.remove(p.mesh); }
-                    });
-                    this.powerups = this.powerups.filter(p => !p.dead);
-                    
-                    this.environment.forEach(e => {
-                        e.position.z += currentSpeed * moveFactor;
-                        if(e.position.z > 30) { e.dead = true; this.scene.remove(e); }
-                    });
-                    this.environment = this.environment.filter(e => !e.dead);
-
-                    // Spawning Logic (Harder over time)
-                    const spawnRate = Math.max(0.01, 0.025 - (level * 0.002));
-                    if(this.objects.length < 3 + level && Math.random() < spawnRate) {
-                        if(Math.random() > 0.3) this.spawnTrain();
-                        else this.spawnBarrier();
+                        if(o.mesh.position.z > 30) { this.scene.remove(o.mesh); this.objects.splice(i, 1); }
                     }
-                    if(Math.random() < 0.04) this.spawnCoin([-2.5, 0, 2.5][Math.floor(Math.random()*3)], 1, -200);
-                    if(Math.random() < 0.003) this.spawnPowerup();
-                    if(Math.random() < 0.1) this.spawnEnvironment(-250);
+                    for(let i=this.coins.length-1; i>=0; i--) {
+                        const c = this.coins[i];
+                        c.position.z += currentSpeed * moveFactor;
+                        c.rotation.z += 5 * dt;
+                        if(c.position.z > 10) { this.scene.remove(c); this.coins.splice(i, 1); }
+                    }
+                    for(let i=this.powerups.length-1; i>=0; i--) {
+                        const p = this.powerups[i];
+                        p.mesh.position.z += currentSpeed * moveFactor;
+                        p.mesh.rotation.y += 3 * dt;
+                        if(p.mesh.position.z > 10) { this.scene.remove(p.mesh); this.powerups.splice(i, 1); }
+                    }
+                    for(let i=this.environment.length-1; i>=0; i--) {
+                        const e = this.environment[i];
+                        e.position.z += currentSpeed * moveFactor;
+                        if(e.position.z > 30) { this.scene.remove(e); this.environment.splice(i, 1); }
+                    }
+
+                    // Spawning Logic with Timers instead of Random per frame
+                    this.spawnTimer -= dt;
+                    if(this.spawnTimer <= 0) {
+                        const spawnRate = Math.max(0.5, 1.5 - (level * 0.1));
+                        this.spawnTimer = spawnRate;
+                        if(Math.random() > 0.3) this.spawnTrain(); else this.spawnBarrier();
+                        if(Math.random() < 0.1) this.spawnPowerup();
+                    }
+                    
+                    this.envSpawnTimer -= dt;
+                    if(this.envSpawnTimer <= 0) {
+                        this.envSpawnTimer = 0.5;
+                        this.spawnEnvironment(-250);
+                    }
 
                     if(!this.isJumping && !this.activePUs.jetpack && !this.jetpackDescending) {
-                        const t = Date.now() * 0.02 * (currentSpeed/0.4);
+                        const t = now * 0.01 * (currentSpeed/0.4);
                         this.player.userData.parts.ll.rotation.x = Math.sin(t);
                         this.player.userData.parts.rl.rotation.x = Math.sin(t + Math.PI);
                         this.player.userData.parts.la.rotation.x = Math.sin(t + Math.PI);
                         this.player.userData.parts.ra.rotation.x = Math.sin(t);
                     }
 
-                    if(state.settings.shake && !this.stunned) {
-                        this.camera.position.x = (Math.random() - 0.5) * 0.05;
-                    } else {
-                        this.camera.position.x += (0 - this.camera.position.x) * 5 * delta;
-                    }
+                    if(state.settings.shake && !this.stunned) this.camera.position.x = (Math.random() - 0.5) * 0.05;
+                    else this.camera.position.x += (0 - this.camera.position.x) * 5 * dt;
 
                     this.checkCollisions();
                     
-                    // Check Mission Completion
                     if(!state.mission.completed && state.mission.current >= state.mission.target) {
                         state.mission.completed = true;
-                        state.coins += 50; // Reward
+                        state.coins += 50;
                         localStorage.setItem('v24_coins', state.coins);
                         ui.toast("🎉 مأموریت انجام شد! +50 سکه");
                         ui.updateMission();
-                        
-                        // Generate new mission immediately
-                        setTimeout(() => {
-                            state.mission.current = 0;
-                            state.mission.completed = false;
+                        this.addTimer(3000, () => {
+                            state.mission.current = 0; state.mission.completed = false;
                             state.mission.target = 50 + Math.floor(Math.random() * 100);
                             ui.updateMission();
-                        }, 3000);
+                        });
                     }
                 }
-
                 this.renderer.render(this.scene, this.camera);
             }
             
@@ -1029,16 +848,13 @@
             },
             toast: (msg) => {
                 const t = document.getElementById('toast');
-                t.innerText = msg;
-                t.style.opacity = 1;
-                // Use a simple timeout for toast since it's UI only and not game-critical
+                t.innerText = msg; t.style.opacity = 1;
                 if(ui.toastTimer) clearTimeout(ui.toastTimer);
                 ui.toastTimer = setTimeout(() => t.style.opacity = 0, 2000);
             },
             renderShop: () => {
                 document.getElementById('shop-coins').innerText = state.coins;
-                const sGrid = document.getElementById('skin-grid');
-                sGrid.innerHTML = '';
+                const sGrid = document.getElementById('skin-grid'); sGrid.innerHTML = '';
                 SKINS.forEach(skin => {
                     const isUnlocked = state.unlockedSkins.includes(skin.id);
                     const isSelected = state.currentSkin === skin.id;
@@ -1048,34 +864,19 @@
                     div.innerHTML = `<div class="item-preview" style="background:${colorHex}">${skin.icon}</div><div style="font-size:12px">${skin.name}</div><div style="color:#f1c40f; font-size:10px">${isUnlocked ? (isSelected ? '✓' : 'انتخاب') : skin.price}</div>`;
                     div.onclick = () => {
                         if(isUnlocked) {
-                            state.currentSkin = skin.id;
-                            localStorage.setItem('v24_skin', skin.id);
-                            game.scene.remove(game.player);
-                            game.player = game.createPlayerMesh(skin.color);
-                            game.scene.add(game.player);
+                            state.currentSkin = skin.id; localStorage.setItem('v24_skin', skin.id);
+                            game.scene.remove(game.player); game.player = game.createPlayerMesh(skin.color); game.scene.add(game.player);
                             ui.renderShop();
                         } else if(state.coins >= skin.price) {
-                            state.coins -= skin.price;
-                            state.unlockedSkins.push(skin.id);
-                            state.currentSkin = skin.id;
-                            localStorage.setItem('v24_coins', state.coins);
-                            localStorage.setItem('v24_skins', JSON.stringify(state.unlockedSkins));
-                            localStorage.setItem('v24_skin', skin.id);
-                            game.scene.remove(game.player);
-                            game.player = game.createPlayerMesh(skin.color);
-                            game.scene.add(game.player);
-                            ui.renderShop();
-                            ui.updateMenu();
-                            ui.toast(`${skin.name} خریداری شد!`);
-                        } else {
-                            ui.toast("سکه کافی نیست! 💸");
-                        }
+                            state.coins -= skin.price; state.unlockedSkins.push(skin.id); state.currentSkin = skin.id;
+                            localStorage.setItem('v24_coins', state.coins); localStorage.setItem('v24_skins', JSON.stringify(state.unlockedSkins)); localStorage.setItem('v24_skin', skin.id);
+                            game.scene.remove(game.player); game.player = game.createPlayerMesh(skin.color); game.scene.add(game.player);
+                            ui.renderShop(); ui.updateMenu(); ui.toast(`${skin.name} خریداری شد!`);
+                        } else ui.toast("سکه کافی نیست! 💸");
                     };
                     sGrid.appendChild(div);
                 });
-
-                const uGrid = document.getElementById('upgrade-grid');
-                uGrid.innerHTML = '';
+                const uGrid = document.getElementById('upgrade-grid'); uGrid.innerHTML = '';
                 POWERUPS_SHOP.forEach(pu => {
                     const isOwned = state.ownedPowerups.includes(pu.id);
                     const div = document.createElement('div');
@@ -1083,23 +884,16 @@
                     div.innerHTML = `<div class="item-preview" style="background:#333;">${pu.icon}</div><div style="font-size:12px">${pu.name}</div><div style="color:#f1c40f; font-size:10px">${isOwned ? '✓ فعال' : pu.price}</div>`;
                     div.onclick = () => {
                         if(!isOwned && state.coins >= pu.price) {
-                            state.coins -= pu.price;
-                            state.ownedPowerups.push(pu.id);
-                            localStorage.setItem('v24_coins', state.coins);
-                            localStorage.setItem('v24_pu', JSON.stringify(state.ownedPowerups));
-                            ui.renderShop();
-                            ui.updateMenu();
-                            ui.toast(`${pu.name} ارتقا یافت!`);
-                        } else if (!isOwned) {
-                            ui.toast("سکه کافی نیست! 💸");
-                        }
+                            state.coins -= pu.price; state.ownedPowerups.push(pu.id);
+                            localStorage.setItem('v24_coins', state.coins); localStorage.setItem('v24_pu', JSON.stringify(state.ownedPowerups));
+                            ui.renderShop(); ui.updateMenu(); ui.toast(`${pu.name} ارتقا یافت!`);
+                        } else if (!isOwned) ui.toast("سکه کافی نیست! 💸");
                     };
                     uGrid.appendChild(div);
                 });
             },
             renderAchievements: () => {
-                const list = document.getElementById('achieve-list');
-                list.innerHTML = '';
+                const list = document.getElementById('achieve-list'); list.innerHTML = '';
                 ACHIEVEMENTS.forEach(ach => {
                     const isDone = state.achievements.includes(ach.id);
                     const div = document.createElement('div');
@@ -1118,24 +912,15 @@
                         if(ach.type === 'trains') val = state.stats.trainsHopped || 0;
                         if(ach.type === 'jetpack_used') val = state.stats.jetpackUsed || 0;
                         if(ach.type === 'revive_used') val = state.stats.reviveUsed || 0;
-                        if(val >= ach.target) {
-                            state.achievements.push(ach.id);
-                            newUnlock = true;
-                        }
+                        if(val >= ach.target) { state.achievements.push(ach.id); newUnlock = true; }
                     }
                 });
-                if(newUnlock) {
-                    localStorage.setItem('v24_ach', JSON.stringify(state.achievements));
-                    ui.toast("🏆 دستاورد جدید باز شد!");
-                }
+                if(newUnlock) { localStorage.setItem('v24_ach', JSON.stringify(state.achievements)); ui.toast("🏆 دستاورد جدید!"); }
             }
         };
 
         const game = new Game();
-        window.game = game;
-        window.ui = ui;
-        window.audio = audio;
-
+        window.game = game; window.ui = ui; window.audio = audio;
     </script>
 </body>
 </html>
