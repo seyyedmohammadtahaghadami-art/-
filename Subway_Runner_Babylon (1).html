@@ -3,52 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Subway Runner V24 - Stable Ultimate</title>
+    <title>Subway Runner V24 - Mobile Stable</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lalezar&display=swap');
         body { margin: 0; overflow: hidden; background: #000; font-family: 'Lalezar', sans-serif; user-select: none; touch-action: none; color: white; }
         .interactive { pointer-events: auto; }
         
         /* HUD */
-        #hud { position: absolute; top: 10px; width: 100%; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box; text-shadow: 2px 2px 0 #000; font-size: 22px; display: none; pointer-events: none; }
-        .hud-box { background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; border: 2px solid #f1c40f; backdrop-filter: blur(4px); display: flex; align-items: center; gap: 5px; }
-        #mission-hud { position: absolute; top: 60px; right: 20px; background: rgba(0,0,0,0.7); padding: 8px 15px; border-radius: 10px; border-right: 4px solid #e67e22; font-size: 16px; display: none; pointer-events: none; }
+        #hud { position: absolute; top: 10px; width: 100%; display: flex; justify-content: space-between; padding: 0 15px; box-sizing: border-box; text-shadow: 1px 1px 0 #000; font-size: 18px; display: none; pointer-events: none; z-index: 10;}
+        .hud-box { background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 15px; border: 2px solid #f1c40f; display: flex; align-items: center; gap: 5px; }
+        #mission-hud { position: absolute; top: 55px; right: 15px; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 8px; border-right: 4px solid #e67e22; font-size: 14px; display: none; pointer-events: none; z-index: 10;}
         
-        #pause-btn { position: absolute; top: 10px; right: 20px; z-index: 25; background: rgba(0,0,0,0.5); border: 2px solid #fff; color: white; border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; display: none; pointer-events: auto; }
-        #active-powerups { position: absolute; top: 70px; left: 10px; display: flex; flex-direction: column; gap: 5px; pointer-events: none; }
-        .pu-badge { background: rgba(0,0,0,0.8); padding: 5px 10px; border-radius: 10px; border-left: 4px solid #fff; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+        #pause-btn { position: absolute; top: 10px; left: 15px; z-index: 25; background: rgba(0,0,0,0.5); border: 2px solid #fff; color: white; border-radius: 50%; width: 35px; height: 35px; font-size: 16px; cursor: pointer; display: none; pointer-events: auto; }
+        #active-powerups { position: absolute; top: 60px; left: 10px; display: flex; flex-direction: column; gap: 5px; pointer-events: none; z-index: 10;}
+        .pu-badge { background: rgba(0,0,0,0.8); padding: 4px 8px; border-radius: 8px; border-left: 3px solid #fff; font-size: 12px; display: flex; align-items: center; gap: 5px; }
 
         /* Menus */
-        .menu-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; overflow-y: auto; padding: 20px 0; backdrop-filter: blur(5px); }
+        .menu-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; overflow-y: auto; padding: 20px 0; }
         .hidden { display: none !important; }
-        h1 { color: #f1c40f; font-size: 45px; margin: 0 0 10px 0; text-shadow: 3px 3px 0 #c0392b; transform: skew(-5deg); }
-        h2 { color: #ecf0f1; margin-bottom: 15px; font-size: 24px; border-bottom: 2px solid #f1c40f; padding-bottom: 5px; display: inline-block; }
+        h1 { color: #f1c40f; font-size: 36px; margin: 0 0 10px 0; text-shadow: 2px 2px 0 #c0392b; transform: skew(-5deg); }
+        h2 { color: #ecf0f1; margin-bottom: 15px; font-size: 20px; border-bottom: 2px solid #f1c40f; padding-bottom: 5px; display: inline-block; }
         
-        .btn { background: linear-gradient(#e67e22, #d35400); border: none; padding: 12px 25px; margin: 6px; color: white; font-family: 'Lalezar'; font-size: 20px; border-radius: 50px; cursor: pointer; box-shadow: 0 5px 0 #a04000; width: 260px; transition: 0.1s; }
-        .btn:active { transform: translateY(5px); box-shadow: none; }
-        .btn-blue { background: linear-gradient(#3498db, #2980b9); box-shadow: 0 5px 0 #1c5980; }
-        .btn-gray { background: linear-gradient(#7f8c8d, #636e72); box-shadow: 0 5px 0 #4b5456; width: 140px; font-size: 16px; }
-        .btn-green { background: linear-gradient(#2ecc71, #27ae60); box-shadow: 0 5px 0 #1e8449; }
-        .btn-red { background: linear-gradient(#e74c3c, #c0392b); box-shadow: 0 5px 0 #922b21; }
-        .btn-revive { background: linear-gradient(#9b59b6, #8e44ad); box-shadow: 0 5px 0 #6c3483; animation: pulse 1.5s infinite; }
+        .btn { background: linear-gradient(#e67e22, #d35400); border: none; padding: 10px 20px; margin: 5px; color: white; font-family: 'Lalezar'; font-size: 18px; border-radius: 40px; cursor: pointer; box-shadow: 0 4px 0 #a04000; width: 220px; transition: 0.1s; }
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+        .btn-blue { background: linear-gradient(#3498db, #2980b9); box-shadow: 0 4px 0 #1c5980; }
+        .btn-gray { background: linear-gradient(#7f8c8d, #636e72); box-shadow: 0 4px 0 #4b5456; width: 120px; font-size: 14px; }
+        .btn-green { background: linear-gradient(#2ecc71, #27ae60); box-shadow: 0 4px 0 #1e8449; }
+        .btn-red { background: linear-gradient(#e74c3c, #c0392b); box-shadow: 0 4px 0 #922b21; }
+        .btn-revive { background: linear-gradient(#9b59b6, #8e44ad); box-shadow: 0 4px 0 #6c3483; animation: pulse 1.5s infinite; }
 
-        .grid-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 500px; margin-bottom: 20px; }
-        .grid-item { background: rgba(255,255,255,0.1); border: 2px solid #555; border-radius: 10px; padding: 10px; width: 90px; text-align: center; cursor: pointer; }
+        .grid-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 90%; margin-bottom: 15px; }
+        .grid-item { background: rgba(255,255,255,0.1); border: 2px solid #555; border-radius: 8px; padding: 8px; width: 70px; text-align: center; cursor: pointer; }
         .grid-item.selected { border-color: #f1c40f; background: rgba(241, 196, 15, 0.2); }
-        .item-preview { width: 40px; height: 40px; margin: 0 auto 5px; border-radius: 5px; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .item-preview { width: 30px; height: 30px; margin: 0 auto 5px; border-radius: 4px; border: 1px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; }
         
-        .setting-row { display: flex; justify-content: space-between; align-items: center; width: 90%; max-width: 300px; background: rgba(255,255,255,0.05); padding: 10px; margin: 5px 0; border-radius: 8px; }
-        select { background: #333; color: white; border: 1px solid #555; padding: 5px; border-radius: 5px; font-family: 'Lalezar'; }
+        .setting-row { display: flex; justify-content: space-between; align-items: center; width: 90%; max-width: 300px; background: rgba(255,255,255,0.05); padding: 8px; margin: 5px 0; border-radius: 8px; font-size: 14px;}
+        select { background: #333; color: white; border: 1px solid #555; padding: 4px; border-radius: 4px; font-family: 'Lalezar'; }
 
         #blur-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; backdrop-filter: blur(0px); pointer-events: none; transition: 0.2s; z-index: 5; }
-        #toast { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: #f1c40f; padding: 10px 25px; border-radius: 30px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 30; border: 2px solid #f1c40f; font-size: 18px; white-space: nowrap;}
-        #new-record-banner { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%) scale(0); color: #f1c40f; font-size: 40px; text-shadow: 0 0 20px #e67e22; pointer-events: none; z-index: 15; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #toast { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: #f1c40f; padding: 8px 20px; border-radius: 20px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 30; border: 2px solid #f1c40f; font-size: 16px; white-space: nowrap;}
+        #new-record-banner { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%) scale(0); color: #f1c40f; font-size: 30px; text-shadow: 0 0 10px #e67e22; pointer-events: none; z-index: 15; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
-    <script type="importmap">
-        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
-    </script>
+    <!-- استفاده از اسکریپت معمولی برای سازگاری ۱۰٪ با مرورگرهای موبایل و جلوگیری از صفحه سیاه -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
@@ -60,15 +59,15 @@
     <div id="hud">
         <div class="hud-box">امتیاز: <span id="score">0</span></div>
         <div class="hud-box">🪙 <span id="coins">0</span></div>
-        <div class="hud-box" style="border-color:#aaa; font-size:16px;">رکورد: <span id="hud-high">0</span></div>
+        <div class="hud-box" style="border-color:#aaa; font-size:14px;">رکورد: <span id="hud-high">0</span></div>
     </div>
     <div id="mission-hud">🎯 مأموریت: <span id="mission-text">...</span> (<span id="mission-prog">0</span>)</div>
     <div id="active-powerups"></div>
 
     <div id="main-menu" class="menu-screen interactive">
         <h1>SUBWAY V24</h1>
-        <p style="color:#aaa; margin-bottom:20px;">نسخه پایدار نهایی - بدون هنگی</p>
-        <div style="margin-bottom:15px; font-size:20px; color:#f1c40f;">سکه: <span id="menu-coins">0</span> | رکورد: <span id="menu-high">0</span></div>
+        <p style="color:#aaa; margin-bottom:15px; font-size:14px;">نسخه موبایل - فوق پایدار و روان</p>
+        <div style="margin-bottom:15px; font-size:18px; color:#f1c40f;">سکه: <span id="menu-coins">0</span> | رکورد: <span id="menu-high">0</span></div>
         <button class="btn" id="btn-start">شروع دویدن 🏃‍♂️</button>
         <button class="btn btn-blue" id="btn-shop">فروشگاه 🛒</button>
         <button class="btn btn-green" id="btn-ach">دستاوردها 🏆</button>
@@ -84,10 +83,10 @@
 
     <div id="shop-menu" class="menu-screen interactive hidden">
         <h2>فروشگاه</h2>
-        <div style="color:#f1c40f; margin-bottom:10px; font-size:20px;">موجودی: <span id="shop-coins">0</span> 🪙</div>
-        <h3 style="width:100%; text-align:center; color:#aaa; font-size:16px; margin-top:10px;">👕 اسکین‌ها</h3>
+        <div style="color:#f1c40f; margin-bottom:10px; font-size:18px;">موجودی: <span id="shop-coins">0</span> 🪙</div>
+        <h3 style="width:100%; text-align:center; color:#aaa; font-size:14px; margin-top:10px;">👕 اسکین‌ها</h3>
         <div class="grid-container" id="skin-grid"></div>
-        <h3 style="width:100%; text-align:center; color:#aaa; font-size:16px;">⚡ ارتقاهای دائمی</h3>
+        <h3 style="width:100%; text-align:center; color:#aaa; font-size:14px;">⚡ ارتقاهای دائمی</h3>
         <div class="grid-container" id="upgrade-grid"></div>
         <button class="btn btn-gray" id="btn-shop-back">بازگشت</button>
     </div>
@@ -100,26 +99,23 @@
 
     <div id="settings-menu" class="menu-screen interactive hidden">
         <h2>تنظیمات</h2>
-        <div class="setting-row"><span>کیفیت گرافیک</span><select id="quality-select"><option value="low">پایین</option><option value="med" selected>متوسط</option><option value="high">بالا</option></select></div>
-        <div class="setting-row"><span>سایه‌ها</span><input type="checkbox" id="shadow-toggle" checked></div>
+        <div class="setting-row"><span>کیفیت گرافیک</span><select id="quality-select"><option value="low" selected>پایین (پیشنهادی)</option><option value="med">متوسط</option><option value="high">بالا</option></select></div>
         <div class="setting-row"><span>لرزش دوربین</span><input type="checkbox" id="shake-toggle" checked></div>
         <button class="btn btn-gray" id="btn-set-back" style="margin-top:20px;">بازگشت</button>
     </div>
 
     <div id="game-over" class="menu-screen interactive hidden">
         <h1 style="color:#e74c3c">BUSTED!</h1>
-        <div style="font-size:28px; margin:10px;">امتیاز: <span id="final-score">0</span></div>
-        <div style="font-size:18px; color:#aaa;">رکورد: <span id="final-high">0</span></div>
-        <div style="font-size:20px; color:#f1c40f; margin-bottom:20px;">سکه: +<span id="final-coins">0</span></div>
+        <div style="font-size:24px; margin:10px;">امتیاز: <span id="final-score">0</span></div>
+        <div style="font-size:16px; color:#aaa;">رکورد: <span id="final-high">0</span></div>
+        <div style="font-size:18px; color:#f1c40f; margin-bottom:15px;">سکه: +<span id="final-coins">0</span></div>
         <button class="btn btn-revive" id="btn-revive">ادامه با ۱۰۰ سکه 💎</button>
         <button class="btn" id="btn-restart">دوباره 🔄</button>
         <button class="btn btn-gray" id="btn-go-menu">منو</button>
     </div>
 
-    <script type="module">
-        import * as THREE from 'three';
-
-        // --- AUDIO SYSTEM (Stable) ---
+    <script>
+        // --- AUDIO SYSTEM (Stable & Mobile Friendly) ---
         const audio = {
             ctx: null, muted: false, musicTimer: 0,
             init() { 
@@ -180,8 +176,8 @@
         ];
 
         const ACHIEVEMENTS = [
-            { id: 'score_1000', name: 'دوننده تازه کار', desc: '۱۰۰۰ امتیاز', target: 1000, type: 'score' },
-            { id: 'coins_500', name: 'ثروتمند', desc: '۵۰۰ سکه', target: 500, type: 'coins' },
+            { id: 'score_1000', name: 'دونده تازه کار', desc: '۱۰۰۰ امتیاز', target: 1000, type: 'score' },
+            { id: 'coins_500', name: 'ثروتمند', desc: '۵۰ سکه', target: 500, type: 'coins' },
             { id: 'train_hopper', name: 'پارکور باز', desc: '۱۰ پرش روی قطار', target: 10, type: 'trains' },
             { id: 'sky_high', name: 'پرنده', desc: 'استفاده از جت‌پک', target: 1, type: 'jetpack_used' },
             { id: 'survivor', name: 'بازگشت از مرگ', desc: 'استفاده از Revive', target: 1, type: 'revive_used' }
@@ -195,36 +191,34 @@
             achievements: JSON.parse(localStorage.getItem('v24_ach')) || [],
             ownedPowerups: JSON.parse(localStorage.getItem('v24_pu')) || [],
             stats: { trainsHopped: 0, jetpackUsed: 0, reviveUsed: 0 },
-            settings: { quality: 'med', shadows: true, shake: true },
+            settings: { quality: 'low', shake: true }, // Default to LOW for mobile stability
             mission: { type: 'coins', target: 50, current: 0, completed: false }
         };
 
-        // --- STABLE GAME ENGINE ---
+        // --- MOBILE OPTIMIZED GAME ENGINE ---
         class Game {
             constructor() {
                 this.scene = new THREE.Scene();
                 this.scene.background = new THREE.Color(0x87CEEB);
-                this.scene.fog = new THREE.FogExp2(0x87CEEB, 0.012);
+                this.scene.fog = new THREE.Fog(0x87CEEB, 20, 100); // Linear fog is cheaper than Exp2
 
                 this.baseCamPos = new THREE.Vector3(0, 6, 10);
-                this.camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 300);
+                this.camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 150);
                 this.camera.position.copy(this.baseCamPos);
                 
-                this.renderer = new THREE.WebGLRenderer({ antialias: state.settings.quality !== 'low', powerPreference: "high-performance" });
+                // WebGL Renderer optimized for mobile
+                this.renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-                this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-                this.renderer.shadowMap.enabled = state.settings.shadows;
-                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Cap pixel ratio to prevent overheating
+                // Shadows completely disabled by default for mobile performance
+                this.renderer.shadowMap.enabled = false; 
                 document.body.appendChild(this.renderer.domElement);
 
-                // Lighting
-                this.sun = new THREE.DirectionalLight(0xffffff, 1.5);
-                this.sun.position.set(20, 40, 20);
-                this.sun.castShadow = true;
-                this.sun.shadow.mapSize.set(1024, 1024); // Optimized shadow map
+                // Simple Lighting (No shadows)
+                this.sun = new THREE.DirectionalLight(0xffffff, 1.0);
+                this.sun.position.set(10, 20, 10);
                 this.scene.add(this.sun);
-                this.scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+                this.scene.add(new THREE.AmbientLight(0xffffff, 0.7));
 
                 this.createWorld();
                 this.player = this.createPlayerMesh(SKINS.find(s=>s.id===state.currentSkin).color);
@@ -252,7 +246,6 @@
             }
 
             bindUI() {
-                // استفاده از addEventListener به جای onclick داخل HTML برای پایداری بیشتر
                 document.getElementById('pause-btn').addEventListener('click', () => this.togglePause());
                 document.getElementById('btn-start').addEventListener('click', () => this.start());
                 document.getElementById('btn-shop').addEventListener('click', () => ui.showShop());
@@ -269,20 +262,21 @@
                 document.getElementById('btn-go-menu').addEventListener('click', () => ui.showMain());
                 
                 document.getElementById('quality-select').addEventListener('change', (e) => { state.settings.quality = e.target.value; location.reload(); });
-                document.getElementById('shadow-toggle').addEventListener('change', (e) => { state.settings.shadows = e.target.checked; this.renderer.shadowMap.enabled = e.target.checked; });
                 document.getElementById('shake-toggle').addEventListener('change', (e) => { state.settings.shake = e.target.checked; });
             }
 
             createWorld() {
-                const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 800), new THREE.MeshStandardMaterial({ color: 0x2c3e50, roughness: 0.9 }));
-                ground.rotation.x = -Math.PI/2; ground.position.z = -300; ground.receiveShadow = true;
+                // Simpler ground
+                const ground = new THREE.Mesh(new THREE.PlaneGeometry(100, 300), new THREE.MeshLambertMaterial({ color: 0x2c3e50 }));
+                ground.rotation.x = -Math.PI/2; ground.position.z = -100;
                 this.scene.add(ground);
 
-                const railMat = new THREE.MeshStandardMaterial({ color: 0x7f8c8d, metalness: 0.9, roughness: 0.1 });
+                // Simpler rails
+                const railMat = new THREE.MeshBasicMaterial({ color: 0x7f8c8d });
                 [-2.5, 0, 2.5].forEach(x => {
                     [-0.8, 0.8].forEach(offset => {
-                        const r = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 800), railMat);
-                        r.position.set(x + offset, 0.08, -300);
+                        const r = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 300), railMat);
+                        r.position.set(x + offset, 0.08, -100);
                         this.scene.add(r);
                     });
                 });
@@ -290,12 +284,13 @@
 
             createPlayerMesh(color) {
                 const g = new THREE.Group();
-                const b = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.9, 0.4), new THREE.MeshStandardMaterial({color: color}));
-                b.position.y = 0.9; b.castShadow = true; g.add(b);
-                const h = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), new THREE.MeshStandardMaterial({color: 0xffccaa}));
-                h.position.y = 1.6; h.castShadow = true; g.add(h);
+                // Using LambertMaterial instead of Standard for huge FPS boost on mobile
+                const b = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.9, 0.4), new THREE.MeshLambertMaterial({color: color}));
+                b.position.y = 0.9; g.add(b);
+                const h = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), new THREE.MeshLambertMaterial({color: 0xffccaa}));
+                h.position.y = 1.6; g.add(h);
                 const lGeo = new THREE.BoxGeometry(0.2, 0.7, 0.2);
-                const lMat = new THREE.MeshStandardMaterial({color: 0x333});
+                const lMat = new THREE.MeshLambertMaterial({color: 0x333});
                 const ll = new THREE.Mesh(lGeo, lMat); ll.position.set(-0.2, 0.35, 0); g.add(ll);
                 const rl = new THREE.Mesh(lGeo, lMat); rl.position.set(0.2, 0.35, 0); g.add(rl);
                 const la = new THREE.Mesh(lGeo, lMat); la.position.set(-0.4, 1.0, 0); g.add(la);
@@ -305,40 +300,31 @@
             }
 
             spawnEnvironment(zPos) {
-                // محدودیت تعداد برای جلوگیری از هنگی
-                if(this.environment.length > 40) return; 
+                if(this.environment.length > 20) return; // Strict limit for mobile RAM
 
-                if(Math.random() > 0.3) {
+                if(Math.random() > 0.4) {
                     const side = Math.random() > 0.5 ? 1 : -1;
-                    const h = 10 + Math.random() * 30;
-                    const b = new THREE.Mesh(new THREE.BoxGeometry(8, h, 15), new THREE.MeshStandardMaterial({ color: Math.random() * 0x555555 + 0x222222 }));
-                    b.position.set(side * (15 + Math.random() * 20), h/2, zPos);
-                    b.castShadow = true; b.receiveShadow = true;
+                    const h = 10 + Math.random() * 20;
+                    const b = new THREE.Mesh(new THREE.BoxGeometry(8, h, 15), new THREE.MeshLambertMaterial({ color: Math.random() * 0x555555 + 0x222222 }));
+                    b.position.set(side * (12 + Math.random() * 15), h/2, zPos);
                     this.scene.add(b);
                     this.environment.push(b);
-                }
-                if(Math.random() > 0.8) {
-                    const side = Math.random() > 0.5 ? 1 : -1;
-                    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 6), new THREE.MeshStandardMaterial({color: 0x333}));
-                    pole.position.set(side * 6, 3, zPos);
-                    this.scene.add(pole);
-                    this.environment.push(pole);
                 }
             }
 
             spawnTrain() {
-                if(this.objects.length > 8) return; // سقف تولید
+                if(this.objects.length > 5) return; // Strict limit
                 const laneIdx = Math.floor(Math.random() * 3);
-                const length = 30 + Math.random() * 40; 
+                const length = 20 + Math.random() * 20; // Shorter trains for mobile
                 const group = new THREE.Group();
                 
-                const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 3.5, length), new THREE.MeshStandardMaterial({ color: 0x2980b9, metalness: 0.6 }));
-                body.position.y = 1.75; body.castShadow = true; body.receiveShadow = true; group.add(body);
+                const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 3.5, length), new THREE.MeshLambertMaterial({ color: 0x2980b9 }));
+                body.position.y = 1.75; group.add(body);
                 
-                const roof = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.2, length-1), new THREE.MeshStandardMaterial({ color: 0xecf0f1 }));
+                const roof = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.2, length-1), new THREE.MeshLambertMaterial({ color: 0xecf0f1 }));
                 roof.position.y = 3.6; group.add(roof);
 
-                group.position.set([-2.5, 0, 2.5][laneIdx], 0, -200);
+                group.position.set([-2.5, 0, 2.5][laneIdx], 0, -120);
                 this.scene.add(group);
                 
                 const rand = Math.random();
@@ -348,44 +334,46 @@
 
                 this.objects.push({ mesh: group, type: 'train', lane: laneIdx, length: length, height: 3.5, moveSpeed: moveSpeed });
 
-                for(let z = -length/2 + 5; z < length/2 - 5; z+=4) {
-                    this.spawnCoin([-2.5, 0, 2.5][laneIdx], 4.0, -200 + z);
+                // Fewer coins on train
+                for(let z = -length/2 + 5; z < length/2 - 5; z+=6) {
+                    this.spawnCoin([-2.5, 0, 2.5][laneIdx], 4.0, -120 + z);
                 }
             }
 
             spawnBarrier() {
-                if(this.objects.length > 8) return;
+                if(this.objects.length > 5) return;
                 const laneIdx = Math.floor(Math.random() * 3);
                 const type = Math.random() > 0.5 ? 'low' : 'high';
                 const group = new THREE.Group();
                 if(type === 'low') {
-                    const m = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 0.5), new THREE.MeshStandardMaterial({color: 0xe67e22}));
-                    m.position.y = 0.5; m.castShadow = true; group.add(m);
+                    const m = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 0.5), new THREE.MeshLambertMaterial({color: 0xe67e22}));
+                    m.position.y = 0.5; group.add(m);
                 } else {
-                    const m = new THREE.Mesh(new THREE.BoxGeometry(2, 0.5, 0.5), new THREE.MeshStandardMaterial({color: 0xc0392b}));
-                    m.position.y = 2; m.castShadow = true; group.add(m);
+                    const m = new THREE.Mesh(new THREE.BoxGeometry(2, 0.5, 0.5), new THREE.MeshLambertMaterial({color: 0xc0392b}));
+                    m.position.y = 2; group.add(m);
                 }
-                group.position.set([-2.5, 0, 2.5][laneIdx], 0, -200);
+                group.position.set([-2.5, 0, 2.5][laneIdx], 0, -120);
                 this.scene.add(group);
                 this.objects.push({ mesh: group, type: 'barrier', subType: type, lane: laneIdx });
             }
 
             spawnCoin(x, y, z) {
-                if(this.coins.length > 50) return;
-                const c = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.1, 8), new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1 }));
+                if(this.coins.length > 30) return; // Strict limit
+                // Lower segment cylinder for mobile
+                const c = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.1, 6), new THREE.MeshBasicMaterial({ color: 0xffd700 }));
                 c.rotation.x = Math.PI/2; c.position.set(x, y, z);
                 this.scene.add(c);
                 this.coins.push(c);
             }
 
             spawnPowerup() {
-                if(this.powerups.length > 3) return;
+                if(this.powerups.length > 2) return;
                 const laneIdx = Math.floor(Math.random() * 3);
                 const types = ['magnet', 'shield', 'jetpack', 'multiplier', 'slowmo', 'superjump', 'hoverboard'];
                 const type = types[Math.floor(Math.random() * types.length)];
                 const colors = { magnet: 0xe74c3c, shield: 0x3498db, jetpack: 0x9b59b6, multiplier: 0x2ecc71, slowmo: 0x00ffff, superjump: 0xff00ff, hoverboard: 0xffff00 };
-                const p = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshStandardMaterial({ color: colors[type], emissive: colors[type], emissiveIntensity: 0.5 }));
-                p.position.set([-2.5, 0, 2.5][laneIdx], 1.5, -200);
+                const p = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshBasicMaterial({ color: colors[type] }));
+                p.position.set([-2.5, 0, 2.5][laneIdx], 1.5, -120);
                 this.scene.add(p);
                 this.powerups.push({ mesh: p, type: type });
             }
@@ -530,7 +518,7 @@
                 }
                 this.stunned = true;
                 this.speed *= 0.4; 
-                document.getElementById('blur-overlay').style.backdropFilter = 'blur(8px)';
+                document.getElementById('blur-overlay').style.backdropFilter = 'blur(5px)';
                 
                 if(fromSide) {
                     if(this.lane < 2) this.lane++; else this.lane--;
@@ -547,7 +535,6 @@
             }
 
             checkCollisions() {
-                // ساده‌سازی برخورد برای کاهش بار CPU
                 const px = this.player.position.x;
                 const py = this.player.position.y;
                 const pz = this.player.position.z;
@@ -586,7 +573,7 @@
 
                 for(let i=this.coins.length-1; i>=0; i--) {
                     const c = this.coins[i];
-                    if(this.activePUs.magnet && c.position.distanceTo(this.player.position) < 15) {
+                    if(this.activePUs.magnet && c.position.distanceTo(this.player.position) < 12) {
                         c.position.lerp(this.player.position, 0.2);
                     }
                     if(Math.abs(c.position.z - pz) < 0.8 && Math.abs(c.position.x - px) < 0.8 && Math.abs(c.position.y - py) < 1.5) {
@@ -673,7 +660,6 @@
             animate() {
                 requestAnimationFrame(() => this.animate());
                 const now = performance.now();
-                // Clamp delta to prevent physics explosion after lag spike
                 const dt = Math.min((now - this.lastTime) / 1000, 0.1); 
                 this.lastTime = now;
 
@@ -685,7 +671,7 @@
                     if(this.activePUs.slowmo) currentSpeed *= 0.5;
                     
                     const level = Math.floor(this.score / 1000);
-                    if(!this.stunned) this.speed = Math.min(0.4 + (level * 0.05) + (this.score * 0.0001), 2.2);
+                    if(!this.stunned) this.speed = Math.min(0.4 + (level * 0.05) + (this.score * 0.0001), 2.0);
                     
                     this.score += currentSpeed;
                     document.getElementById('score').innerText = Math.floor(this.score);
@@ -705,7 +691,7 @@
                         this.player.rotation.x = -0.5;
                         this.vy = 0; this.isJumping = false; this.jetpackDescending = false;
                         targetCamY = 16; targetCamZ = 18;
-                        if(Math.random() < 0.1) this.spawnCoin([-2.5, 0, 2.5][Math.floor(Math.random()*3)], 10 + Math.random()*3, -150);
+                        if(Math.random() < 0.1) this.spawnCoin([-2.5, 0, 2.5][Math.floor(Math.random()*3)], 10 + Math.random()*3, -100);
                     } else if (this.jetpackDescending) {
                         this.player.position.y -= 3 * dt;
                         this.player.rotation.x = -0.2;
@@ -726,13 +712,12 @@
 
                     const moveFactor = dt * 60;
                     
-                    // Cleanup & Move Objects safely
                     for(let i=this.objects.length-1; i>=0; i--) {
                         const o = this.objects[i];
                         let move = currentSpeed;
                         if(o.type === 'train') move += o.moveSpeed;
                         o.mesh.position.z += move * moveFactor;
-                        if(o.mesh.position.z > 30) { this.scene.remove(o.mesh); this.objects.splice(i, 1); }
+                        if(o.mesh.position.z > 20) { this.scene.remove(o.mesh); this.objects.splice(i, 1); }
                     }
                     for(let i=this.coins.length-1; i>=0; i--) {
                         const c = this.coins[i];
@@ -749,13 +734,12 @@
                     for(let i=this.environment.length-1; i>=0; i--) {
                         const e = this.environment[i];
                         e.position.z += currentSpeed * moveFactor;
-                        if(e.position.z > 30) { this.scene.remove(e); this.environment.splice(i, 1); }
+                        if(e.position.z > 20) { this.scene.remove(e); this.environment.splice(i, 1); }
                     }
 
-                    // Spawning Logic with Timers instead of Random per frame
                     this.spawnTimer -= dt;
                     if(this.spawnTimer <= 0) {
-                        const spawnRate = Math.max(0.5, 1.5 - (level * 0.1));
+                        const spawnRate = Math.max(0.6, 1.5 - (level * 0.1));
                         this.spawnTimer = spawnRate;
                         if(Math.random() > 0.3) this.spawnTrain(); else this.spawnBarrier();
                         if(Math.random() < 0.1) this.spawnPowerup();
@@ -763,8 +747,8 @@
                     
                     this.envSpawnTimer -= dt;
                     if(this.envSpawnTimer <= 0) {
-                        this.envSpawnTimer = 0.5;
-                        this.spawnEnvironment(-250);
+                        this.envSpawnTimer = 0.8;
+                        this.spawnEnvironment(-120);
                     }
 
                     if(!this.isJumping && !this.activePUs.jetpack && !this.jetpackDescending) {
@@ -800,7 +784,7 @@
                 this.camera.aspect = window.innerWidth / window.innerHeight;
                 this.camera.updateProjectionMatrix();
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
             }
         }
 
@@ -827,7 +811,6 @@
                 document.querySelectorAll('.menu-screen').forEach(el => el.classList.add('hidden'));
                 document.getElementById('settings-menu').classList.remove('hidden');
                 document.getElementById('quality-select').value = state.settings.quality;
-                document.getElementById('shadow-toggle').checked = state.settings.shadows;
                 document.getElementById('shake-toggle').checked = state.settings.shake;
             },
             updateMenu: () => {
@@ -861,7 +844,7 @@
                     const div = document.createElement('div');
                     div.className = `grid-item ${isSelected ? 'selected' : ''}`;
                     const colorHex = '#' + skin.color.toString(16).padStart(6, '0');
-                    div.innerHTML = `<div class="item-preview" style="background:${colorHex}">${skin.icon}</div><div style="font-size:12px">${skin.name}</div><div style="color:#f1c40f; font-size:10px">${isUnlocked ? (isSelected ? '✓' : 'انتخاب') : skin.price}</div>`;
+                    div.innerHTML = `<div class="item-preview" style="background:${colorHex}">${skin.icon}</div><div style="font-size:10px">${skin.name}</div><div style="color:#f1c40f; font-size:10px">${isUnlocked ? (isSelected ? '✓' : 'انتخاب') : skin.price}</div>`;
                     div.onclick = () => {
                         if(isUnlocked) {
                             state.currentSkin = skin.id; localStorage.setItem('v24_skin', skin.id);
@@ -881,7 +864,7 @@
                     const isOwned = state.ownedPowerups.includes(pu.id);
                     const div = document.createElement('div');
                     div.className = `grid-item ${isOwned ? 'selected' : ''}`;
-                    div.innerHTML = `<div class="item-preview" style="background:#333;">${pu.icon}</div><div style="font-size:12px">${pu.name}</div><div style="color:#f1c40f; font-size:10px">${isOwned ? '✓ فعال' : pu.price}</div>`;
+                    div.innerHTML = `<div class="item-preview" style="background:#333;">${pu.icon}</div><div style="font-size:10px">${pu.name}</div><div style="color:#f1c40f; font-size:10px">${isOwned ? '✓ فعال' : pu.price}</div>`;
                     div.onclick = () => {
                         if(!isOwned && state.coins >= pu.price) {
                             state.coins -= pu.price; state.ownedPowerups.push(pu.id);
@@ -897,8 +880,8 @@
                 ACHIEVEMENTS.forEach(ach => {
                     const isDone = state.achievements.includes(ach.id);
                     const div = document.createElement('div');
-                    div.style.cssText = `background:rgba(255,255,255,0.1); margin:5px 0; padding:10px; border-radius:5px; border-right: 4px solid ${isDone ? '#2ecc71' : '#555'}`;
-                    div.innerHTML = `<div style="color:${isDone ? '#2ecc71' : '#fff'}">${ach.name}</div><div style="font-size:12px; color:#aaa">${ach.desc}</div>`;
+                    div.style.cssText = `background:rgba(255,255,255,0.1); margin:5px 0; padding:8px; border-radius:5px; border-right: 4px solid ${isDone ? '#2ecc71' : '#555'}`;
+                    div.innerHTML = `<div style="color:${isDone ? '#2ecc71' : '#fff'}; font-size:14px;">${ach.name}</div><div style="font-size:11px; color:#aaa">${ach.desc}</div>`;
                     list.appendChild(div);
                 });
             },
@@ -919,8 +902,16 @@
             }
         };
 
-        const game = new Game();
-        window.game = game; window.ui = ui; window.audio = audio;
+        // Initialize Game safely after DOM is fully ready
+        window.onload = () => {
+            try {
+                const game = new Game();
+                window.game = game; window.ui = ui; window.audio = audio;
+            } catch(e) {
+                console.error("Game Init Error:", e);
+                alert("خطا در اجرای گرافیک. لطفاً مرورگر خود را آپدیت کنید.");
+            }
+        };
     </script>
 </body>
 </html>
