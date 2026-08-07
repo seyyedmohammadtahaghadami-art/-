@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <title>Subway Runner Pro V16 - The Titan Architecture</title>
+    <title>Subway Runner Pro V16 - Hotfix Final</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@400;700;900&display=swap');
         
@@ -90,6 +90,7 @@
             cursor: pointer; font-size: 1.5rem; border: 2px solid rgba(255,255,255,0.3); backdrop-filter: blur(5px);
         }
     </style>
+    <!-- Using r128 for stability, but fixing CapsuleGeometry manually -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
@@ -186,8 +187,8 @@
 
 <script>
 /**
- * SUBWAY RUNNER PRO V16 - THE TITAN ARCHITECTURE
- * Full Logic from V7 + Physics Fix + Real Models + Particles
+ * SUBWAY RUNNER PRO V16 - HOTFIX FINAL
+ * Fixed: CapsuleGeometry Error (Manual Implementation), Full V7 Logic, Physics, Graphics
  */
 
 // --- CONFIG & STATE ---
@@ -196,7 +197,7 @@ const CONFIG = {
     baseSpeed: 20,
     gravity: -65,
     jumpForce: 24,
-    superJumpForce: 35, // For Super Jump Powerup
+    superJumpForce: 35,
     colors: {
         skyTop: 0x4FC3F7, skyBot: 0xE1F5FE, ground: 0x5D4037, rail: 0x3E2723,
         building: [0xFFCDD2, 0xC8E6C9, 0xBBDEFB, 0xFFF9C4, 0xE1BEE7]
@@ -263,6 +264,7 @@ scene.add(sunLight);
 let player, ground, obstacles = [], coins = [], buildings = [], particles = [];
 let clock = new THREE.Clock();
 
+// MANUAL CAPSULE GEOMETRY FOR R128 COMPATIBILITY
 function createCapsule(radius, length, mat) {
     const group = new THREE.Group();
     const cyl = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, length, 16), mat);
@@ -284,10 +286,11 @@ function createPlayer() {
     const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.15, 32), new THREE.MeshStandardMaterial({color: 0xD32F2F})); cap.position.y = 2.0; group.add(cap);
     const brim = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.05, 0.35), new THREE.MeshStandardMaterial({color: 0xD32F2F})); brim.position.set(0, 2.0, 0.3); group.add(brim);
 
-    const legGeo = new THREE.CapsuleGeometry(0.12, 0.6, 4, 8);
-    const ll = new THREE.Mesh(legGeo, matCloth); ll.position.set(-0.18, 0.4, 0); ll.castShadow=true; ll.name = 'legL';
-    const rl = new THREE.Mesh(legGeo, matCloth); rl.position.set(0.18, 0.4, 0); rl.castShadow=true; rl.name = 'legR';
-    group.add(ll, rl);
+    const legGeo = new THREE.CapsuleGeometry ? new THREE.CapsuleGeometry(0.12, 0.6, 4, 8) : new THREE.CylinderGeometry(0.12, 0.12, 0.6, 8); // Fallback
+    // Since r128 doesn't have CapsuleGeometry, we use the manual function for legs too or just cylinders
+    const llGroup = createCapsule(0.12, 0.6, matCloth); llGroup.position.set(-0.18, 0.4, 0); llGroup.castShadow=true; llGroup.name = 'legL';
+    const rlGroup = createCapsule(0.12, 0.6, matCloth); rlGroup.position.set(0.18, 0.4, 0); rlGroup.castShadow=true; rlGroup.name = 'legR';
+    group.add(llGroup, rlGroup);
 
     const shoeGeo = new THREE.BoxGeometry(0.2, 0.15, 0.35);
     group.add(new THREE.Mesh(shoeGeo, matShoe).translateX(-0.18).translateY(0.08).translateZ(0.05));
@@ -652,7 +655,7 @@ function renderChars() {
 
 function renderAchievements() {
     const grid = document.getElementById('achieve-grid');
-    grid.innerHTML = `<div class="item-card">اولین قدم<br>✅</div><div class="item-card">۱۰۰ سکه<br>${state.coins >= 100 ? '✅' : '❌'}</div><div class="item-card">امتیاز ۱۰۰۰<br>${state.score >= 1000 ? '✅' : '❌'}</div><div class="item-card">ثروتمند (۵۰۰ سکه)<br>${state.coins >= 500 ? '✅' : '❌'}</div>`;
+    grid.innerHTML = `<div class="item-card">اولین قدم<br>✅</div><div class="item-card">۱۰۰ سکه<br>${state.coins >= 100 ? '✅' : '❌'}</div><div class="item-card">امتیاز ۱۰۰<br>${state.score >= 1000 ? '✅' : '❌'}</div><div class="item-card">ثروتمند (۵۰۰ سکه)<br>${state.coins >= 500 ? '✅' : '❌'}</div>`;
 }
 
 function buyPowerup(key, price) {
